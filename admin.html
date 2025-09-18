@@ -98,6 +98,16 @@
 
     <h3>📊 AI Stats</h3>
     <div id="statsBox">Loading...</div>
+    import { collection, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Most asked question live
+const q = query(collection(db, "stats"), orderBy("count", "desc"), limit(1));
+onSnapshot(q, (snap) => {
+  snap.forEach(doc => {
+    document.getElementById("statsBox").innerText =
+      "🔥 Most Asked Question: " + doc.data().question + " (" + doc.data().count + " times)";
+  });
+});
   </div>
 </body>
 </html>
