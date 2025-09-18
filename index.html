@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Assistant</title>
+  <meta charset="UTF-8" />
+  <title>AI School Assistant</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    h2 { color: #333; }
-    #notifList li { margin: 5px 0; }
-    .maint { background: #ffdddd; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
-    .chat { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 8px; max-width: 80%; }
-    .ai { background: #eef; }
-    .user { background: #efe; align-self: flex-end; }
-    #chatBox { display: flex; flex-direction: column; }
-    input, button { padding: 8px; margin: 5px; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
+    #chat { max-width: 600px; margin: auto; }
+    .msg { padding: 10px; margin: 5px 0; border-radius: 5px; }
+    .user { background: #d1e7dd; }
+    .ai { background: #f8d7da; }
+    #notifications, #maintenance, #stats { margin-top: 20px; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-      getFirestore, collection, doc, setDoc, updateDoc, increment, getDoc, onSnapshot, query, orderBy, limit 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+</head>
+<body>
+  <h2>📚 AI School Assistant</h2>
 
-    // Firebase Config
+  <div id="chat"></div>
+  <input id="q" placeholder="Ask something..." style="width:70%; padding:5px;" />
+  <button onclick="askAI()">Send</button>
+
+  <div id="notifications"><h3>🔔 Notifications</h3><ul id="notifList"></ul></div>
+  <div id="maintenance"><h3>🛠 Maintenance</h3><p id="maintMsg">No active maintenance</p></div>
+  <div id="stats"><h3>📊 Stats</h3><div id="statsList">Loading...</div></div>
+
+  <script>
+    // 🔥 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
       authDomain: "mkps-balrampur.firebaseapp.com",
@@ -31,91 +36,34 @@
       messagingSenderId: "469227187804",
       appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
     };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    // 🔐 Anonymous login
-    signInAnonymously(auth).catch(err => console.error("Auth error:", err));
-
-    // 🔔 Notifications realtime
-    onSnapshot(collection(db, "notifications"), (snap) => {
-      const list = document.getElementById("notifList");
-      list.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.textContent = data.title + ": " + data.message;
-        list.appendChild(li);
-      });
-    });
-
-    // 🛠 Maintenance realtime
-    onSnapshot(doc(db, "system", "maintenance"), (snap) => {
-      const box = document.getElementById("maintBox");
-      if (snap.exists() && snap.data().active) {
-        box.innerText = "⚠️ The system is under maintenance.";
-        box.style.display = "block";
-      } else {
-        box.style.display = "none";
-      }
-    });
-
-    // 📊 Stats realtime (Top 5)
-    const statsList = document.getElementById("statsList");
-    const statsQuery = query(collection(db, "stats"), orderBy("count", "desc"), limit(5));
-    onSnapshot(statsQuery, (snap) => {
-      statsList.innerHTML = "";
-      if (snap.empty) {
-        statsList.innerHTML = "<li>No stats yet</li>";
-      } else {
-        snap.forEach(doc => {
-          const data = doc.data();
-          const li = document.createElement("li");
-          li.textContent = `${data.question} → ${data.count} times`;
-          statsList.appendChild(li);
-        });
-      }
-    });
-
-    // 🤖 Gemini API Key
+    // 🔑 Gemini API Key
     const GEMINI_API_KEY = "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs";
 
-    // 🚀 Ask AI
+    // Auto login (anonymous)
+    auth.signInAnonymously().catch(err => console.error("Auth error:", err));
+
+    // 💬 Ask AI
     async function askAI() {
-      const q = document.getElementById("question").value.trim();
+      const q = document.getElementById("q").value;
       if (!q) return;
+      document.getElementById("q").value = "";
 
-      const chatBox = document.getElementById("chatBox");
-      const userMsg = document.createElement("div");
-      userMsg.className = "chat user";
-      userMsg.innerText = "You: " + q;
-      chatBox.appendChild(userMsg);
-
-      // save stats
-      const ref = doc(db, "stats", q.toLowerCase());
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        await updateDoc(ref, { count: increment(1) });
-      } else {
-        await setDoc(ref, { question: q, count: 1 });
-      }
-
-      // show typing...
-      const aiMsg = document.createElement("div");
-      aiMsg.className = "chat ai";
-      aiMsg.innerText = "AI: typing...";
-      chatBox.appendChild(aiMsg);
-
+      const chat = document.getElementById("chat");
+      chat.innerHTML += `<div class="msg user">You: ${q}</div>`;
+      
+      // Gemini API Call
       try {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: q }] }]
+              contents: [{ role: "user", parts: [{ text: q }]}]
             })
           }
         );
@@ -123,36 +71,56 @@
         const data = await res.json();
         console.log("Gemini response:", data);
 
-        let answer = "⚠️ No response from AI";
-        if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        let answer = "⚠️ No response";
+        if (data?.candidates?.length > 0) {
           answer = data.candidates[0].content.parts[0].text;
         }
-        aiMsg.innerText = "AI: " + answer;
+
+        chat.innerHTML += `<div class="msg ai">AI: ${answer}</div>`;
+
+        // Save to stats
+        const qId = q.toLowerCase().replace(/[^a-z0-9]/g, "_");
+        const ref = db.collection("stats").doc(qId);
+        await db.runTransaction(async (tx) => {
+          const doc = await tx.get(ref);
+          if (!doc.exists) {
+            tx.set(ref, { question: q, count: 1 });
+          } else {
+            tx.update(ref, { count: (doc.data().count || 0) + 1 });
+          }
+        });
+
       } catch (err) {
-        console.error("AI error:", err);
-        aiMsg.innerText = "⚠️ API Error: " + err.message;
+        console.error("Gemini error:", err);
+        chat.innerHTML += `<div class="msg ai">❌ Error: ${err.message}</div>`;
       }
-
-      document.getElementById("question").value = "";
     }
-    window.askAI = askAI;
+
+    // 🔔 Listen Notifications
+    db.collection("notifications").orderBy("time", "desc").onSnapshot(snap => {
+      const list = document.getElementById("notifList");
+      list.innerHTML = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `<li>${d.title || "Notice"}: ${d.message}</li>`;
+      });
+    });
+
+    // 🛠 Maintenance
+    db.collection("system").doc("maintenance").onSnapshot(doc => {
+      const d = doc.data();
+      document.getElementById("maintMsg").innerText = d?.active ? d.message : "No active maintenance";
+    });
+
+    // 📊 Stats
+    db.collection("stats").orderBy("count", "desc").limit(5).onSnapshot(snap => {
+      const list = document.getElementById("statsList");
+      list.innerHTML = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `<div>${d.question} → ${d.count}</div>`;
+      });
+    });
   </script>
-</head>
-<body>
-  <h2>🤖 AI Assistant</h2>
-  <div id="maintBox" class="maint" style="display:none;"></div>
-
-  <div>
-    <input type="text" id="question" placeholder="Type your question..." style="width:70%;">
-    <button onclick="askAI()">Ask</button>
-  </div>
-
-  <div id="chatBox"></div>
-
-  <h3>🔔 Notifications</h3>
-  <ul id="notifList"></ul>
-
-  <h3>📊 Top Asked Questions</h3>
-  <ul id="statsList"><li>Loading...</li></ul>
 </body>
 </html>
