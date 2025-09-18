@@ -2,24 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h2 { color: #333; }
-    .box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
-    button { padding: 8px 15px; margin-top: 10px; }
-  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, onSnapshot, query, orderBy, limit 
+      getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, query, orderBy, limit 
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { 
-      getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // 🔹 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
       authDomain: "mkps-balrampur.firebaseapp.com",
@@ -33,98 +23,72 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // 🔐 Admin Login
-    async function login() {
+    // 🔐 Admin login
+    async function loginAdmin() {
       const email = document.getElementById("email").value;
-      const pass = document.getElementById("password").value;
+      const pass = document.getElementById("pass").value;
       try {
         await signInWithEmailAndPassword(auth, email, pass);
         document.getElementById("loginBox").style.display = "none";
         document.getElementById("adminBox").style.display = "block";
-      } catch (e) {
-        alert("Login failed: " + e.message);
+      } catch (err) {
+        alert("Login failed: " + err.message);
       }
     }
-    window.login = login;
-
-    function logout() {
-      signOut(auth);
-      document.getElementById("loginBox").style.display = "block";
-      document.getElementById("adminBox").style.display = "none";
-    }
-    window.logout = logout;
+    window.loginAdmin = loginAdmin;
 
     // 🔔 Send Notification
     async function sendNotif() {
-      const title = document.getElementById("title").value;
-      const msg = document.getElementById("message").value;
-      if (!title || !msg) return alert("Fill all fields!");
-
-      await addDoc(collection(db, "notifications"), {
-        title, message: msg, createdAt: serverTimestamp()
-      });
-      alert("Notification Sent ✅");
+      const title = document.getElementById("nTitle").value;
+      const msg = document.getElementById("nMsg").value;
+      const id = Date.now().toString();
+      await setDoc(doc(db, "notifications", id), { title, message: msg, time: new Date() });
+      alert("Notification sent!");
     }
     window.sendNotif = sendNotif;
 
-    // 🛠 Maintenance Mode Toggle
-    async function toggleMaint() {
-      const status = document.getElementById("maint").checked;
-      await setDoc(doc(db, "system", "maintenance"), { active: status });
-      alert("Maintenance updated ✅");
+    // 🛠 Maintenance toggle
+    async function toggleMaint(active) {
+      await setDoc(doc(db, "system", "maintenance"), { active });
+      alert("Maintenance " + (active ? "ON" : "OFF"));
     }
     window.toggleMaint = toggleMaint;
 
-    // 📊 Most Asked Question
-    const q = query(collection(db, "stats"), orderBy("count", "desc"), limit(1));
-    onSnapshot(q, (snap) => {
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        document.getElementById("statsBox").innerText =
-          "🔥 Most Asked: " + data.question + " (" + data.count + " times)";
+    // 📊 Realtime Stats
+    const statsList = document.getElementById("statsList");
+    const statsQuery = query(collection(db, "stats"), orderBy("count", "desc"), limit(10));
+    onSnapshot(statsQuery, (snap) => {
+      statsList.innerHTML = "";
+      snap.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${data.question} → ${data.count} times`;
+        statsList.appendChild(li);
       });
-    });
-
-    // Auth Listener
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        document.getElementById("loginBox").style.display = "block";
-        document.getElementById("adminBox").style.display = "none";
-      }
     });
   </script>
 </head>
 <body>
-  <h2>⚙️ Admin Panel</h2>
+  <h2>👑 Admin Panel</h2>
 
-  <!-- Login -->
-  <div id="loginBox" class="box">
-    <h3>Admin Login</h3>
-    <input type="email" id="email" placeholder="Email"><br><br>
-    <input type="password" id="password" placeholder="Password"><br><br>
-    <button onclick="login()">Login</button>
+  <div id="loginBox">
+    <input id="email" placeholder="Admin Email"><br>
+    <input id="pass" type="password" placeholder="Password"><br>
+    <button onclick="loginAdmin()">Login</button>
   </div>
 
-  <!-- Admin Functions -->
-  <div id="adminBox" class="box" style="display:none;">
-    <button onclick="logout()">Logout</button>
+  <div id="adminBox" style="display:none;">
+    <h3>🔔 Send Notification</h3>
+    <input id="nTitle" placeholder="Title"><br>
+    <textarea id="nMsg" placeholder="Message"></textarea><br>
+    <button onclick="sendNotif()">Send</button>
 
-    <div class="box">
-      <h3>🔔 Send Notification</h3>
-      <input type="text" id="title" placeholder="Title"><br><br>
-      <textarea id="message" placeholder="Message"></textarea><br><br>
-      <button onclick="sendNotif()">Send</button>
-    </div>
+    <h3>🛠 Maintenance</h3>
+    <button onclick="toggleMaint(true)">Enable</button>
+    <button onclick="toggleMaint(false)">Disable</button>
 
-    <div class="box">
-      <h3>🛠 Maintenance Mode</h3>
-      <label><input type="checkbox" id="maint" onchange="toggleMaint()"> Active</label>
-    </div>
-
-    <div class="box">
-      <h3>📊 Stats</h3>
-      <p id="statsBox">Loading...</p>
-    </div>
+    <h3>📊 Stats (Top 10)</h3>
+    <ul id="statsList"><li>Loading...</li></ul>
   </div>
 </body>
 </html>
