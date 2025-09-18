@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realtime Notifications</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
+      authDomain: "mkps-balrampur.firebaseapp.com",
+      projectId: "mkps-balrampur",
+      storageBucket: "mkps-balrampur.appspot.com",
+      messagingSenderId: "469227187804",
+      appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
+    };
+
+    // Init
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Anonymous login
+    signInAnonymously(auth).then(() => {
+      console.log("✅ Signed in anonymously");
+    });
+
+    // Listen Realtime Notifications
+    const notifRef = collection(db, "notifications");
+    onSnapshot(notifRef, (snapshot) => {
+      const list = document.getElementById("notifList");
+      list.innerHTML = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${data.title} - ${data.message}`;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</head>
+<body>
+  <h2>🔔 Realtime Notifications</h2>
+  <ul id="notifList"></ul>
+</body>
+</html>
