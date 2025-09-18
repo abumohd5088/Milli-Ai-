@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Assistant</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     h2 { color: #333; }
     #notifList li { margin: 5px 0; }
     .maint { background: #ffdddd; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
-    .chat { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 8px; }
+    .chat { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 8px; max-width: 80%; }
     .ai { background: #eef; }
-    .user { background: #efe; }
+    .user { background: #efe; align-self: flex-end; }
+    #chatBox { display: flex; flex-direction: column; }
+    input, button { padding: 8px; margin: 5px; }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -34,10 +36,10 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Anonymous login
-    signInAnonymously(auth);
+    // 🔐 Anonymous login
+    signInAnonymously(auth).catch(err => console.error("Auth error:", err));
 
-    // Notifications realtime
+    // 🔔 Notifications realtime
     onSnapshot(collection(db, "notifications"), (snap) => {
       const list = document.getElementById("notifList");
       list.innerHTML = "";
@@ -49,7 +51,7 @@
       });
     });
 
-    // Maintenance realtime
+    // 🛠 Maintenance realtime
     onSnapshot(doc(db, "system", "maintenance"), (snap) => {
       const box = document.getElementById("maintBox");
       if (snap.exists() && snap.data().active) {
@@ -60,7 +62,7 @@
       }
     });
 
-    // Stats realtime (Top 5)
+    // 📊 Stats realtime (Top 5)
     const statsList = document.getElementById("statsList");
     const statsQuery = query(collection(db, "stats"), orderBy("count", "desc"), limit(5));
     onSnapshot(statsQuery, (snap) => {
@@ -77,22 +79,21 @@
       }
     });
 
-    // Gemini API Key
+    // 🤖 Gemini API Key
     const GEMINI_API_KEY = "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs";
 
-    // AI Ask
+    // 🚀 Ask AI
     async function askAI() {
       const q = document.getElementById("question").value.trim();
       if (!q) return;
 
-      // User message
       const chatBox = document.getElementById("chatBox");
       const userMsg = document.createElement("div");
       userMsg.className = "chat user";
       userMsg.innerText = "You: " + q;
       chatBox.appendChild(userMsg);
 
-      // Save stats
+      // save stats
       const ref = doc(db, "stats", q.toLowerCase());
       const snap = await getDoc(ref);
       if (snap.exists()) {
@@ -101,13 +102,12 @@
         await setDoc(ref, { question: q, count: 1 });
       }
 
-      // Typing indicator
+      // show typing...
       const aiMsg = document.createElement("div");
       aiMsg.className = "chat ai";
       aiMsg.innerText = "AI: typing...";
       chatBox.appendChild(aiMsg);
 
-      // Call Gemini API
       try {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -127,7 +127,6 @@
         if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
           answer = data.candidates[0].content.parts[0].text;
         }
-
         aiMsg.innerText = "AI: " + answer;
       } catch (err) {
         console.error("AI error:", err);
