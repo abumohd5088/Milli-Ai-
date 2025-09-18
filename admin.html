@@ -1,94 +1,3238 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-      getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, query, orderBy, limit 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milli Ai - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --hover-color: #f1f3f4;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --danger-color: #ea4335;
+            --warning-color: #fbbc04;
+            --success-color: #34a853;
+            --transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+        }
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
-      authDomain: "mkps-balrampur.firebaseapp.com",
-      projectId: "mkps-balrampur",
-      storageBucket: "mkps-balrampur.appspot.com",
-      messagingSenderId: "469227187804",
-      appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
-    };
+        .dark-theme {
+            --primary-color: #5a95f5;
+            --secondary-color: #4caf50;
+            --background-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e8eaed;
+            --border-color: #3c4043;
+            --hover-color: #2d2d2d;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
+        }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    // 🔐 Admin login
-    async function loginAdmin() {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("pass").value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("adminBox").style.display = "block";
-      } catch (err) {
-        alert("Login failed: " + err.message);
-      }
-    }
-    window.loginAdmin = loginAdmin;
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    // 🔔 Send Notification
-    async function sendNotif() {
-      const title = document.getElementById("nTitle").value;
-      const msg = document.getElementById("nMsg").value;
-      const id = Date.now().toString();
-      await setDoc(doc(db, "notifications", id), { title, message: msg, time: new Date() });
-      alert("Notification sent!");
-    }
-    window.sendNotif = sendNotif;
+        .admin-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
-    // 🛠 Maintenance toggle
-    async function toggleMaint(active) {
-      await setDoc(doc(db, "system", "maintenance"), { active });
-      alert("Maintenance " + (active ? "ON" : "OFF"));
-    }
-    window.toggleMaint = toggleMaint;
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: var(--card-color);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
 
-    // 📊 Realtime Stats
-    const statsList = document.getElementById("statsList");
-    const statsQuery = query(collection(db, "stats"), orderBy("count", "desc"), limit(10));
-    onSnapshot(statsQuery, (snap) => {
-      statsList.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.textContent = `${data.question} → ${data.count} times`;
-        statsList.appendChild(li);
-      });
-    });
-  </script>
+        .header-title {
+            font-size: 24px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 24px;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-color);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .menu-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .menu-item.active {
+            background-color: var(--hover-color);
+            border-left: 3px solid var(--primary-color);
+            padding-left: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--background-color);
+        }
+
+        .content-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-title {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+
+        .btn-secondary {
+            background-color: var(--hover-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e8eaed;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d93025;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #2e8b44;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 24px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: var(--hover-color);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        /* Stats cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #5f6368;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        /* Toggle switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 4px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Badge */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background-color: rgba(66, 133, 244, 0.2);
+            color: var(--primary-color);
+        }
+
+        .badge-success {
+            background-color: rgba(52, 168, 83, 0.2);
+            color: var(--success-color);
+        }
+
+        .badge-danger {
+            background-color: rgba(234, 67, 53, 0.2);
+            color: var(--danger-color);
+        }
+
+        .badge-warning {
+            background-color: rgba(251, 188, 4, 0.2);
+            color: var(--warning-color);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background-color: var(--card-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            font-size: 14px;
+            color: #5f6368;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 4px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .toast-close:hover {
+            background-color: var(--hover-color);
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            -webkit-animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+
+        @-webkit-keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--text-color);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--text-color) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+            
+            .content-area {
+                padding: 16px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal {
+                width: 95%;
+                margin: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h2>👑 Admin Panel</h2>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <span class="material-icons">admin_panel_settings</span>
+                <span>Milli Ai Admin Panel</span>
+            </div>
+            <div class="header-actions">
+                <button class="icon-button" id="themeToggle">
+                    <span class="material-icons">brightness_4</span>
+                </button>
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <span>Admin</span>
+                </div>
+            </div>
+        </header>
 
-  <div id="loginBox">
-    <input id="email" placeholder="Admin Email"><br>
-    <input id="pass" type="password" placeholder="Password"><br>
-    <button onclick="loginAdmin()">Login</button>
-  </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <h2 class="sidebar-title">Admin Dashboard</h2>
+                <div class="sidebar-menu">
+                    <div class="menu-item active" data-section="notifications">
+                        <span class="material-icons">notifications</span>
+                        <span>Notifications</span>
+                    </div>
+                    <div class="menu-item" data-section="system">
+                        <span class="material-icons">settings_suggest</span>
+                        <span>System Settings</span>
+                    </div>
+                    <div class="menu-item" data-section="top-questions">
+                        <span class="material-icons">help</span>
+                        <span>Top Questions</span>
+                    </div>
+                    <div class="menu-item" data-section="users">
+                        <span class="material-icons">people</span>
+                        <span>Users & Stats</span>
+                    </div>
+                    <div class="menu-item" data-section="image-jobs">
+                        <span class="material-icons">image</span>
+                        <span>Image Jobs</span>
+                    </div>
+                    <div class="menu-item" data-section="logs">
+                        <span class="material-icons">receipt_long</span>
+                        <span>Logs & Audit</span>
+                    </div>
+                    <div class="menu-item" data-section="moderation">
+                        <span class="material-icons">gavel</span>
+                        <span>Moderation</span>
+                    </div>
+                    <div class="menu-item" data-section="export">
+                        <span class="material-icons">file_download</span>
+                        <span>Export/Backup</span>
+                    </div>
+                    <div class="menu-item" data-section="settings">
+                        <span class="material-icons">settings</span>
+                        <span>Settings</span>
+                    </div>
+                </div>
+            </div>
 
-  <div id="adminBox" style="display:none;">
-    <h3>🔔 Send Notification</h3>
-    <input id="nTitle" placeholder="Title"><br>
-    <textarea id="nMsg" placeholder="Message"></textarea><br>
-    <button onclick="sendNotif()">Send</button>
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Notifications Section -->
+                <div id="notifications-section" class="section active">
+                    <div class="content-header">
+                        <h1 class="content-title">Notifications Manager</h1>
+                        <div class="content-actions">
+                            <button class="btn btn-primary" id="createNotificationBtn">
+                                <span class="material-icons">add</span>
+                                Create Notification
+                            </button>
+                        </div>
+                    </div>
 
-    <h3>🛠 Maintenance</h3>
-    <button onclick="toggleMaint(true)">Enable</button>
-    <button onclick="toggleMaint(false)">Disable</button>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(66, 133, 244, 0.2); color: #4285f4;">
+                                    <span class="material-icons">notifications</span>
+                                </div>
+                                <div class="stat-title">Total Notifications</div>
+                            </div>
+                            <div class="stat-value">24</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>12% from last month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(52, 168, 83, 0.2); color: #34a853;">
+                                    <span class="material-icons">check_circle</span>
+                                </div>
+                                <div class="stat-title">Sent Today</div>
+                            </div>
+                            <div class="stat-value">3</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>2 new today</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(251, 188, 4, 0.2); color: #fbbc04;">
+                                    <span class="material-icons">schedule</span>
+                                </div>
+                                <div class="stat-title">Scheduled</div>
+                            </div>
+                            <div class="stat-value">5</div>
+                            <div class="stat-change negative">
+                                <span class="material-icons">arrow_downward</span>
+                                <span>1 less than yesterday</span>
+                            </div>
+                        </div>
+                    </div>
 
-    <h3>📊 Stats (Top 10)</h3>
-    <ul id="statsList"><li>Loading...</li></ul>
-  </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Notifications</h3>
+                            <div class="tabs">
+                                <div class="tab active" data-tab="all">All</div>
+                                <div class="tab" data-tab="sent">Sent</div>
+                                <div class="tab" data-tab="scheduled">Scheduled</div>
+                                <div class="tab" data-tab="drafts">Drafts</div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                        <th>Scheduled</th>
+                                        <th>Recipients</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>New Feature: Image Generation</td>
+                                        <td><span class="badge badge-success">Sent</span></td>
+                                        <td>Today, 10:30 AM</td>
+                                        <td>All Users (1,245)</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">Preview</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>System Maintenance Tomorrow</td>
+                                        <td><span class="badge badge-warning">Scheduled</span></td>
+                                        <td>Tomorrow, 2:00 AM</td>
+                                        <td>All Users (1,245)</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">Preview</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tip: Use Voice Input</td>
+                                        <td><span class="badge badge-success">Sent</span></td>
+                                        <td>Yesterday, 3:15 PM</td>
+                                        <td>All Users (1,245)</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">Preview</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Weekly Study Tips</td>
+                                        <td><span class="badge badge-primary">Draft</span></td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">Preview</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Settings Section -->
+                <div id="system-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">System Settings</h1>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Maintenance Mode</h3>
+                        </div>
+                        <div class="form-group">
+                            <div class="toggle-container">
+                                <span class="toggle-label">Enable Maintenance Mode</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="maintenanceToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="maintenanceTitle">Maintenance Title</label>
+                            <input type="text" class="form-input" id="maintenanceTitle" value="System Maintenance">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="maintenanceMessage">Maintenance Message</label>
+                            <textarea class="form-textarea" id="maintenanceMessage">We are performing scheduled maintenance. Some features may be temporarily unavailable.</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Schedule</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="maintenanceSchedule" id="scheduleNow" checked>
+                                    <label for="scheduleNow">Start Now</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="maintenanceSchedule" id="scheduleLater">
+                                    <label for="scheduleLater">Schedule for Later</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" id="scheduleTimeGroup" style="display: none;">
+                            <label class="form-label" for="scheduleTime">Start Time</label>
+                            <input type="datetime-local" class="form-input" id="scheduleTime">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="endTime">End Time (Optional)</label>
+                            <input type="datetime-local" class="form-input" id="endTime">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="saveMaintenanceBtn">
+                                <span class="material-icons">save</span>
+                                Save Settings
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">System Status</h3>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(66, 133, 244, 0.2); color: #4285f4;">
+                                        <span class="material-icons">cloud</span>
+                                    </div>
+                                    <div class="stat-title">Server Status</div>
+                                </div>
+                                <div class="stat-value">Online</div>
+                                <div class="stat-change positive">
+                                    <span class="material-icons">check_circle</span>
+                                    <span>All systems operational</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(52, 168, 83, 0.2); color: #34a853;">
+                                        <span class="material-icons">memory</span>
+                                    </div>
+                                    <div class="stat-title">Memory Usage</div>
+                                </div>
+                                <div class="stat-value">68%</div>
+                                <div class="stat-change positive">
+                                    <span class="material-icons">arrow_downward</span>
+                                    <span>Normal usage</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(251, 188, 4, 0.2); color: #fbbc04;">
+                                        <span class="material-icons">speed</span>
+                                    </div>
+                                    <div class="stat-title">Response Time</div>
+                                </div>
+                                <div class="stat-value">245ms</div>
+                                <div class="stat-change positive">
+                                    <span class="material-icons">arrow_downward</span>
+                                    <span>Faster than average</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(234, 67, 53, 0.2); color: #ea4335;">
+                                        <span class="material-icons">error</span>
+                                    </div>
+                                    <div class="stat-title">Active Issues</div>
+                                </div>
+                                <div class="stat-value">0</div>
+                                <div class="stat-change positive">
+                                    <span class="material-icons">check_circle</span>
+                                    <span>No active issues</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Questions Section -->
+                <div id="top-questions-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Top 10 Most Asked Questions</h1>
+                        <div class="content-actions">
+                            <button class="btn btn-primary" id="addQuestionBtn">
+                                <span class="material-icons">add</span>
+                                Add Question
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Manage Questions</h3>
+                            <p>Drag and drop to reorder questions. Click edit to modify content.</p>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Question</th>
+                                        <th>Asked Count</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="questionsTableBody">
+                                    <tr>
+                                        <td>1</td>
+                                        <td>What is photosynthesis?</td>
+                                        <td>1,245</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>How to solve quadratic equations?</td>
+                                        <td>987</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Explain Newton's laws of motion</td>
+                                        <td>856</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>What are the parts of a plant?</td>
+                                        <td>734</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>How to write a good essay?</td>
+                                        <td>654</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td>What is the water cycle?</td>
+                                        <td>589</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>7</td>
+                                        <td>Explain fractions in math</td>
+                                        <td>523</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>8</td>
+                                        <td>What are the states of matter?</td>
+                                        <td>487</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>9</td>
+                                        <td>How to study effectively?</td>
+                                        <td>432</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>10</td>
+                                        <td>What is gravity?</td>
+                                        <td>398</td>
+                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">drag_indicator</span>
+                                                <span class="tooltip-text">Drag to reorder</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">edit</span>
+                                                <span class="tooltip-text">Edit</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">delete</span>
+                                                <span class="tooltip-text">Delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="saveQuestionsBtn">
+                                <span class="material-icons">save</span>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users & Stats Section -->
+                <div id="users-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Users & Statistics</h1>
+                        <div class="content-actions">
+                            <button class="btn btn-secondary" id="refreshStatsBtn">
+                                <span class="material-icons">refresh</span>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(66, 133, 244, 0.2); color: #4285f4;">
+                                    <span class="material-icons">people</span>
+                                </div>
+                                <div class="stat-title">Total Users</div>
+                            </div>
+                            <div class="stat-value">1,245</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>45 new this week</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(52, 168, 83, 0.2); color: #34a853;">
+                                    <span class="material-icons">chat</span>
+                                </div>
+                                <div class="stat-title">Active Chats</div>
+                            </div>
+                            <div class="stat-value">892</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>12% increase</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(251, 188, 4, 0.2); color: #fbbc04;">
+                                    <span class="material-icons">image</span>
+                                </div>
+                                <div class="stat-title">Images Generated</div>
+                            </div>
+                            <div class="stat-value">2,345</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>345 this week</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(234, 67, 53, 0.2); color: #ea4335;">
+                                    <span class="material-icons">mic</span>
+                                </div>
+                                <div class="stat-title">Voice Queries</div>
+                            </div>
+                            <div class="stat-value">1,876</div>
+                            <div class="stat-change negative">
+                                <span class="material-icons">arrow_downward</span>
+                                <span>5% decrease</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">User Search</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="userSearch">Search Users</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" class="form-input" id="userSearch" placeholder="Search by name, email, or UID...">
+                                <button class="btn btn-primary">
+                                    <span class="material-icons">search</span>
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Users</h3>
+                            <div class="tabs">
+                                <div class="tab active" data-tab="all-users">All Users</div>
+                                <div class="tab" data-tab="active">Active</div>
+                                <div class="tab" data-tab="inactive">Inactive</div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>UID</th>
+                                        <th>Last Active</th>
+                                        <th>Chats</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 14px;">S</div>
+                                                <span>Student 1</span>
+                                            </div>
+                                        </td>
+                                        <td>student1@example.com</td>
+                                        <td>user123456</td>
+                                        <td>2 minutes ago</td>
+                                        <td>15</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Details</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">block</span>
+                                                <span class="tooltip-text">Disable</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 14px; background-color: #34a853;">T</div>
+                                                <span>Teacher 1</span>
+                                            </div>
+                                        </td>
+                                        <td>teacher1@school.edu</td>
+                                        <td>teacher789</td>
+                                        <td>1 hour ago</td>
+                                        <td>42</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Details</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">block</span>
+                                                <span class="tooltip-text">Disable</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 14px; background-color: #fbbc04;">P</div>
+                                                <span>Parent 1</span>
+                                            </div>
+                                        </td>
+                                        <td>parent1@email.com</td>
+                                        <td>parent456</td>
+                                        <td>3 hours ago</td>
+                                        <td>8</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Details</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">block</span>
+                                                <span class="tooltip-text">Disable</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 14px; background-color: #ea4335;">S</div>
+                                                <span>Student 2</span>
+                                            </div>
+                                        </td>
+                                        <td>student2@example.com</td>
+                                        <td>user789012</td>
+                                        <td>1 day ago</td>
+                                        <td>23</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Details</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">block</span>
+                                                <span class="tooltip-text">Disable</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div class="user-avatar" style="width: 32px; height: 32px; font-size: 14px; background-color: #4285f4;">A</div>
+                                                <span>Admin User</span>
+                                            </div>
+                                        </td>
+                                        <td>admin@school.edu</td>
+                                        <td>PEjvSCXzScXA2q0NnVo7CUWnXrj1</td>
+                                        <td>5 minutes ago</td>
+                                        <td>67</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Details</span>
+                                            </button>
+                                            <button class="icon-button tooltip" disabled>
+                                                <span class="material-icons">block</span>
+                                                <span class="tooltip-text">Cannot disable admin</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-top: 1px solid var(--border-color);">
+                            <div>Showing 1-5 of 1,245 users</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary">Previous</button>
+                                <button class="btn btn-primary">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Jobs Section -->
+                <div id="image-jobs-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Image Generation Jobs</h1>
+                        <div class="content-actions">
+                            <button class="btn btn-secondary" id="refreshJobsBtn">
+                                <span class="material-icons">refresh</span>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(66, 133, 244, 0.2); color: #4285f4;">
+                                    <span class="material-icons">image</span>
+                                </div>
+                                <div class="stat-title">Total Jobs</div>
+                            </div>
+                            <div class="stat-value">2,345</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>345 this week</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(52, 168, 83, 0.2); color: #34a853;">
+                                    <span class="material-icons">check_circle</span>
+                                </div>
+                                <div class="stat-title">Completed</div>
+                            </div>
+                            <div class="stat-value">2,102</div>
+                            <div class="stat-change positive">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>92% success rate</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(251, 188, 4, 0.2); color: #fbbc04;">
+                                    <span class="material-icons">hourglass_top</span>
+                                </div>
+                                <div class="stat-title">Processing</div>
+                            </div>
+                            <div class="stat-value">12</div>
+                            <div class="stat-change negative">
+                                <span class="material-icons">arrow_downward</span>
+                                <span>Waiting in queue</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background-color: rgba(234, 67, 53, 0.2); color: #ea4335;">
+                                    <span class="material-icons">error</span>
+                                </div>
+                                <div class="stat-title">Failed</div>
+                            </div>
+                            <div class="stat-value">231</div>
+                            <div class="stat-change negative">
+                                <span class="material-icons">arrow_upward</span>
+                                <span>8% failure rate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Image Jobs</h3>
+                            <div class="tabs">
+                                <div class="tab active" data-tab="all-jobs">All Jobs</div>
+                                <div class="tab" data-tab="processing">Processing</div>
+                                <div class="tab" data-tab="completed">Completed</div>
+                                <div class="tab" data-tab="failed">Failed</div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Job ID</th>
+                                        <th>User</th>
+                                        <th>Prompt</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>job_abc123</td>
+                                        <td>Student 1</td>
+                                        <td>A beautiful landscape with mountains...</td>
+                                        <td><span class="badge badge-success">Completed</span></td>
+                                        <td>2 minutes ago</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Image</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">file_download</span>
+                                                <span class="tooltip-text">Download</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>job_def456</td>
+                                        <td>Teacher 1</td>
+                                        <td>Diagram of plant cell for biology...</td>
+                                        <td><span class="badge badge-success">Completed</span></td>
+                                        <td>1 hour ago</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Image</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">file_download</span>
+                                                <span class="tooltip-text">Download</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>job_ghi789</td>
+                                        <td>Student 2</td>
+                                        <td>Cartoon character for school project...</td>
+                                        <td><span class="badge badge-warning">Processing</span></td>
+                                        <td>5 minutes ago</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">refresh</span>
+                                                <span class="tooltip-text">Refresh Status</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">cancel</span>
+                                                <span class="tooltip-text">Cancel Job</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>job_jkl012</td>
+                                        <td>Parent 1</td>
+                                        <td>Family portrait in cartoon style...</td>
+                                        <td><span class="badge badge-danger">Failed</span></td>
+                                        <td>3 hours ago</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Error</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">autorenew</span>
+                                                <span class="tooltip-text">Retry</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>job_mno345</td>
+                                        <td>Student 1</td>
+                                        <td>Mathematical graph of quadratic...</td>
+                                        <td><span class="badge badge-success">Completed</span></td>
+                                        <td>1 day ago</td>
+                                        <td>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">visibility</span>
+                                                <span class="tooltip-text">View Image</span>
+                                            </button>
+                                            <button class="icon-button tooltip">
+                                                <span class="material-icons">file_download</span>
+                                                <span class="tooltip-text">Download</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-top: 1px solid var(--border-color);">
+                            <div>Showing 1-5 of 2,345 jobs</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary">Previous</button>
+                                <button class="btn btn-primary">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs & Audit Section -->
+                <div id="logs-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Logs & Audit Trail</h1>
+                        <div class="content-actions">
+                            <button class="btn btn-secondary" id="refreshLogsBtn">
+                                <span class="material-icons">refresh</span>
+                                Refresh
+                            </button>
+                            <button class="btn btn-primary" id="exportLogsBtn">
+                                <span class="material-icons">file_download</span>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Filter Logs</h3>
+                        </div>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label class="form-label" for="logType">Log Type</label>
+                                <select class="form-input" id="logType">
+                                    <option value="all">All Types</option>
+                                    <option value="auth">Authentication</option>
+                                    <option value="system">System</option>
+                                    <option value="notification">Notification</option>
+                                    <option value="image">Image Generation</option>
+                                    <option value="error">Error</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label class="form-label" for="logDate">Date Range</label>
+                                <select class="form-input" id="logDate">
+                                    <option value="today">Today</option>
+                                    <option value="week">Last 7 Days</option>
+                                    <option value="month">Last 30 Days</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label class="form-label" for="logSearch">Search</label>
+                                <input type="text" class="form-input" id="logSearch" placeholder="Search logs...">
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button class="btn btn-primary">
+                                    <span class="material-icons">search</span>
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Logs</h3>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Type</th>
+                                        <th>Event</th>
+                                        <th>User/Source</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2024-01-15 10:30:25</td>
+                                        <td><span class="badge badge-success">Notification</span></td>
+                                        <td>Notification Sent</td>
+                                        <td>Admin User</td>
+                                        <td>Sent notification "New Feature: Image Generation" to 1,245 users</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15 09:45:12</td>
+                                        <td><span class="badge badge-primary">System</span></td>
+                                        <td>Maintenance Mode Enabled</td>
+                                        <td>Admin User</td>
+                                        <td>System maintenance scheduled for 2024-01-16 02:00:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15 08:32:47</td>
+                                        <td><span class="badge badge-warning">Image</span></td>
+                                        <td>Image Job Failed</td>
+                                        <td>Student 2 (user789012)</td>
+                                        <td>Job job_ghi789 failed: Timeout error - prompt too complex</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15 07:15:33</td>
+                                        <td><span class="badge badge-success">Auth</span></td>
+                                        <td>User Login</td>
+                                        <td>Teacher 1 (teacher789)</td>
+                                        <td>Successful login from IP 192.168.1.105</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15 06:42:18</td>
+                                        <td><span class="badge badge-danger">Error</span></td>
+                                        <td>API Rate Limit Exceeded</td>
+                                        <td>System</td>
+                                        <td>Gemini API rate limit exceeded for user user123456</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14 18:23:56</td>
+                                        <td><span class="badge badge-success">Image</span></td>
+                                        <td>Image Job Completed</td>
+                                        <td>Student 1 (user123456)</td>
+                                        <td>Job job_abc123 completed successfully</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14 16:54:32</td>
+                                        <td><span class="badge badge-primary">System</span></td>
+                                        <td>Top Questions Updated</td>
+                                        <td>Admin User</td>
+                                        <td>Updated top 10 most asked questions list</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14 15:12:45</td>
+                                        <td><span class="badge badge-success">Auth</span></td>
+                                        <td>New User Registration</td>
+                                        <td>Parent 1 (parent456)</td>
+                                        <td>New user registered with email parent1@email.com</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-top: 1px solid var(--border-color);">
+                            <div>Showing 1-8 of 247 logs</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary">Previous</button>
+                                <button class="btn btn-primary">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Moderation Section -->
+                <div id="moderation-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Content Moderation</h1>
+                        <div class="content-actions">
+                            <button class="btn btn-secondary" id="refreshModerationBtn">
+                                <span class="material-icons">refresh</span>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Flagged Content</h3>
+                            <div class="tabs">
+                                <div class="tab active" data-tab="all-flagged">All Flagged</div>
+                                <div class="tab" data-tab="chats">Flagged Chats</div>
+                                <div class="tab" data-tab="images">Flagged Images</div>
+                                <div class="tab" data-tab="reviewed">Reviewed</div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Content</th>
+                                        <th>Reported By</th>
+                                        <th>Reason</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge badge-warning">Chat</span></td>
+                                        <td>"How to cheat on exams..."</td>
+                                        <td>System Auto-Flag</td>
+                                        <td>Inappropriate content</td>
+                                        <td>2 hours ago</td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm">
+                                                <span class="material-icons">check</span>
+                                                Approve
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Remove
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">visibility</span>
+                                                Review
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-warning">Image</span></td>
+                                        <td><img src="https://placehold.co/100x100/ea4335/ffffff?text=NSFW" alt="Flagged image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+                                        <td>User Report</td>
+                                        <td>NSFW content</td>
+                                        <td>5 hours ago</td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm">
+                                                <span class="material-icons">check</span>
+                                                Approve
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Remove
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">visibility</span>
+                                                Review
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-warning">Chat</span></td>
+                                        <td>"Give me answers to math test..."</td>
+                                        <td>System Auto-Flag</td>
+                                        <td>Academic dishonesty</td>
+                                        <td>1 day ago</td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm">
+                                                <span class="material-icons">check</span>
+                                                Approve
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Remove
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">visibility</span>
+                                                Review
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-warning">Image</span></td>
+                                        <td><img src="https://placehold.co/100x100/fbbc04/ffffff?text=Copyright" alt="Flagged image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+                                        <td>Teacher 1</td>
+                                        <td>Copyright violation</td>
+                                        <td>2 days ago</td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm">
+                                                <span class="material-icons">check</span>
+                                                Approve
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Remove
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">visibility</span>
+                                                Review
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-success">Chat</span></td>
+                                        <td>"What is photosynthesis?"</td>
+                                        <td>System Auto-Flag</td>
+                                        <td>False positive</td>
+                                        <td>3 days ago</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <span class="material-icons">check</span>
+                                                Approved
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">visibility</span>
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Moderation Statistics</h3>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(251, 188, 4, 0.2); color: #fbbc04;">
+                                        <span class="material-icons">flag</span>
+                                    </div>
+                                    <div class="stat-title">Total Flagged</div>
+                                </div>
+                                <div class="stat-value">47</div>
+                                <div class="stat-change positive">
+                                    <span class="material-icons">arrow_downward</span>
+                                    <span>12% decrease from last week</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(52, 168, 83, 0.2); color: #34a853;">
+                                        <span class="material-icons">check_circle</span>
+                                    </div>
+                                    <div class="stat-title">Approved</div>
+                                </div>
+                                <div class="stat-value">23</div>
+                                <div class="stat-change positive">
+                                    <span class="material-icons">arrow_upward</span>
+                                    <span>49% of flagged content</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(234, 67, 53, 0.2); color: #ea4335;">
+                                        <span class="material-icons">delete</span>
+                                    </div>
+                                    <div class="stat-title">Removed</div>
+                                </div>
+                                <div class="stat-value">18</div>
+                                <div class="stat-change negative">
+                                    <span class="material-icons">arrow_upward</span>
+                                    <span>38% of flagged content</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: rgba(66, 133, 244, 0.2); color: #4285f4;">
+                                        <span class="material-icons">hourglass_empty</span>
+                                    </div>
+                                    <div class="stat-title">Pending Review</div>
+                                </div>
+                                <div class="stat-value">6</div>
+                                <div class="stat-change negative">
+                                    <span class="material-icons">arrow_upward</span>
+                                    <span>13% of flagged content</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export/Backup Section -->
+                <div id="export-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Data Export & Backup</h1>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Export Data</h3>
+                            <p>Select the data you want to export. Exports will be generated as CSV or JSON files.</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Select Data to Export</label>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="exportNotifications">
+                                    <label for="exportNotifications">Notifications</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="exportTopQuestions">
+                                    <label for="exportTopQuestions">Top 10 Questions</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="exportSystemSettings">
+                                    <label for="exportSystemSettings">System Settings</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="exportUserStats">
+                                    <label for="exportUserStats">User Statistics</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="exportImageJobs">
+                                    <label for="exportImageJobs">Image Generation Jobs</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="exportLogs">
+                                    <label for="exportLogs">System Logs</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date Range (Optional)</label>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label class="form-label" for="exportStartDate">Start Date</label>
+                                    <input type="date" class="form-input" id="exportStartDate">
+                                </div>
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label class="form-label" for="exportEndDate">End Date</label>
+                                    <input type="date" class="form-input" id="exportEndDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Export Format</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="exportFormat" id="formatCSV" checked>
+                                    <label for="formatCSV">CSV</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="exportFormat" id="formatJSON">
+                                    <label for="formatJSON">JSON</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="exportFormat" id="formatExcel">
+                                    <label for="formatExcel">Excel</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="exportDataBtn">
+                                <span class="material-icons">file_download</span>
+                                Export Selected Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Backup History</h3>
+                            <p>View and download previous backups of your system data.</p>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Backup Name</th>
+                                        <th>Date</th>
+                                        <th>Size</th>
+                                        <th>Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Full Backup - Jan 15, 2024</td>
+                                        <td>Today, 8:30 AM</td>
+                                        <td>12.4 MB</td>
+                                        <td><span class="badge badge-primary">Full</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">file_download</span>
+                                                Download
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Notifications Backup - Jan 14, 2024</td>
+                                        <td>Yesterday, 9:15 PM</td>
+                                        <td>2.1 MB</td>
+                                        <td><span class="badge badge-success">Partial</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">file_download</span>
+                                                Download
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Top Questions Backup - Jan 10, 2024</td>
+                                        <td>Jan 10, 2024, 3:45 PM</td>
+                                        <td>0.8 MB</td>
+                                        <td><span class="badge badge-success">Partial</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">file_download</span>
+                                                Download
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Full Backup - Jan 1, 2024</td>
+                                        <td>Jan 1, 2024, 12:00 AM</td>
+                                        <td>15.2 MB</td>
+                                        <td><span class="badge badge-primary">Full</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">
+                                                <span class="material-icons">file_download</span>
+                                                Download
+                                            </button>
+                                            <button class="btn btn-danger btn-sm">
+                                                <span class="material-icons">delete</span>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Create New Backup</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="backupName">Backup Name</label>
+                            <input type="text" class="form-input" id="backupName" placeholder="Enter backup name...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Backup Type</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="backupType" id="backupFull" checked>
+                                    <label for="backupFull">Full Backup (All Data)</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="backupType" id="backupPartial">
+                                    <label for="backupPartial">Partial Backup (Select Data)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" id="partialBackupOptions" style="display: none;">
+                            <label class="form-label">Select Data for Partial Backup</label>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="backupNotifications">
+                                    <label for="backupNotifications">Notifications</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="backupTopQuestions">
+                                    <label for="backupTopQuestions">Top 10 Questions</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="backupSystemSettings">
+                                    <label for="backupSystemSettings">System Settings</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" class="checkbox" id="backupUserStats">
+                                    <label for="backupUserStats">User Statistics</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Compression</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="compression" id="compressionNone">
+                                    <label for="compressionNone">None</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="compression" id="compressionZip" checked>
+                                    <label for="compressionZip">ZIP</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="compression" id="compressionGzip">
+                                    <label for="compressionGzip">GZIP</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="createBackupBtn">
+                                <span class="material-icons">save</span>
+                                Create Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings-section" class="section" style="display: none;">
+                    <div class="content-header">
+                        <h1 class="content-title">Admin Settings</h1>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Application Settings</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="appName">Application Name</label>
+                            <input type="text" class="form-input" id="appName" value="Milli Ai">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="appVersion">Version</label>
+                            <input type="text" class="form-input" id="appVersion" value="1.2.0" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="schoolName">School Name</label>
+                            <input type="text" class="form-input" id="schoolName" value="Milli Karwaan Public School (MKPS)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="schoolAddress">School Address</label>
+                            <textarea class="form-textarea" id="schoolAddress">Baluha Police Chowki, Balrampur, Uttar Pradesh</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="schoolContact">School Contact</label>
+                            <input type="text" class="form-input" id="schoolContact" value="9758919151">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="developerInfo">Developer Information</label>
+                            <textarea class="form-textarea" id="developerInfo">Abutalha — Class 6 — Study in your school (Milli karwaan public school Balrampur). Phone: 9839469669</textarea>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="saveAppSettingsBtn">
+                                <span class="material-icons">save</span>
+                                Save Settings
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">API & Integration Settings</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="geminiApiKey">Gemini API Key</label>
+                            <div style="position: relative;">
+                                <input type="password" class="form-input" id="geminiApiKey" value="••••••••••••••••••••••••••••••••••••••••">
+                                <button class="icon-button" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);" id="toggleGeminiKey">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="stableHordeKey">Stable Horde API Key</label>
+                            <div style="position: relative;">
+                                <input type="password" class="form-input" id="stableHordeKey" value="••••••••••••••••••••••••••••••••••••••••">
+                                <button class="icon-button" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);" id="toggleStableHordeKey">
+                                    <span class="material-icons">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="firebaseConfig">Firebase Config</label>
+                            <textarea class="form-textarea" id="firebaseConfig" disabled>{
+  "apiKey": "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
+  "authDomain": "mkps-balrampur.firebaseapp.com",
+  "projectId": "mkps-balrampur",
+  "storageBucket": "mkps-balrampur.appspot.com",
+  "messagingSenderId": "469227187804",
+  "appId": "1:469227187804:web:8abdb9b75ed05b7eadc099"
+}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rate Limits</label>
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label class="form-label" for="imageRateLimit">Image Generation (per user)</label>
+                                    <input type="number" class="form-input" id="imageRateLimit" value="10" min="1" max="100">
+                                    <small>Images per hour</small>
+                                </div>
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label class="form-label" for="chatRateLimit">Chat Requests (per user)</label>
+                                    <input type="number" class="form-input" id="chatRateLimit" value="50" min="1" max="500">
+                                    <small>Requests per hour</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="saveApiSettingsBtn">
+                                <span class="material-icons">save</span>
+                                Save API Settings
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Security Settings</h3>
+                        </div>
+                        <div class="form-group">
+                            <div class="toggle-container">
+                                <span class="toggle-label">Enable Two-Factor Authentication</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="2faToggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="toggle-container">
+                                <span class="toggle-label">Require Strong Passwords</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="strongPasswordToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="toggle-container">
+                                <span class="toggle-label">Auto-Logout Inactive Sessions</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoLogoutToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sessionTimeout">Session Timeout (minutes)</label>
+                            <input type="number" class="form-input" id="sessionTimeout" value="30" min="5" max="1440">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="adminUids">Admin User IDs (comma separated)</label>
+                            <textarea class="form-textarea" id="adminUids">PEjvSCXzScXA2q0NnVo7CUWnXrj1</textarea>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="saveSecuritySettingsBtn">
+                                <span class="material-icons">save</span>
+                                Save Security Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Notification Modal -->
+    <div class="modal-overlay" id="createNotificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Notification</h3>
+                <button class="close-button" id="closeCreateNotificationModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="notificationTitle">Title</label>
+                <input type="text" class="form-input" id="notificationTitle" placeholder="Enter notification title...">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="notificationMessage">Message</label>
+                <textarea class="form-textarea" id="notificationMessage" placeholder="Enter notification message..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="notificationIcon">Icon</label>
+                <select class="form-input" id="notificationIcon">
+                    <option value="info">Info (info)</option>
+                    <option value="announcement">Announcement (announcement)</option>
+                    <option value="new_releases">New Feature (new_releases)</option>
+                    <option value="error">Error (error)</option>
+                    <option value="warning">Warning (warning)</option>
+                    <option value="check_circle">Success (check_circle)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Recipients</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="recipients" id="allUsers" checked>
+                        <label for="allUsers">All Users</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="recipients" id="specificUsers">
+                        <label for="specificUsers">Specific Users</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="recipients" id="userGroups">
+                        <label for="userGroups">User Groups</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" id="specificUsersGroup" style="display: none;">
+                <label class="form-label" for="userIds">User IDs (comma separated)</label>
+                <input type="text" class="form-input" id="userIds" placeholder="Enter user IDs...">
+            </div>
+            <div class="form-group" id="userGroupsGroup" style="display: none;">
+                <label class="form-label" for="userGroupsSelect">Select User Groups</label>
+                <select class="form-input" id="userGroupsSelect" multiple>
+                    <option value="students">Students</option>
+                    <option value="teachers">Teachers</option>
+                    <option value="parents">Parents</option>
+                    <option value="admins">Admins</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Schedule</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="schedule" id="sendNow" checked>
+                        <label for="sendNow">Send Now</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="schedule" id="scheduleForLater">
+                        <label for="scheduleForLater">Schedule for Later</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" id="scheduleTimeGroup" style="display: none;">
+                <label class="form-label" for="scheduleDateTime">Date & Time</label>
+                <input type="datetime-local" class="form-input" id="scheduleDateTime">
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" class="checkbox" id="sendBrowserNotification">
+                    <label for="sendBrowserNotification">Send as Browser Notification</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" class="checkbox" id="playSound">
+                    <label for="playSound">Play Sound</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" class="checkbox" id="showBadge">
+                    <label for="showBadge">Show Badge</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelCreateNotification">Cancel</button>
+                <button class="btn btn-primary" id="previewNotification">Preview</button>
+                <button class="btn btn-success" id="sendNotification">Send Notification</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Notification Modal -->
+    <div class="modal-overlay" id="previewNotificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Preview Notification</h3>
+                <button class="close-button" id="closePreviewNotificationModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div style="background-color: var(--hover-color); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                    <div style="font-size: 24px; color: var(--primary-color);" id="previewIcon">
+                        <span class="material-icons">info</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="margin-bottom: 8px; font-weight: 500;" id="previewTitle">Notification Title</h4>
+                        <p style="margin-bottom: 16px; line-height: 1.5;" id="previewMessage">Notification message will appear here.</p>
+                        <div style="font-size: 12px; color: #5f6368;">Just now</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="backToEdit">Back to Edit</button>
+                <button class="btn btn-success" id="confirmSendNotification">Confirm Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Question Modal -->
+    <div class="modal-overlay" id="editQuestionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="editQuestionModalTitle">Add New Question</h3>
+                <button class="close-button" id="closeEditQuestionModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="questionText">Question</label>
+                <textarea class="form-textarea" id="questionText" placeholder="Enter the question..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="questionCount">Asked Count</label>
+                <input type="number" class="form-input" id="questionCount" value="0" min="0">
+            </div>
+            <div class="form-group">
+                <div class="toggle-container">
+                    <span class="toggle-label">Active</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="questionActive" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEditQuestion">Cancel</button>
+                <button class="btn btn-primary" id="saveQuestion">Save Question</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer">
+        <!-- Toasts will be dynamically added here -->
+    </div>
+
+    <script>
+        // Initialize Firebase config (mock for demo)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
+            authDomain: "mkps-balrampur.firebaseapp.com",
+            projectId: "mkps-balrampur",
+            storageBucket: "mkps-balrampur.appspot.com",
+            messagingSenderId: "469227187804",
+            appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
+        };
+
+        // Admin UID
+        const adminUID = "PEjvSCXzScXA2q0NnVo7CUWnXrj1";
+        
+        // Current user (mock)
+        let currentUser = {
+            uid: adminUID,
+            displayName: "Admin User",
+            email: "admin@school.edu",
+            role: "admin"
+        };
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const sidebarMenuItems = document.querySelectorAll('.menu-item');
+        const sections = document.querySelectorAll('.section');
+        const tabs = document.querySelectorAll('.tab');
+        const createNotificationBtn = document.getElementById('createNotificationBtn');
+        const createNotificationModal = document.getElementById('createNotificationModal');
+        const closeCreateNotificationModal = document.getElementById('closeCreateNotificationModal');
+        const cancelCreateNotification = document.getElementById('cancelCreateNotification');
+        const previewNotification = document.getElementById('previewNotification');
+        const sendNotification = document.getElementById('sendNotification');
+        const previewNotificationModal = document.getElementById('previewNotificationModal');
+        const closePreviewNotificationModal = document.getElementById('closePreviewNotificationModal');
+        const backToEdit = document.getElementById('backToEdit');
+        const confirmSendNotification = document.getElementById('confirmSendNotification');
+        const notificationTitle = document.getElementById('notificationTitle');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const scheduleForLater = document.getElementById('scheduleForLater');
+        const scheduleTimeGroup = document.querySelector('#createNotificationModal #scheduleTimeGroup');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewMessage = document.getElementById('previewMessage');
+        const previewIcon = document.getElementById('previewIcon');
+        const addQuestionBtn = document.getElementById('addQuestionBtn');
+        const editQuestionModal = document.getElementById('editQuestionModal');
+        const closeEditQuestionModal = document.getElementById('closeEditQuestionModal');
+        const cancelEditQuestion = document.getElementById('cancelEditQuestion');
+        const saveQuestion = document.getElementById('saveQuestion');
+        const editQuestionModalTitle = document.getElementById('editQuestionModalTitle');
+        const questionText = document.getElementById('questionText');
+        const toggleGeminiKey = document.getElementById('toggleGeminiKey');
+        const toggleStableHordeKey = document.getElementById('toggleStableHordeKey');
+        const geminiApiKey = document.getElementById('geminiApiKey');
+        const stableHordeKey = document.getElementById('stableHordeKey');
+        const toastContainer = document.getElementById('toastContainer');
+
+        // State variables
+        let isDarkTheme = false;
+        let currentSection = 'notifications';
+        let editingQuestionId = null;
+
+        // Initialize the admin panel
+        function initAdminPanel() {
+            // Check if user is admin
+            if (currentUser.uid !== adminUID) {
+                window.location.href = 'index.html'; // Redirect to user app if not admin
+                return;
+            }
+            
+            // Load theme preference
+            loadThemePreference();
+            
+            // Add event listeners
+            addEventListeners();
+            
+            // Show initial section
+            showSection(currentSection);
+        }
+
+        // Load theme preference
+        function loadThemePreference() {
+            const savedTheme = localStorage.getItem('adminDarkTheme');
+            if (savedTheme === 'true') {
+                document.body.classList.add('dark-theme');
+                isDarkTheme = true;
+                themeToggle.innerHTML = '<span class="material-icons">brightness_7</span>';
+            }
+        }
+
+        // Add event listeners
+        function addEventListeners() {
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Sidebar menu items
+            sidebarMenuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    showSection(section);
+                });
+            });
+            
+            // Tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabGroup = this.parentElement;
+                    const activeTab = tabGroup.querySelector('.tab.active');
+                    if (activeTab) {
+                        activeTab.classList.remove('active');
+                    }
+                    this.classList.add('active');
+                    
+                    // Show/hide tab content if needed
+                    const tabName = this.dataset.tab;
+                    // Handle tab content switching if needed
+                });
+            });
+            
+            // Create notification button
+            createNotificationBtn.addEventListener('click', function() {
+                createNotificationModal.style.display = 'flex';
+            });
+            
+            // Close modals
+            closeCreateNotificationModal.addEventListener('click', function() {
+                createNotificationModal.style.display = 'none';
+            });
+            
+            cancelCreateNotification.addEventListener('click', function() {
+                createNotificationModal.style.display = 'none';
+            });
+            
+            closePreviewNotificationModal.addEventListener('click', function() {
+                previewNotificationModal.style.display = 'none';
+            });
+            
+            // Preview notification
+            previewNotification.addEventListener('click', previewNotificationFunc);
+            confirmSendNotification.addEventListener('click', sendNotificationFunc);
+            backToEdit.addEventListener('click', function() {
+                previewNotificationModal.style.display = 'none';
+                createNotificationModal.style.display = 'flex';
+            });
+            
+            // Schedule for later toggle
+            scheduleForLater.addEventListener('change', function() {
+                if (this.checked) {
+                    scheduleTimeGroup.style.display = 'block';
+                } else {
+                    scheduleTimeGroup.style.display = 'none';
+                }
+            });
+            
+            // Add question button
+            addQuestionBtn.addEventListener('click', function() {
+                editingQuestionId = null;
+                editQuestionModalTitle.textContent = 'Add New Question';
+                questionText.value = '';
+                document.getElementById('questionCount').value = '0';
+                document.getElementById('questionActive').checked = true;
+                editQuestionModal.style.display = 'flex';
+            });
+            
+            // Close edit question modal
+            closeEditQuestionModal.addEventListener('click', function() {
+                editQuestionModal.style.display = 'none';
+            });
+            
+            cancelEditQuestion.addEventListener('click', function() {
+                editQuestionModal.style.display = 'none';
+            });
+            
+            // Save question
+            saveQuestion.addEventListener('click', saveQuestionFunc);
+            
+            // Toggle API keys visibility
+            toggleGeminiKey.addEventListener('click', function() {
+                toggleApiKeyVisibility(geminiApiKey, toggleGeminiKey);
+            });
+            
+            toggleStableHordeKey.addEventListener('click', function() {
+                toggleApiKeyVisibility(stableHordeKey, toggleStableHordeKey);
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === createNotificationModal) {
+                    createNotificationModal.style.display = 'none';
+                }
+                if (e.target === previewNotificationModal) {
+                    previewNotificationModal.style.display = 'none';
+                }
+                if (e.target === editQuestionModal) {
+                    editQuestionModal.style.display = 'none';
+                }
+            });
+            
+            // Refresh buttons
+            document.getElementById('refreshStatsBtn')?.addEventListener('click', refreshStats);
+            document.getElementById('refreshJobsBtn')?.addEventListener('click', refreshJobs);
+            document.getElementById('refreshLogsBtn')?.addEventListener('click', refreshLogs);
+            document.getElementById('refreshModerationBtn')?.addEventListener('click', refreshModeration);
+            
+            // Export buttons
+            document.getElementById('exportDataBtn')?.addEventListener('click', exportData);
+            document.getElementById('exportLogsBtn')?.addEventListener('click', exportLogs);
+            
+            // Create backup button
+            document.getElementById('createBackupBtn')?.addEventListener('click', createBackup);
+            
+            // Save buttons
+            document.getElementById('saveMaintenanceBtn')?.addEventListener('click', saveMaintenanceSettings);
+            document.getElementById('saveQuestionsBtn')?.addEventListener('click', saveQuestions);
+            document.getElementById('saveAppSettingsBtn')?.addEventListener('click', saveAppSettings);
+            document.getElementById('saveApiSettingsBtn')?.addEventListener('click', saveApiSettings);
+            document.getElementById('saveSecuritySettingsBtn')?.addEventListener('click', saveSecuritySettings);
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('adminDarkTheme', isDarkTheme);
+            
+            if (isDarkTheme) {
+                themeToggle.innerHTML = '<span class="material-icons">brightness_7</span>';
+            } else {
+                themeToggle.innerHTML = '<span class="material-icons">brightness_4</span>';
+            }
+        }
+
+        // Show section
+        function showSection(section) {
+            // Hide all sections
+            sections.forEach(s => {
+                s.style.display = 'none';
+            });
+            
+            // Remove active class from all menu items
+            sidebarMenuItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(`${section}-section`).style.display = 'block';
+            
+            // Add active class to selected menu item
+            document.querySelector(`.menu-item[data-section="${section}"]`).classList.add('active');
+            
+            // Update current section
+            currentSection = section;
+        }
+
+        // Preview notification
+        function previewNotificationFunc() {
+            const title = notificationTitle.value.trim();
+            const message = notificationMessage.value.trim();
+            const icon = notificationIcon.value;
+            
+            if (title === '') {
+                showToast('Error', 'Please enter a notification title.');
+                return;
+            }
+            
+            if (message === '') {
+                showToast('Error', 'Please enter a notification message.');
+                return;
+            }
+            
+            // Set preview content
+            previewTitle.textContent = title;
+            previewMessage.textContent = message;
+            previewIcon.innerHTML = `<span class="material-icons">${icon}</span>`;
+            
+            // Hide create modal and show preview modal
+            createNotificationModal.style.display = 'none';
+            previewNotificationModal.style.display = 'flex';
+        }
+
+        // Send notification
+        function sendNotificationFunc() {
+            const title = notificationTitle.value.trim();
+            const message = notificationMessage.value.trim();
+            
+            // In a real app, this would save to Firestore
+            // For demo, we'll just show a success message
+            previewNotificationModal.style.display = 'none';
+            
+            showToast('Success', `Notification "${title}" has been sent to users.`);
+            
+            // Reset form
+            notificationTitle.value = '';
+            notificationMessage.value = '';
+            notificationIcon.value = 'info';
+            document.getElementById('sendNow').checked = true;
+            document.getElementById('scheduleTimeGroup').style.display = 'none';
+            document.getElementById('sendBrowserNotification').checked = false;
+            document.getElementById('playSound').checked = false;
+            document.getElementById('showBadge').checked = false;
+        }
+
+        // Save question
+        function saveQuestionFunc() {
+            const question = questionText.value.trim();
+            const count = parseInt(document.getElementById('questionCount').value) || 0;
+            const active = document.getElementById('questionActive').checked;
+            
+            if (question === '') {
+                showToast('Error', 'Please enter a question.');
+                return;
+            }
+            
+            if (editingQuestionId) {
+                // Update existing question
+                // In a real app, this would update Firestore
+                showToast('Success', 'Question updated successfully.');
+            } else {
+                // Add new question
+                // In a real app, this would add to Firestore
+                showToast('Success', 'Question added successfully.');
+            }
+            
+            // Close modal
+            editQuestionModal.style.display = 'none';
+            
+            // Refresh questions list
+            // In a real app, this would fetch from Firestore
+        }
+
+        // Toggle API key visibility
+        function toggleApiKeyVisibility(inputField, toggleButton) {
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                toggleButton.innerHTML = '<span class="material-icons">visibility_off</span>';
+            } else {
+                inputField.type = 'password';
+                toggleButton.innerHTML = '<span class="material-icons">visibility</span>';
+            }
+        }
+
+        // Show toast notification
+        function showToast(title, message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <span class="material-icons toast-icon">notifications</span>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close">
+                    <span class="material-icons">close</span>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            }, 5000);
+            
+            // Close button
+            toast.querySelector('.toast-close').addEventListener('click', function() {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            });
+        }
+
+        // Refresh stats
+        function refreshStats() {
+            showToast('Info', 'Statistics refreshed successfully.');
+            // In a real app, this would fetch fresh data from Firestore
+        }
+
+        // Refresh jobs
+        function refreshJobs() {
+            showToast('Info', 'Image jobs refreshed successfully.');
+            // In a real app, this would fetch fresh data from Firestore
+        }
+
+        // Refresh logs
+        function refreshLogs() {
+            showToast('Info', 'Logs refreshed successfully.');
+            // In a real app, this would fetch fresh data from Firestore
+        }
+
+        // Refresh moderation
+        function refreshModeration() {
+            showToast('Info', 'Moderation queue refreshed successfully.');
+            // In a real app, this would fetch fresh data from Firestore
+        }
+
+        // Export data
+        function exportData() {
+            const selectedData = [];
+            if (document.getElementById('exportNotifications').checked) selectedData.push('notifications');
+            if (document.getElementById('exportTopQuestions').checked) selectedData.push('topQuestions');
+            if (document.getElementById('exportSystemSettings').checked) selectedData.push('systemSettings');
+            if (document.getElementById('exportUserStats').checked) selectedData.push('userStats');
+            if (document.getElementById('exportImageJobs').checked) selectedData.push('imageJobs');
+            if (document.getElementById('exportLogs').checked) selectedData.push('logs');
+            
+            if (selectedData.length === 0) {
+                showToast('Error', 'Please select at least one data type to export.');
+                return;
+            }
+            
+            // In a real app, this would generate and download the export file
+            showToast('Success', `Exporting ${selectedData.length} data types. File will download shortly.`);
+            
+            // Simulate file download
+            setTimeout(() => {
+                showToast('Success', 'Export completed and file downloaded.');
+            }, 2000);
+        }
+
+        // Export logs
+        function exportLogs() {
+            showToast('Success', 'System logs exported and downloaded.');
+            // In a real app, this would generate and download the logs file
+        }
+
+        // Create backup
+        function createBackup() {
+            const backupName = document.getElementById('backupName').value.trim();
+            if (backupName === '') {
+                showToast('Error', 'Please enter a backup name.');
+                return;
+            }
+            
+            // In a real app, this would create a backup
+            showToast('Info', `Creating backup "${backupName}"...`);
+            
+            // Simulate backup creation
+            setTimeout(() => {
+                showToast('Success', `Backup "${backupName}" created successfully.`);
+            }, 3000);
+        }
+
+        // Save maintenance settings
+        function saveMaintenanceSettings() {
+            const maintenanceEnabled = document.getElementById('maintenanceToggle').checked;
+            const maintenanceTitle = document.getElementById('maintenanceTitle').value;
+            const maintenanceMessage = document.getElementById('maintenanceMessage').value;
+            
+            // In a real app, this would save to Firestore
+            showToast('Success', 'Maintenance settings saved successfully.');
+        }
+
+        // Save questions
+        function saveQuestions() {
+            // In a real app, this would save the reordered questions to Firestore
+            showToast('Success', 'Top 10 questions saved successfully.');
+        }
+
+        // Save app settings
+        function saveAppSettings() {
+            const appName = document.getElementById('appName').value;
+            const schoolName = document.getElementById('schoolName').value;
+            const schoolAddress = document.getElementById('schoolAddress').value;
+            const schoolContact = document.getElementById('schoolContact').value;
+            const developerInfo = document.getElementById('developerInfo').value;
+            
+            // In a real app, this would save to Firestore
+            showToast('Success', 'Application settings saved successfully.');
+        }
+
+        // Save API settings
+        function saveApiSettings() {
+            const imageRateLimit = document.getElementById('imageRateLimit').value;
+            const chatRateLimit = document.getElementById('chatRateLimit').value;
+            
+            // In a real app, this would save to Firestore or server config
+            showToast('Success', 'API settings saved successfully.');
+        }
+
+        // Save security settings
+        function saveSecuritySettings() {
+            const twoFactorEnabled = document.getElementById('2faToggle').checked;
+            const strongPasswordEnabled = document.getElementById('strongPasswordToggle').checked;
+            const autoLogoutEnabled = document.getElementById('autoLogoutToggle').checked;
+            const sessionTimeout = document.getElementById('sessionTimeout').value;
+            const adminUids = document.getElementById('adminUids').value;
+            
+            // In a real app, this would save to Firestore or server config
+            showToast('Success', 'Security settings saved successfully.');
+        }
+
+        // Initialize admin panel when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initAdminPanel);
+
+        // Cloud Function pseudo-code snippets (for reference)
+        console.log('Cloud Function pseudo-code snippets:');
+        
+        // Scheduled notifications function
+        console.log(`
+        // Cloud Function for scheduled notifications
+        exports.sendScheduledNotifications = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
+          const now = new Date();
+          
+          // Get all scheduled notifications that should be sent now
+          const notificationsSnapshot = await db.collection('notifications')
+            .where('scheduledFor', '<=', now)
+            .where('status', '==', 'scheduled')
+            .get();
+          
+          const promises = [];
+          
+          notificationsSnapshot.forEach(doc => {
+            const notification = doc.data();
+            
+            // Send notification to all users
+            const message = {
+              notification: {
+                title: notification.title,
+                body: notification.message
+              }
+            };
+            
+            // Get all users (in batches for large datasets)
+            const usersSnapshot = await db.collection('users').get();
+            
+            usersSnapshot.forEach(userDoc => {
+              const user = userDoc.data();
+              if (user.fcmToken) {
+                admin.messaging().sendToDevice(user.fcmToken, message)
+                  .then(response => {
+                    console.log('Notification sent to user:', userDoc.id);
+                  })
+                  .catch(error => {
+                    console.error('Error sending notification to user:', userDoc.id, error);
+                  });
+              }
+            });
+            
+            // Update notification status
+            promises.push(doc.ref.update({
+              status: 'sent',
+              sentAt: admin.firestore.FieldValue.serverTimestamp()
+            }));
+          });
+          
+          await Promise.all(promises);
+          return null;
+        });
+        `);
+        
+        // Image job cleanup function
+        console.log(`
+        // Cloud Function for image job cleanup
+        exports.cleanupImageJobs = functions.pubsub.schedule('every 24 hours').onRun(async (context) => {
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - 30); // 30 days ago
+          
+          // Delete old completed image jobs
+          const oldJobsSnapshot = await db.collection('imageJobs')
+            .where('status', 'in', ['completed', 'failed'])
+            .where('createdAt', '<=', cutoffDate)
+            .get();
+          
+          const deletePromises = [];
+          
+          oldJobsSnapshot.forEach(doc => {
+            // Also delete the actual image file from Storage if needed
+            const job = doc.data();
+            if (job.imageUrl) {
+              const fileName = job.imageUrl.split('/').pop();
+              const file = storage.bucket().file('generated-images/' + fileName);
+              deletePromises.push(file.delete().catch(err => {
+                console.log('Could not delete file:', err);
+              }));
+            }
+            
+            // Delete the job document
+            deletePromises.push(doc.ref.delete());
+          });
+          
+          await Promise.all(deletePromises);
+          console.log('Cleaned up', oldJobsSnapshot.size, 'old image jobs');
+          return null;
+        });
+        `);
+    </script>
 </body>
 </html>
