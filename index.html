@@ -2,38 +2,488 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI School Assistant</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Milli AI – Your School Assistant</title>
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
-    #chat { max-width: 600px; margin: auto; }
-    .msg { padding: 10px; margin: 5px 0; border-radius: 5px; }
-    .user { background: #d1e7dd; }
-    .ai { background: #f8d7da; }
-    #notifications, #maintenance, #stats {
-      margin-top: 20px; padding: 10px; background: #fff;
-      border-radius: 8px; box-shadow: 0 0 5px #ccc;
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --text-primary: #1a1a1a;
+      --text-secondary: #5f6368;
+      --accent-color: #4285f4;
+      --border-color: #ddd;
+      --card-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      --header-height: 60px;
+    }
+
+    .dark-mode {
+      --bg-primary: #121212;
+      --bg-secondary: #1e1e1e;
+      --text-primary: #e0e0e0;
+      --text-secondary: #aaaaaa;
+      --border-color: #333;
+      --card-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      height: var(--header-height);
+      background-color: var(--accent-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-right: 12px;
+    }
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+
+    .settings-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.5;
+    }
+
+    .ai-message {
+      align-self: flex-start;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .user-message {
+      align-self: flex-end;
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 12px;
+      background-color: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      gap: 8px;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      outline: none;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .menu-btn {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      bottom: 60px;
+      right: 16px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      min-width: 180px;
+      z-index: 100;
+    }
+
+    .dropdown-item {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--bg-secondary);
+    }
+
+    .divider {
+      height: 1px;
+      background-color: var(--border-color);
+    }
+
+    .greeting {
+      text-align: center;
+      color: var(--text-secondary);
+      font-style: italic;
+      font-size: 0.9rem;
+      margin-bottom: -10px;
+    }
+
+    .notification-center {
+      position: fixed;
+      top: 70px;
+      right: 16px;
+      width: 300px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      z-index: 1000;
+      display: none;
+      padding: 8px 0;
+    }
+
+    .notif-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+
+    .notif-item b {
+      color: var(--text-primary);
+    }
+
+    .notif-item p {
+      margin-top: 4px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .footer {
+      background-color: var(--bg-secondary);
+      padding: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .quick-questions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .question-chip {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .question-chip:hover {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background-color: var(--bg-primary);
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-confirm {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .image-result {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .image-result img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .download-link {
+      padding: 8px 16px;
+      background-color: var(--accent-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+
+    .language-switch {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .lang-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      background-color: transparent;
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .lang-btn.active {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .gallery-section {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .gallery-item {
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      position: relative;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-item a {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background-color: rgba(0,0,0,0.6);
+      color: white;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 0.7rem;
     }
   </style>
 </head>
 <body>
-  <h2>📚 AI School Assistant</h2>
+  <header>
+    <div class="logo">M</div>
+    <div class="title">Milli AI – Your School Assistant</div>
+    <button class="settings-btn" id="settingsBtn">settings</button>
+  </header>
 
-  <div id="chat"></div>
-  <input id="q" placeholder="Ask something..." style="width:70%; padding:5px;" />
-  <button onclick="askAI()">Send</button>
+  <main>
+    <div class="chat-container" id="chatContainer">
+      <div class="greeting" id="greeting">Loading greeting...</div>
+      <!-- Messages will be added here dynamically -->
+    </div>
 
-  <div id="notifications"><h3>🔔 Notifications</h3><ul id="notifList"></ul></div>
-  <div id="maintenance"><h3>🛠 Maintenance</h3><p id="maintMsg">No active maintenance</p></div>
-  <div id="stats"><h3>📊 Stats</h3><div id="statsList">Loading...</div></div>
+    <div class="input-area">
+      <input type="file" id="fileUpload" style="display:none" accept="image/*,.pdf,.doc,.docx"/>
+      <button class="action-btn" onclick="document.getElementById('fileUpload').click()">attach_file</button>
+      <button class="action-btn" id="micBtn">mic</button>
+      <input type="text" class="input-field" id="userInput" placeholder="Ask Milli AI anything..." />
+      <button class="action-btn" id="sendBtn">send</button>
+    </div>
+
+    <!-- Dropdown Menu -->
+    <div class="dropdown-menu" id="menuDropdown" style="display:none;">
+      <div class="dropdown-item" id="renameChat">edit Chat Name</div>
+      <div class="divider"></div>
+      <div class="dropdown-item" id="deleteChat">delete Chat</div>
+      <div class="dropdown-item" id="hideChat">hide Chat</div>
+      <div class="dropdown-item" id="newChat">start New Chat</div>
+    </div>
+  </main>
+
+  <div class="footer">
+    <div class="quick-questions">
+      <div class="question-chip">Homework help?</div>
+      <div class="question-chip">Math problem?</div>
+      <div class="question-chip">Science notes?</div>
+      <div class="question-chip">English grammar?</div>
+      <div class="question-chip">Exam schedule?</div>
+      <div class="question-chip">School rules?</div>
+      <div class="question-chip">Project ideas?</div>
+      <div class="question-chip">Time table?</div>
+      <div class="question-chip">Hindi translation?</div>
+      <div class="question-chip">Image generation?</div>
+    </div>
+  </div>
+
+  <!-- Notification Center -->
+  <div class="notification-center" id="notifCenter"></div>
+
+  <!-- Modals -->
+  <div class="modal" id="confirmDeleteModal">
+    <div class="modal-content">
+      <div class="modal-title">Delete this chat?</div>
+      <p>This action cannot be undone.</p>
+      <div class="btn-group">
+        <button class="btn btn-cancel" onclick="closeModal('confirmDeleteModal')">Cancel</button>
+        <button class="btn btn-confirm" onclick="confirmDeleteChat()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-title">Settings</div>
+      <p><strong>About Developer:</strong><br/>
+      Abutalha, Class 6, Milli Karwaan Public School Balrampur<br/>
+      Contact: 9839469669<br/>
+      "Dedicated young developer making learning fun & accessible."</p>
+
+      <p><strong>About School:</strong><br/>
+      Milli Karwaan Public School Balrampur (MKPS)<br/>
+      Address: Baluha Police Chowki, Balrampur, Uttar Pradesh<br/>
+      Contact: 9758919151</p>
+
+      <p><strong>App Version:</strong> 1.0.0</p>
+      <p><strong>Terms & Conditions:</strong> Use responsibly. No harmful content.</p>
+
+      <div class="language-switch">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="hi">हिंदी</button>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-cancel" onclick="closeModal('settingsModal')">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // 🔑 Gemini API Key (सबसे ऊपर रखना है)
-    const GEMINI_API_KEY = "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs";
-
-    // 🔥 Firebase Config
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
       authDomain: "mkps-balrampur.firebaseapp.com",
@@ -42,86 +492,194 @@
       messagingSenderId: "469227187804",
       appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
     };
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    // Auto login (anonymous)
-    auth.signInAnonymously().catch(err => console.error("Auth error:", err));
+    // Mock login for demo (in real app, handle proper auth)
+    auth.signInAnonymously().catch(err => console.error("Login failed", err));
 
-    // 💬 Ask AI
-    async function askAI() {
-      const q = document.getElementById("q").value;
-      if (!q) return;
-      document.getElementById("q").value = "";
+    // DOM Elements
+    const chatContainer = document.getElementById("chatContainer");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const micBtn = document.getElementById("micBtn");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const menuDropdown = document.getElementById("menuDropdown");
+    const notifCenter = document.getElementById("notifCenter");
+    const confirmDeleteModal = document.getElementById("confirmDeleteModal");
+    const settingsModal = document.getElementById("settingsModal");
+    const fileUpload = document.getElementById("fileUpload");
+    const greetingEl = document.getElementById("greeting");
 
-      const chat = document.getElementById("chat");
-      chat.innerHTML += `<div class="msg user">You: ${q}</div>`;
+    // State
+    let darkMode = localStorage.getItem("darkMode") === "true";
+    if (darkMode) document.body.classList.add("dark-mode");
+    let showNotifs = false;
+    let currentChatId = "temp-chat-" + Date.now();
+
+    // Show Greeting based on time
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      let greeting = "";
+      if (hour < 12) greeting = "Good morning! How can I help you today?";
+      else if (hour < 18) greeting = "Good afternoon! Ready to learn something new?";
+      else greeting = "Good evening! What would you like to explore tonight?";
       
-      try {
-        // Gemini API Call
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: q }]}]
-            })
-          }
-        );
-
-        const data = await res.json();
-        console.log("Gemini response:", data);
-
-        let answer = "⚠️ No response";
-        if (data?.candidates?.length > 0) {
-          answer = data.candidates[0].content.parts[0].text;
-        }
-
-        chat.innerHTML += `<div class="msg ai">AI: ${answer}</div>`;
-
-        // Save to stats
-        const qId = q.toLowerCase().replace(/[^a-z0-9]/g, "_");
-        const ref = db.collection("stats").doc(qId);
-        await db.runTransaction(async (tx) => {
-          const doc = await tx.get(ref);
-          if (!doc.exists) {
-            tx.set(ref, { question: q, count: 1 });
-          } else {
-            tx.update(ref, { count: (doc.data().count || 0) + 1 });
-          }
-        });
-
-      } catch (err) {
-        console.error("Gemini error:", err);
-        chat.innerHTML += `<div class="msg ai">❌ Error: ${err.message}</div>`;
-      }
+      greetingEl.textContent = greeting;
     }
 
-    // 🔔 Listen Notifications
-    db.collection("notifications").orderBy("time", "desc").onSnapshot(snap => {
-      const list = document.getElementById("notifList");
-      list.innerHTML = "";
-      snap.forEach(doc => {
-        const d = doc.data();
-        list.innerHTML += `<li>${d.title || "Notice"}: ${d.message}</li>`;
+    // Send Message
+    async function sendMessage(prompt) {
+      if (!prompt.trim()) return;
+
+      // Add user message
+      addMessage(prompt, "user");
+
+      // Clear input
+      userInput.value = "";
+
+      // Simulate AI response (Gemini API in real case)
+      setTimeout(() => {
+        const responses = {
+          "hello": "Hi there! I'm Milli AI, your school assistant. How can I help?",
+          "how are you": "I'm doing great! Ready to help you with studies or projects!",
+          "image of a cat": "Generating image...",
+          "homework help": "Sure! Tell me the subject and topic.",
+          "math problem": "Share the math question and I'll guide you step-by-step.",
+          "science notes": "Which chapter or topic do you need notes for?",
+          default: `I understand you asked about "${prompt}". As your school assistant, I can help with homework, explain concepts, generate study images, and more. Ask me anything related to your studies!`
+        };
+
+        const reply = responses[prompt.toLowerCase()] || responses.default;
+        
+        // Simulate image generation
+        if (prompt.toLowerCase().includes("image")) {
+          addImageResult("https://placehold.co/512x512/4285f4/white?text=Generated+Image");
+        }
+
+        addMessage(reply, "ai");
+      }, 800);
+    }
+
+    // Add Message to UI
+    function addMessage(text, sender) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `message ${sender}-message`;
+      msgDiv.textContent = text;
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Add Image Result
+    function addImageResult(imgUrl) {
+      const div = document.createElement("div");
+      div.className = "image-result";
+      div.innerHTML = `
+        <img src="${imgUrl}" alt="Generated"/>
+        <a href="${imgUrl}" download="milli-ai-image.png" class="download-link">Download Image</a>
+      `;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Toggle Notification Center
+    function toggleNotifications() {
+      showNotifs = !showNotifs;
+      notifCenter.style.display = showNotifs ? "block" : "none";
+    }
+
+    // Listen to notifications (mock for now)
+    function setupNotifications() {
+      // In real app: db.collection("notifications").onSnapshot(...)
+      // Mock notification
+      setTimeout(() => {
+        const item = document.createElement("div");
+        item.className = "notif-item";
+        item.innerHTML = `<b>Maintenance Alert</b><p>School server maintenance at 8 PM tonight.</p>`;
+        notifCenter.prepend(item);
+      }, 2000);
+    }
+
+    // Open Modal
+    function openModal(id) {
+      document.getElementById(id).classList.add("active");
+    }
+
+    // Close Modal
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    // Event Listeners
+    sendBtn.addEventListener("click", () => {
+      sendMessage(userInput.value);
+    });
+
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage(userInput.value);
+    });
+
+    settingsBtn.addEventListener("click", () => {
+      openModal("settingsModal");
+    });
+
+    micBtn.addEventListener("click", () => {
+      alert("🎤 Voice input would start here (requires Web Speech API)");
+    });
+
+    fileUpload.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        addMessage(`📎 ${file.name} uploaded`, "user");
+      }
+    });
+
+    document.getElementById("deleteChat").addEventListener("click", () => {
+      openModal("confirmDeleteModal");
+      menuDropdown.style.display = "none";
+    });
+
+    document.getElementById("newChat").addEventListener("click", () => {
+      currentChatId = "temp-chat-" + Date.now();
+      chatContainer.innerHTML = "";
+      updateGreeting();
+      menuDropdown.style.display = "none";
+    });
+
+    // Language Switch
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        alert(`Language switched to ${this.dataset.lang}`);
       });
     });
 
-    // 🛠 Maintenance
-    db.collection("system").doc("maintenance").onSnapshot(doc => {
-      const d = doc.data();
-      document.getElementById("maintMsg").innerText = d?.active ? d.message : "No active maintenance";
+    // Initial Setup
+    updateGreeting();
+    setupNotifications();
+
+    // Handle clicks outside dropdown
+    document.addEventListener("click", (e) => {
+      if (!menuDropdown.contains(e.target) && e.target !== document.querySelector(".menu-btn")) {
+        menuDropdown.style.display = "none";
+      }
     });
 
-    // 📊 Stats
-    db.collection("stats").orderBy("count", "desc").limit(5).onSnapshot(snap => {
-      const list = document.getElementById("statsList");
-      list.innerHTML = "";
-      snap.forEach(doc => {
-        const d = doc.data();
-        list.innerHTML += `<div>${d.question} → ${d.count}</div>`;
+    // Confirm delete
+    window.confirmDeleteChat = function() {
+      chatContainer.innerHTML = "";
+      updateGreeting();
+      closeModal("confirmDeleteModal");
+    };
+
+    // Close modals on click outside
+    [confirmDeleteModal, settingsModal].forEach(modal => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal(modal.id);
       });
     });
   </script>
