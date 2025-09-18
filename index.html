@@ -4,11 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Assistant</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { color: #333; }
+    #notifList li { margin: 5px 0; }
+    .maint { background: #ffdddd; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
+    .chat { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 8px; }
+    .ai { background: #eef; }
+    .user { background: #efe; }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, increment, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { 
+      getFirestore, collection, doc, setDoc, updateDoc, increment, getDoc, onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+    // 🔹 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
       authDomain: "mkps-balrampur.firebaseapp.com",
@@ -21,15 +33,48 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+
+    // 🔐 Anonymous login
     signInAnonymously(auth);
 
+    // 🔔 Realtime Notifications
+    onSnapshot(collection(db, "notifications"), (snap) => {
+      const list = document.getElementById("notifList");
+      list.innerHTML = "";
+      snap.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = data.title + ": " + data.message;
+        list.appendChild(li);
+      });
+    });
+
+    // 🛠 Realtime Maintenance
+    onSnapshot(doc(db, "system", "maintenance"), (snap) => {
+      const box = document.getElementById("maintBox");
+      if (snap.exists() && snap.data().active) {
+        box.innerText = "⚠️ The system is under maintenance.";
+        box.style.display = "block";
+      } else {
+        box.style.display = "none";
+      }
+    });
+
+    // 🤖 AI + Save Stats
     const GEMINI_API_KEY = "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs";
 
     async function askAI() {
       const q = document.getElementById("question").value;
       if (!q) return;
 
-      // 🔹 1. Count save in Firestore
+      // Show user message
+      const chatBox = document.getElementById("chatBox");
+      const userMsg = document.createElement("div");
+      userMsg.className = "chat user";
+      userMsg.innerText = "You: " + q;
+      chatBox.appendChild(userMsg);
+
+      // 🔹 Save count
       const ref = doc(db, "stats", q.toLowerCase());
       const snap = await getDoc(ref);
       if (snap.exists()) {
@@ -38,7 +83,7 @@
         await setDoc(ref, { question: q, count: 1 });
       }
 
-      // 🔹 2. Call Gemini API
+      // 🔹 Call Gemini
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,22 +93,35 @@
       });
 
       const data = await res.json();
-      console.log(data);
+      console.log("AI Response:", data);
+
       let answer = "⚠️ Error from AI";
       try {
         answer = data.candidates[0].content.parts[0].text;
       } catch(e) {}
 
-      document.getElementById("answer").innerText = answer;
-    }
+      const aiMsg = document.createElement("div");
+      aiMsg.className = "chat ai";
+      aiMsg.innerText = "AI: " + answer;
+      chatBox.appendChild(aiMsg);
 
+      document.getElementById("question").value = "";
+    }
     window.askAI = askAI;
   </script>
 </head>
 <body>
-  <h2>🤖 Ask AI</h2>
-  <input type="text" id="question" placeholder="Type your question...">
-  <button onclick="askAI()">Ask</button>
-  <p id="answer"></p>
+  <h2>🤖 AI Assistant</h2>
+  <div id="maintBox" class="maint" style="display:none;"></div>
+
+  <div>
+    <input type="text" id="question" placeholder="Type your question..." style="width:70%;">
+    <button onclick="askAI()">Ask</button>
+  </div>
+
+  <div id="chatBox"></div>
+
+  <h3>🔔 Notifications</h3>
+  <ul id="notifList"></ul>
 </body>
-  </html>
+</html>
