@@ -1,1945 +1,1851 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milli AI - School AI Assistant</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #4285f4;
-            --secondary-color: #34a853;
-            --background-color: #f5f5f5;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-            --accent-color: #ea4335;
-            --success-color: #0f9d58;
-            --warning-color: #f4b400;
-        }
-
-        .dark-mode {
-            --background-color: #121212;
-            --card-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --border-color: #333333;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 100%;
-            overflow: hidden;
-        }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .logo i {
-            font-size: 1.5rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 16px;
-        }
-
-        .icon-button {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .welcome-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            padding: 20px;
-            text-align: center;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .welcome-icon {
-            font-size: 6rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            animation: bounce 1s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .welcome-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--text-color);
-        }
-
-        .welcome-subtitle {
-            font-size: 1rem;
-            margin-bottom: 30px;
-            color: var(--text-color);
-            opacity: 0.8;
-        }
-
-        .start-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background-color: var(--primary-color);
-            color: white;
-            border-bottom-right-radius: 5px;
-        }
-
-        .ai-message {
-            align-self: flex-start;
-            background-color: var(--card-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-bottom-left-radius: 5px;
-        }
-
-        .message-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            justify-content: flex-end;
-        }
-
-        .message-action-btn {
-            background: none;
-            border: none;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: var(--text-color);
-            opacity: 0.7;
-            transition: all 0.2s ease;
-        }
-
-        .message-action-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .ai-message .message-action-btn {
-            color: var(--primary-color);
-        }
-
-        .user-message .message-action-btn {
-            color: white;
-            opacity: 0.8;
-        }
-
-        .input-container {
-            padding: 16px;
-            background-color: var(--card-color);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-        }
-
-        .input-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-action-btn {
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.2s ease;
-        }
-
-        .input-action-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 25px;
-            font-size: 1rem;
-            background-color: var(--card-color);
-            color: var(--text-color);
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .message-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
-        }
-
-        .send-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .send-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3);
-        }
-
-        .send-button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .suggestions-container {
-            padding: 16px;
-            background-color: var(--card-color);
-            border-top: 1px solid var(--border-color);
-            display: none;
-            flex-wrap: wrap;
-            gap: 10px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .suggestion-chip {
-            background-color: var(--background-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid var(--border-color);
-        }
-
-        .suggestion-chip:hover {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .floating-menu {
-            position: absolute;
-            top: 60px;
-            right: 16px;
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: none;
-            flex-direction: column;
-            z-index: 1000;
-            min-width: 200px;
-            animation: slideDown 0.2s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .menu-item {
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .menu-item:hover {
-            background-color: var(--background-color);
-        }
-
-        .menu-item i {
-            font-size: 1.1rem;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            display: none;
-            z-index: 999;
-        }
-
-        .settings-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--card-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 400px;
-            max-height: 90vh;
-            overflow-y: auto;
-            z-index: 1001;
-            display: none;
-            animation: modalIn 0.3s ease-out;
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: translate(-50%, -60%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-color);
-        }
-
-        .modal-content {
-            padding: 20px;
-        }
-
-        .settings-section {
-            margin-bottom: 25px;
-        }
-
-        .settings-section-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .settings-option {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .settings-label {
-            font-size: 0.95rem;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .info-item {
-            margin-bottom: 15px;
-        }
-
-        .info-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            color: var(--text-color);
-            opacity: 0.8;
-        }
-
-        .logout-button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .logout-button:hover {
-            background-color: #d3302f;
-            transform: translateY(-2px);
-        }
-
-        .gallery-container {
-            display: none;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 16px;
-            background-color: var(--card-color);
-            border-top: 1px solid var(--border-color);
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .gallery-item {
-            position: relative;
-            width: calc(50% - 5px);
-            aspect-ratio: 1/1;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .gallery-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-actions {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.7);
-            padding: 8px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .gallery-item:hover .gallery-actions {
-            opacity: 1;
-        }
-
-        .gallery-action-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .notification-center {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 300px;
-            height: 100vh;
-            background-color: var(--card-color);
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-            z-index: 1002;
-            transition: right 0.3s ease;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .notification-center.active {
-            right: 0;
-        }
-
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .notification-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .notification-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-color);
-        }
-
-        .notification-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: var(--background-color);
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-            animation: slideInRight 0.3s ease-out;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .notification-title-small {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .notification-time {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            margin-bottom: 8px;
-        }
-
-        .notification-content {
-            font-size: 0.9rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: var(--border-color);
-        }
-
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .typing-indicator {
-            display: flex;
-            padding: 12px 16px;
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            align-self: flex-start;
-            margin-bottom: 10px;
-            width: fit-content;
-            max-width: 80%;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--text-color);
-            border-radius: 50%;
-            margin: 0 2px;
-            opacity: 0.4;
-            animation: typingAnimation 1.4s infinite ease-in-out;
-        }
-
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingAnimation {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
-
-        .language-toggle {
-            display: flex;
-            background-color: var(--background-color);
-            border-radius: 25px;
-            padding: 3px;
-            width: fit-content;
-        }
-
-        .language-option {
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        .language-option.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .confirmation-dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--card-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 350px;
-            padding: 20px;
-            z-index: 1003;
-            display: none;
-            animation: modalIn 0.3s ease-out;
-        }
-
-        .dialog-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .dialog-message {
-            margin-bottom: 20px;
-            text-align: center;
-            color: var(--text-color);
-            opacity: 0.8;
-        }
-
-        .dialog-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .dialog-button {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s ease;
-        }
-
-        .cancel-button {
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-
-        .confirm-button {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .cancel-button:hover {
-            background-color: var(--border-color);
-        }
-
-        .confirm-button:hover {
-            background-color: #d3302f;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .gallery-item {
-                width: calc(50% - 5px);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .gallery-item {
-                width: 100%;
-            }
-            
-            .message {
-                max-width: 85%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Milli AI - Your Study Assistant</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --secondary-color: #34a853;
+      --background-color: #ffffff;
+      --card-color: #f8f9fa;
+      --text-color: #202124;
+      --border-color: #dadce0;
+      --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      --shadow-hover: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      --menu-bg: rgba(255,255,255,0.95);
+      --error-color: #ea4335;
+      --success-color: #34a853;
+    }
+
+    .dark-theme {
+      --background-color: #121212;
+      --card-color: #1e1e1e;
+      --text-color: #e8eaed;
+      --border-color: #3c4043;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
+      --shadow-hover: 0 3px 6px rgba(0,0,0,0.3), 0 3px 6px rgba(0,0,0,0.4);
+      --menu-bg: rgba(30,30,30,0.95);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-size: 16px;
+      line-height: 1.5;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background-color: var(--background-color);
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 16px;
+    }
+
+    .icon-button {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 24px;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .icon-button:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    /* Main content */
+    .main {
+      margin-top: 64px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 64px - 72px);
+    }
+
+    /* Greeting section */
+    .greeting {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 24px 16px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .greeting::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .greeting-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .greeting-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* Chat list */
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 16px;
+    }
+
+    .chat-item {
+      background-color: var(--card-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .chat-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .chat-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .chat-title {
+      font-weight: 500;
+      font-size: 1.1rem;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chat-time {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-left: 8px;
+    }
+
+    .chat-preview {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .chat-unread {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    .ephemeral-indicator {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background-color: var(--secondary-color);
+      color: white;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.7rem;
+    }
+
+    /* Start new chat button */
+    .start-chat {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 16px;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-top: 16px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .start-chat:hover {
+      background-color: #3367d6;
+    }
+
+    .start-chat:active {
+      transform: scale(0.98);
+    }
+
+    /* Composer */
+    .composer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--background-color);
+      padding: 12px 16px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      border-top: 1px solid var(--border-color);
+      z-index: 90;
+    }
+
+    .composer-input-container {
+      display: flex;
+      align-items: center;
+      background-color: var(--card-color);
+      border-radius: 24px;
+      padding: 8px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .composer-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 1rem;
+      color: var(--text-color);
+      outline: none;
+    }
+
+    .composer-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
+    .composer-action {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 24px;
+      padding: 4px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .composer-action:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    /* Suggestions */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+      padding: 0 16px;
+    }
+
+    .suggestion-chip {
+      background-color: var(--card-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      box-shadow: var(--shadow);
+    }
+
+    .suggestion-chip:hover {
+      background-color: rgba(66, 133, 244, 0.1);
+      transform: translateY(-1px);
+    }
+
+    /* Menu overlay */
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .menu {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: var(--menu-bg);
+      border-radius: 8px;
+      box-shadow: var(--shadow-hover);
+      padding: 8px 0;
+      min-width: 200px;
+      z-index: 201;
+      transform: translateX(100%);
+      animation: slideIn 0.2s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    .menu-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(0,0,0,0.05);
+    }
+
+    .menu-item .material-icons {
+      font-size: 20px;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 300;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content {
+      background-color: var(--background-color);
+      border-radius: 12px;
+      padding: 24px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: var(--shadow-hover);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-button {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .modal-button.cancel {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+
+    .modal-button.confirm {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+    }
+
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      right: 16px;
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background-color: var(--card-color);
+      color: var(--text-color);
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      max-width: 300px;
+      animation: slideInFromRight 0.3s ease, fadeOut 0.3s ease 3s forwards;
+    }
+
+    @keyframes slideInFromRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    .toast-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .toast-message {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* Login modal */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--card-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .login-button:hover {
+      background-color: #3367d6;
+    }
+
+    .login-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .login-divider span {
+      padding: 0 16px;
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    .guest-login {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+
+    /* Loading indicator */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Skeleton loader */
+    .skeleton {
+      background: linear-gradient(90deg, var(--card-color) 25%, rgba(255,255,255,0.1) 50%, var(--card-color) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-text {
+      height: 16px;
+      margin-bottom: 8px;
+    }
+
+    .skeleton-line {
+      height: 12px;
+      width: 80%;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .header {
+        padding: 8px 12px;
+        height: 56px;
+      }
+      
+      .greeting {
+        padding: 16px 12px;
+        margin-bottom: 16px;
+      }
+      
+      .greeting-title {
+        font-size: 1.25rem;
+      }
+      
+      .start-chat {
+        padding: 12px;
+        font-size: 0.95rem;
+      }
+      
+      .composer {
+        padding: 8px 12px;
+      }
+      
+      .composer-input-container {
+        padding: 6px 12px;
+      }
+      
+      .suggestion-chip {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Dark mode toggle animation */
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Message typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--text-color);
+      opacity: 0.6;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    /* Image generation status */
+    .image-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background-color: var(--card-color);
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+
+    /* Maintenance banner */
+    .maintenance-banner {
+      background-color: var(--error-color);
+      color: white;
+      padding: 12px 16px;
+      text-align: center;
+      font-weight: 500;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      z-index: 99;
+      box-shadow: var(--shadow);
+    }
+
+    /* Language selector */
+    .language-selector {
+      display: flex;
+      background-color: var(--card-color);
+      border-radius: 20px;
+      padding: 4px;
+      box-shadow: var(--shadow);
+    }
+
+    .language-option {
+      padding: 6px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+    }
+
+    .language-option.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    /* Settings panel */
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 80%;
+      max-width: 320px;
+      background-color: var(--background-color);
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      z-index: 250;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .settings-panel.active {
+      transform: translateX(0);
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .settings-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section-title {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--text-color);
+      opacity: 0.9;
+    }
+
+    .settings-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-option:last-child {
+      border-bottom: none;
+    }
+
+    .settings-label {
+      font-size: 0.95rem;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-color);
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--primary-color);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Notification badge */
+    .notification-badge {
+      position: relative;
+    }
+
+    .notification-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--error-color);
+      color: white;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-title {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .empty-state-message {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Welcome Screen -->
-        <div class="welcome-screen" id="welcomeScreen">
-            <i class="material-icons welcome-icon">school</i>
-            <h1 class="welcome-title">Milli AI</h1>
-            <p class="welcome-subtitle" id="greetingText">Good Morning, Ask me anything...</p>
-            <button class="start-button" id="startButton">Get Started</button>
-        </div>
-
-        <!-- Main Chat Interface -->
-        <div class="main-content">
-            <header>
-                <div class="logo">
-                    <i class="material-icons">school</i>
-                    <span>Milli AI</span>
-                </div>
-                <div class="header-actions">
-                    <button class="icon-button" id="notificationButton">
-                        <i class="material-icons">notifications</i>
-                    </button>
-                    <button class="icon-button" id="menuButton">
-                        <i class="material-icons">more_vert</i>
-                    </button>
-                </div>
-            </header>
-
-            <div class="chat-container" id="chatContainer">
-                <!-- Messages will be added here dynamically -->
-            </div>
-
-            <div class="suggestions-container" id="suggestionsContainer">
-                <!-- Suggestions will be added here dynamically -->
-            </div>
-
-            <div class="gallery-container" id="galleryContainer">
-                <!-- Generated images will be added here -->
-            </div>
-
-            <div class="input-container">
-                <div class="input-actions">
-                    <button class="input-action-btn" id="uploadButton">
-                        <i class="material-icons">attach_file</i>
-                    </button>
-                    <button class="input-action-btn" id="micButton">
-                        <i class="material-icons">mic</i>
-                    </button>
-                    <button class="input-action-btn" id="imageGenButton">
-                        <i class="material-icons">image</i>
-                    </button>
-                </div>
-                <input type="text" class="message-input" id="messageInput" placeholder="Ask me anything...">
-                <button class="send-button" id="sendButton">
-                    <i class="material-icons">send</i>
-                </button>
-                <input type="file" id="fileInput" class="file-input" accept="image/*,.pdf,.doc,.docx,.txt">
-            </div>
-        </div>
-
-        <!-- Floating Menu -->
-        <div class="floating-menu" id="floatingMenu">
-            <div class="menu-item" id="searchMenuItem">
-                <i class="material-icons">search</i>
-                <span>Search</span>
-            </div>
-            <div class="menu-item" id="renameMenuItem">
-                <i class="material-icons">edit</i>
-                <span>Rename Chat</span>
-            </div>
-            <div class="menu-item" id="deleteMenuItem">
-                <i class="material-icons">delete</i>
-                <span>Delete Chat</span>
-            </div>
-            <div class="menu-item" id="settingsMenuItem">
-                <i class="material-icons">settings</i>
-                <span>Settings</span>
-            </div>
-        </div>
-
-        <!-- Overlay for menu -->
-        <div class="overlay" id="overlay"></div>
-
-        <!-- Settings Modal -->
-        <div class="settings-modal" id="settingsModal">
-            <div class="modal-header">
-                <h2 class="modal-title">Settings</h2>
-                <button class="modal-close" id="closeSettings">&times;</button>
-            </div>
-            <div class="modal-content">
-                <div class="settings-section">
-                    <h3 class="settings-section-title">Appearance</h3>
-                    <div class="settings-option">
-                        <span class="settings-label">Dark Mode</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="darkModeToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3 class="settings-section-title">Language</h3>
-                    <div class="language-toggle" id="languageToggle">
-                        <div class="language-option active" data-lang="en">English</div>
-                        <div class="language-option" data-lang="hi">Hindi</div>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3 class="settings-section-title">About Developer</h3>
-                    <div class="info-item">
-                        <div class="info-label">Name</div>
-                        <div class="info-value">Abutalha, Class 6</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">School</div>
-                        <div class="info-value">Milli Karwaan Public School Balrampur</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Contact</div>
-                        <div class="info-value">9839469669</div>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3 class="settings-section-title">About School</h3>
-                    <div class="info-item">
-                        <div class="info-label">Name</div>
-                        <div class="info-value">Milli Karwaan Public School Balrampur</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Address</div>
-                        <div class="info-value">Baluha Police Chowki, Balrampur, Uttar Pradesh</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Contact</div>
-                        <div class="info-value">9758919151</div>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3 class="settings-section-title">Terms & Conditions</h3>
-                    <div class="info-item">
-                        <div class="info-value">By using Milli AI, you agree to our terms of service and privacy policy. This AI assistant is designed for educational purposes only.</div>
-                    </div>
-                </div>
-
-                <button class="logout-button" id="logoutButton">Close/Logout</button>
-            </div>
-        </div>
-
-        <!-- Notification Center -->
-        <div class="notification-center" id="notificationCenter">
-            <div class="notification-header">
-                <h2 class="notification-title">Notifications</h2>
-                <button class="notification-close" id="closeNotificationCenter">&times;</button>
-            </div>
-            <div id="notificationsList">
-                <!-- Notifications will be added here dynamically -->
-                <div class="empty-state">
-                    <i class="material-icons">notifications_off</i>
-                    <p>No notifications yet</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Confirmation Dialog -->
-        <div class="confirmation-dialog" id="confirmationDialog">
-            <h3 class="dialog-title" id="dialogTitle">Confirm Action</h3>
-            <p class="dialog-message" id="dialogMessage">Are you sure you want to perform this action?</p>
-            <div class="dialog-actions">
-                <button class="dialog-button cancel-button" id="cancelDialog">Cancel</button>
-                <button class="dialog-button confirm-button" id="confirmDialog">Confirm</button>
-            </div>
-        </div>
-
-        <!-- Firebase SDK -->
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
-
-        <script>
-            // Firebase configuration
-            const firebaseConfig = {
-                apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
-                authDomain: "mkps-balrampur.firebaseapp.com",
-                projectId: "mkps-balrampur",
-                storageBucket: "mkps-balrampur.appspot.com",
-                messagingSenderId: "469227187804",
-                appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
-            };
-
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-            const auth = firebase.auth();
-            let currentUser = null;
-            let currentChatId = null;
-            let currentLanguage = 'en';
-            let isDarkMode = false;
-            let isImageGenerationMode = false;
-
-            // DOM Elements
-            const welcomeScreen = document.getElementById('welcomeScreen');
-            const chatContainer = document.getElementById('chatContainer');
-            const messageInput = document.getElementById('messageInput');
-            const sendButton = document.getElementById('sendButton');
-            const startButton = document.getElementById('startButton');
-            const menuButton = document.getElementById('menuButton');
-            const floatingMenu = document.getElementById('floatingMenu');
-            const overlay = document.getElementById('overlay');
-            const settingsModal = document.getElementById('settingsModal');
-            const closeSettings = document.getElementById('closeSettings');
-            const notificationButton = document.getElementById('notificationButton');
-            const notificationCenter = document.getElementById('notificationCenter');
-            const closeNotificationCenter = document.getElementById('closeNotificationCenter');
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const languageToggle = document.getElementById('languageToggle');
-            const logoutButton = document.getElementById('logoutButton');
-            const suggestionsContainer = document.getElementById('suggestionsContainer');
-            const uploadButton = document.getElementById('uploadButton');
-            const fileInput = document.getElementById('fileInput');
-            const micButton = document.getElementById('micButton');
-            const imageGenButton = document.getElementById('imageGenButton');
-            const galleryContainer = document.getElementById('galleryContainer');
-            const greetingText = document.getElementById('greetingText');
-            const confirmationDialog = document.getElementById('confirmationDialog');
-            const dialogTitle = document.getElementById('dialogTitle');
-            const dialogMessage = document.getElementById('dialogMessage');
-            const cancelDialog = document.getElementById('cancelDialog');
-            const confirmDialog = document.getElementById('confirmDialog');
-
-            // Menu Items
-            const searchMenuItem = document.getElementById('searchMenuItem');
-            const renameMenuItem = document.getElementById('renameMenuItem');
-            const deleteMenuItem = document.getElementById('deleteMenuItem');
-            const settingsMenuItem = document.getElementById('settingsMenuItem');
-
-            // Initialize the app
-            document.addEventListener('DOMContentLoaded', async () => {
-                // Check if user is logged in
-                auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        currentUser = user;
-                        await loadUserData();
-                        await loadNotifications();
-                        await loadMostAskedQuestions();
-                        showChatInterface();
-                    } else {
-                        // For demo purposes, sign in anonymously
-                        try {
-                            const userCredential = await auth.signInAnonymously();
-                            currentUser = userCredential.user;
-                            await loadUserData();
-                            await loadNotifications();
-                            await loadMostAskedQuestions();
-                            showChatInterface();
-                        } catch (error) {
-                            console.error("Error signing in anonymously:", error);
-                            alert("Failed to initialize app. Please try again.");
-                        }
-                    }
-                });
-
-                // Set greeting based on time
-                updateGreeting();
-
-                // Event Listeners
-                startButton.addEventListener('click', () => {
-                    if (Notification.permission !== 'granted') {
-                        Notification.requestPermission().then(permission => {
-                            if (permission === 'granted') {
-                                console.log('Notification permission granted');
-                            }
-                        });
-                    }
-                    showChatInterface();
-                });
-
-                sendButton.addEventListener('click', sendMessage);
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        sendMessage();
-                    }
-                });
-
-                menuButton.addEventListener('click', toggleFloatingMenu);
-                overlay.addEventListener('click', hideFloatingMenu);
-
-                closeSettings.addEventListener('click', () => {
-                    settingsModal.style.display = 'none';
-                    overlay.style.display = 'none';
-                });
-
-                notificationButton.addEventListener('click', toggleNotificationCenter);
-                closeNotificationCenter.addEventListener('click', () => {
-                    notificationCenter.classList.remove('active');
-                });
-
-                darkModeToggle.addEventListener('change', toggleDarkMode);
-                languageToggle.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('language-option')) {
-                        document.querySelectorAll('.language-option').forEach(opt => {
-                            opt.classList.remove('active');
-                        });
-                        e.target.classList.add('active');
-                        currentLanguage = e.target.dataset.lang;
-                        updateLanguage();
-                    }
-                });
-
-                logoutButton.addEventListener('click', logout);
-
-                uploadButton.addEventListener('click', () => {
-                    fileInput.click();
-                });
-
-                fileInput.addEventListener('change', handleFileUpload);
-
-                micButton.addEventListener('click', toggleMicInput);
-
-                imageGenButton.addEventListener('click', toggleImageGeneration);
-
-                searchMenuItem.addEventListener('click', () => {
-                    hideFloatingMenu();
-                    alert('Search feature coming soon!');
-                });
-
-                renameMenuItem.addEventListener('click', () => {
-                    hideFloatingMenu();
-                    renameCurrentChat();
-                });
-
-                deleteMenuItem.addEventListener('click', () => {
-                    hideFloatingMenu();
-                    showDeleteConfirmation();
-                });
-
-                settingsMenuItem.addEventListener('click', () => {
-                    hideFloatingMenu();
-                    showSettings();
-                });
-
-                cancelDialog.addEventListener('click', () => {
-                    confirmationDialog.style.display = 'none';
-                    overlay.style.display = 'none';
-                });
-
-                confirmDialog.addEventListener('click', async () => {
-                    confirmationDialog.style.display = 'none';
-                    overlay.style.display = 'none';
-                    if (window.confirmAction === 'deleteChat') {
-                        await deleteCurrentChat();
-                    }
-                });
-
-                // Close menus when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!menuButton.contains(e.target) && !floatingMenu.contains(e.target)) {
-                        hideFloatingMenu();
-                    }
-                });
-            });
-
-            // Functions
-            function updateGreeting() {
-                const hour = new Date().getHours();
-                let greeting = '';
-                
-                if (hour < 12) {
-                    greeting = currentLanguage === 'hi' ? 'शुभ प्रभात, मुझसे कुछ भी पूछें...' : 'Good Morning, Ask me anything...';
-                } else if (hour < 18) {
-                    greeting = currentLanguage === 'hi' ? 'शुभ अपराह्न, मुझसे कुछ भी पूछें...' : 'Good Afternoon, Ask me anything...';
-                } else {
-                    greeting = currentLanguage === 'hi' ? 'शुभ संध्या, मुझसे कुछ भी पूछें...' : 'Good Evening, Ask me anything...';
-                }
-                
-                greetingText.textContent = greeting;
-            }
-
-            function toggleDarkMode() {
-                isDarkMode = darkModeToggle.checked;
-                document.body.classList.toggle('dark-mode', isDarkMode);
-                localStorage.setItem('darkMode', isDarkMode);
-            }
-
-            function updateLanguage() {
-                // Update UI text based on selected language
-                if (currentLanguage === 'hi') {
-                    messageInput.placeholder = 'मुझसे कुछ भी पूछें...';
-                    sendButton.innerHTML = '<i class="material-icons">send</i>';
-                    uploadButton.innerHTML = '<i class="material-icons">attach_file</i>';
-                    micButton.innerHTML = '<i class="material-icons">mic</i>';
-                    imageGenButton.innerHTML = '<i class="material-icons">image</i>';
-                } else {
-                    messageInput.placeholder = 'Ask me anything...';
-                    sendButton.innerHTML = '<i class="material-icons">send</i>';
-                    uploadButton.innerHTML = '<i class="material-icons">attach_file</i>';
-                    micButton.innerHTML = '<i class="material-icons">mic</i>';
-                    imageGenButton.innerHTML = '<i class="material-icons">image</i>';
-                }
-                
-                updateGreeting();
-                loadMostAskedQuestions(); // Reload suggestions in the selected language
-            }
-
-            function toggleFloatingMenu() {
-                const isVisible = floatingMenu.style.display === 'flex';
-                if (isVisible) {
-                    hideFloatingMenu();
-                } else {
-                    floatingMenu.style.display = 'flex';
-                    overlay.style.display = 'block';
-                }
-            }
-
-            function hideFloatingMenu() {
-                floatingMenu.style.display = 'none';
-                overlay.style.display = 'none';
-            }
-
-            function toggleNotificationCenter() {
-                notificationCenter.classList.toggle('active');
-            }
-
-            function showSettings() {
-                settingsModal.style.display = 'block';
-                overlay.style.display = 'block';
-            }
-
-            function logout() {
-                auth.signOut().then(() => {
-                    currentUser = null;
-                    welcomeScreen.style.display = 'flex';
-                    chatContainer.style.display = 'none';
-                    settingsModal.style.display = 'none';
-                    overlay.style.display = 'none';
-                }).catch((error) => {
-                    console.error("Error signing out:", error);
-                    alert("Failed to logout. Please try again.");
-                });
-            }
-
-            function showChatInterface() {
-                welcomeScreen.style.display = 'none';
-                chatContainer.style.display = 'flex';
-                loadChatHistory();
-                loadSuggestions();
-            }
-
-            async function loadUserData() {
-                if (!currentUser) return;
-                
-                try {
-                    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                    if (!userDoc.exists) {
-                        // Create user document if it doesn't exist
-                        await db.collection('users').doc(currentUser.uid).set({
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-                            language: currentLanguage,
-                            darkMode: isDarkMode
-                        });
-                    } else {
-                        const userData = userDoc.data();
-                        currentLanguage = userData.language || 'en';
-                        isDarkMode = userData.darkMode || false;
-                        
-                        // Update UI based on saved preferences
-                        darkModeToggle.checked = isDarkMode;
-                        toggleDarkMode();
-                        
-                        document.querySelectorAll('.language-option').forEach(opt => {
-                            opt.classList.remove('active');
-                        });
-                        document.querySelector(`.language-option[data-lang="${currentLanguage}"]`).classList.add('active');
-                        updateLanguage();
-                    }
-                } catch (error) {
-                    console.error("Error loading user data:", error);
-                }
-            }
-
-            async function loadChatHistory() {
-                if (!currentUser) return;
-                
-                try {
-                    const chatsSnapshot = await db.collection('users').doc(currentUser.uid)
-                        .collection('chats').orderBy('lastMessageAt', 'desc').limit(10).get();
-                    
-                    if (chatsSnapshot.empty) {
-                        // No chats yet, show welcome message
-                        addWelcomeMessage();
-                    } else {
-                        // Load the most recent chat
-                        const latestChat = chatsSnapshot.docs[0];
-                        currentChatId = latestChat.id;
-                        await loadMessages(currentChatId);
-                    }
-                } catch (error) {
-                    console.error("Error loading chat history:", error);
-                    addWelcomeMessage();
-                }
-            }
-
-            async function loadMessages(chatId) {
-                chatContainer.innerHTML = '';
-                currentChatId = chatId;
-                
-                try {
-                    const messagesSnapshot = await db.collection('users').doc(currentUser.uid)
-                        .collection('chats').doc(chatId).collection('messages')
-                        .orderBy('timestamp', 'asc').get();
-                    
-                    messagesSnapshot.forEach(doc => {
-                        const message = doc.data();
-                        addMessageToUI(message.text, message.sender, message.id, message.timestamp);
-                    });
-                } catch (error) {
-                    console.error("Error loading messages:", error);
-                }
-            }
-
-            function addWelcomeMessage() {
-                const welcomeMessage = currentLanguage === 'hi' 
-                    ? "नमस्ते! मैं आपका स्कूल एआई सहायक हूँ। आप मुझसे कक्षा, होमवर्क, परीक्षा या किसी भी शैक्षिक विषय पर पूछ सकते हैं।"
-                    : "Hello! I'm your school AI assistant. You can ask me about classes, homework, exams, or any educational topic.";
-                
-                addMessageToUI(welcomeMessage, 'ai');
-            }
-
-            async function sendMessage() {
-                const messageText = messageInput.value.trim();
-                if (!messageText) return;
-                
-                // Add user message to UI
-                const messageId = 'temp_' + Date.now();
-                addMessageToUI(messageText, 'user', messageId);
-                messageInput.value = '';
-                
-                // Show typing indicator
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'typing-indicator';
-                typingIndicator.innerHTML = `
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                `;
-                chatContainer.appendChild(typingIndicator);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-                
-                try {
-                    // Generate AI response using Gemini API
-                    const aiResponse = await generateAIResponse(messageText);
-                    
-                    // Remove typing indicator
-                    typingIndicator.remove();
-                    
-                    // Add AI response to UI
-                    addMessageToUI(aiResponse, 'ai');
-                    
-                    // Save messages to Firestore
-                    await saveMessage(messageText, 'user');
-                    await saveMessage(aiResponse, 'ai');
-                    
-                    // Auto-rename chat if it's the first message
-                    if (document.querySelectorAll('.message').length === 2) {
-                        await autoRenameChat(messageText);
-                    }
-                    
-                    // Update last active time
-                    await updateLastActive();
-                    
-                } catch (error) {
-                    console.error("Error sending message:", error);
-                    typingIndicator.remove();
-                    addMessageToUI("Sorry, I encountered an error. Please try again.", 'ai');
-                }
-            }
-
-            async function generateAIResponse(prompt) {
-                try {
-                    // This is a mock implementation since we can't make actual API calls
-                    // In a real app, you would call the Gemini API here
-                    
-                    const responses = {
-                        en: [
-                            "I understand your question about [TOPIC]. Let me explain this concept clearly.",
-                            "That's a great question! The answer is [ANSWER]. Would you like me to elaborate?",
-                            "Based on my knowledge, [DETAILED ANSWER]. I hope this helps with your studies!",
-                            "I can help you with that. [EXPLANATION]. Let me know if you need more clarification.",
-                            "This is an important concept in [SUBJECT]. Here's what you need to know: [INFORMATION]."
-                        ],
-                        hi: [
-                            "मैं आपके [विषय] के बारे में प्रश्न को समझता हूँ। मैं इस अवधारणा को स्पष्ट रूप से समझाता हूँ।",
-                            "यह एक बहुत अच्छा प्रश्न है! उत्तर है [उत्तर]। क्या आप चाहते हैं कि मैं इसे विस्तार से बताऊँ?",
-                            "मेरे ज्ञान के अनुसार, [विस्तृत उत्तर]। मुझे आशा है कि यह आपकी पढ़ाई में मदद करेगा!",
-                            "मैं आपकी इस बात में मदद कर सकता हूँ। [व्याख्या]। यदि आपको और स्पष्टीकरण की आवश्यकता है तो मुझे बताएं।",
-                            "यह [विषय] में एक महत्वपूर्ण अवधारणा है। आपको जो जानने की आवश्यकता है वह यहाँ है: [जानकारी]।"
-                        ]
-                    };
-                    
-                    const languageResponses = responses[currentLanguage] || responses.en;
-                    const randomResponse = languageResponses[Math.floor(Math.random() * languageResponses.length)];
-                    
-                    // Replace placeholders with actual content based on prompt
-                    let finalResponse = randomResponse
-                        .replace('[TOPIC]', prompt.substring(0, 20) + '...')
-                        .replace('[ANSWER]', 'the correct information')
-                        .replace('[DETAILED ANSWER]', 'here is a detailed explanation of your question')
-                        .replace('[EXPLANATION]', 'let me break this down for you')
-                        .replace('[SUBJECT]', 'this subject')
-                        .replace('[INFORMATION]', 'all the necessary information you need')
-                        .replace('[विषय]', prompt.substring(0, 20) + '...')
-                        .replace('[उत्तर]', 'सही जानकारी')
-                        .replace('[विस्तृत उत्तर]', 'आपके प्रश्न की विस्तृत व्याख्या')
-                        .replace('[व्याख्या]', 'मैं इसे आपके लिए समझाता हूँ')
-                        .replace('[जानकारी]', 'आपको जो जानने की आवश्यकता है');
-                    
-                    return finalResponse;
-                } catch (error) {
-                    console.error("Error generating AI response:", error);
-                    return currentLanguage === 'hi' 
-                        ? "माफ़ कीजिए, मुझे एक त्रुटि का सामना करना पड़ा। कृपया पुनः प्रयास करें।" 
-                        : "Sorry, I encountered an error. Please try again.";
-                }
-            }
-
-            async function saveMessage(text, sender) {
-                if (!currentUser || !currentChatId) return;
-                
-                try {
-                    const messageData = {
-                        text,
-                        sender,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    // Create chat if it doesn't exist
-                    const chatRef = db.collection('users').doc(currentUser.uid).collection('chats').doc(currentChatId);
-                    const chatDoc = await chatRef.get();
-                    
-                    if (!chatDoc.exists) {
-                        await chatRef.set({
-                            title: 'New Chat',
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                    
-                    // Add message to chat
-                    const messageRef = await chatRef.collection('messages').add(messageData);
-                    
-                    // Update chat's last message time
-                    await chatRef.update({
-                        lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    // Update stats
-                    await updateStats(text, sender);
-                    
-                    return messageRef.id;
-                } catch (error) {
-                    console.error("Error saving message:", error);
-                    throw error;
-                }
-            }
-
-            async function autoRenameChat(firstMessage) {
-                try {
-                    // Generate a title based on the first message
-                    let title = firstMessage.substring(0, 30);
-                    if (firstMessage.length > 30) title += '...';
-                    
-                    if (currentChatId) {
-                        await db.collection('users').doc(currentUser.uid)
-                            .collection('chats').doc(currentChatId).update({
-                                title: title
-                            });
-                    }
-                } catch (error) {
-                    console.error("Error auto-renaming chat:", error);
-                }
-            }
-
-            async function updateLastActive() {
-                if (!currentUser) return;
-                
-                try {
-                    await db.collection('users').doc(currentUser.uid).update({
-                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error("Error updating last active:", error);
-                }
-            }
-
-            function addMessageToUI(text, sender, id = null, timestamp = null) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}-message`;
-                if (id) messageDiv.dataset.messageId = id;
-                
-                messageDiv.innerHTML = `
-                    <div>${text}</div>
-                    ${sender === 'ai' ? `
-                    <div class="message-actions">
-                        <button class="message-action-btn" onclick="regenerateMessage('${id || ''}')">
-                            <i class="material-icons">refresh</i> Regenerate
-                        </button>
-                        <button class="message-action-btn" onclick="copyMessage('${id || ''}')">
-                            <i class="material-icons">content_copy</i> Copy
-                        </button>
-                        <button class="message-action-btn" onclick="likeMessage('${id || ''}')">
-                            <i class="material-icons">thumb_up</i> Like
-                        </button>
-                        <button class="message-action-btn" onclick="dislikeMessage('${id || ''}')">
-                            <i class="material-icons">thumb_down</i> Dislike
-                        </button>
-                    </div>
-                    ` : ''}
-                `;
-                
-                chatContainer.appendChild(messageDiv);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-
-            function regenerateMessage(messageId) {
-                // Find the message element
-                const messageElement = messageId ? document.querySelector(`[data-message-id="${messageId}"]`) : null;
-                if (!messageElement) return;
-                
-                // Get the previous user message
-                const previousUserMessage = Array.from(document.querySelectorAll('.message'))
-                    .filter(el => el.classList.contains('user-message'))
-                    .slice(-1)[0];
-                
-                if (previousUserMessage) {
-                    const text = previousUserMessage.querySelector('div').textContent;
-                    // Remove the current AI message
-                    messageElement.remove();
-                    // Send the same message again
-                    messageInput.value = text;
-                    sendMessage();
-                }
-            }
-
-            function copyMessage(messageId) {
-                const messageElement = messageId ? document.querySelector(`[data-message-id="${messageId}"]`) : null;
-                if (!messageElement) return;
-                
-                const text = messageElement.querySelector('div').textContent;
-                navigator.clipboard.writeText(text).then(() => {
-                    alert(currentLanguage === 'hi' ? 'संदेश कॉपी किया गया!' : 'Message copied!');
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
-            }
-
-            function likeMessage(messageId) {
-                // In a real app, this would save feedback to Firestore
-                alert(currentLanguage === 'hi' ? 'आपने इस उत्तर को पसंद किया!' : 'You liked this response!');
-            }
-
-            function dislikeMessage(messageId) {
-                // In a real app, this would save feedback to Firestore
-                alert(currentLanguage === 'hi' ? 'आपको यह उत्तर पसंद नहीं आया। हम इसे बेहतर बनाने का प्रयास करेंगे।' : 'You disliked this response. We\'ll try to improve it.');
-            }
-
-            async function loadSuggestions() {
-                suggestionsContainer.style.display = 'flex';
-                
-                // Clear existing suggestions
-                suggestionsContainer.innerHTML = '';
-                
-                // Add AI-generated suggestions
-                const aiSuggestions = currentLanguage === 'hi' 
-                    ? [
-                        "गणित का प्रश्न पूछें",
-                        "विज्ञान प्रयोग समझाएं",
-                        "हिंदी कविता का अर्थ",
-                        "अंग्रेजी व्याकरण समझाएं",
-                        "इतिहास की तिथियाँ याद रखने के टिप्स"
-                    ] 
-                    : [
-                        "Ask a math question",
-                        "Explain a science experiment",
-                        "Help with homework",
-                        "English grammar rules",
-                        "Study tips for exams"
-                    ];
-                
-                aiSuggestions.forEach(suggestion => {
-                    const chip = document.createElement('div');
-                    chip.className = 'suggestion-chip';
-                    chip.textContent = suggestion;
-                    chip.addEventListener('click', () => {
-                        messageInput.value = suggestion;
-                        messageInput.focus();
-                    });
-                    suggestionsContainer.appendChild(chip);
-                });
-            }
-
-            async function loadMostAskedQuestions() {
-                try {
-                    const questionsSnapshot = await db.collection('system').doc('mostAskedQuestions').get();
-                    if (questionsSnapshot.exists) {
-                        const data = questionsSnapshot.data();
-                        const questions = data.questions || [];
-                        
-                        // Clear existing suggestions
-                        suggestionsContainer.innerHTML = '';
-                        
-                        // Add "Most Asked Questions" section title
-                        const title = document.createElement('div');
-                        title.style.gridColumn = '1 / -1';
-                        title.style.fontWeight = 'bold';
-                        title.style.marginBottom = '10px';
-                        title.textContent = currentLanguage === 'hi' ? 'सबसे अधिक पूछे जाने वाले प्रश्न' : 'Most Asked Questions';
-                        suggestionsContainer.appendChild(title);
-                        
-                        // Add questions as suggestions
-                        questions.slice(0, 5).forEach(question => {
-                            const chip = document.createElement('div');
-                            chip.className = 'suggestion-chip';
-                            chip.textContent = question;
-                            chip.addEventListener('click', () => {
-                                messageInput.value = question;
-                                messageInput.focus();
-                            });
-                            suggestionsContainer.appendChild(chip);
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error loading most asked questions:", error);
-                }
-            }
-
-            async function loadNotifications() {
-                if (!currentUser) return;
-                
-                try {
-                    const notificationsSnapshot = await db.collection('notifications')
-                        .where('targetUsers', 'array-contains', 'all') // or currentUser.uid
-                        .orderBy('timestamp', 'desc')
-                        .limit(10)
-                        .get();
-                    
-                    const notificationsList = document.getElementById('notificationsList');
-                    notificationsList.innerHTML = '';
-                    
-                    if (notificationsSnapshot.empty) {
-                        notificationsList.innerHTML = `
-                            <div class="empty-state">
-                                <i class="material-icons">notifications_off</i>
-                                <p>${currentLanguage === 'hi' ? 'अभी तक कोई सूचना नहीं' : 'No notifications yet'}</p>
-                            </div>
-                        `;
-                    } else {
-                        notificationsSnapshot.forEach(doc => {
-                            const notif = doc.data();
-                            const notifElement = document.createElement('div');
-                            notifElement.className = 'notification-item';
-                            notifElement.innerHTML = `
-                                <div class="notification-title-small">${notif.title || 'Notification'}</div>
-                                <div class="notification-time">${formatTimestamp(notif.timestamp)}</div>
-                                <div class="notification-content">${notif.message}</div>
-                            `;
-                            notificationsList.appendChild(notifElement);
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error loading notifications:", error);
-                }
-            }
-
-            function formatTimestamp(timestamp) {
-                if (!timestamp) return '';
-                const date = timestamp.toDate ? timestamp.toDate() : new Date();
-                return date.toLocaleString();
-            }
-
-            async function updateStats(message, sender) {
-                if (!currentUser || sender !== 'user') return;
-                
-                try {
-                    const statsRef = db.collection('stats').doc('usage');
-                    const statsDoc = await statsRef.get();
-                    
-                    if (statsDoc.exists) {
-                        await statsRef.update({
-                            totalMessages: firebase.firestore.FieldValue.increment(1),
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    } else {
-                        await statsRef.set({
-                            totalMessages: 1,
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error updating stats:", error);
-                }
-            }
-
-            function handleFileUpload(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                
-                // In a real app, you would upload the file to Firebase Storage
-                // For now, just show a message
-                const fileName = file.name;
-                const fileSize = (file.size / 1024).toFixed(2);
-                
-                alert(currentLanguage === 'hi' 
-                    ? `फ़ाइल "${fileName}" (${fileSize} KB) सफलतापूर्वक अपलोड हुई!` 
-                    : `File "${fileName}" (${fileSize} KB) uploaded successfully!`);
-                
-                // Clear the file input
-                fileInput.value = '';
-            }
-
-            function toggleMicInput() {
-                // Check if browser supports speech recognition
-                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                    alert(currentLanguage === 'hi' 
-                        ? 'आपका ब्राउज़र वॉइस इनपुट का समर्थन नहीं करता है।' 
-                        : 'Your browser does not support voice input.');
-                    return;
-                }
-                
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                const recognition = new SpeechRecognition();
-                
-                recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-                
-                recognition.start();
-                
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    messageInput.value = transcript;
-                };
-                
-                recognition.onerror = function(event) {
-                    console.error('Speech recognition error:', event.error);
-                    alert(currentLanguage === 'hi' 
-                        ? 'वॉइस इनपुट में त्रुटि। कृपया पुनः प्रयास करें।' 
-                        : 'Voice input error. Please try again.');
-                };
-                
-                recognition.onend = function() {
-                    // Recognition ended, you can add any cleanup code here
-                };
-            }
-
-            function toggleImageGeneration() {
-                isImageGenerationMode = !isImageGenerationMode;
-                
-                if (isImageGenerationMode) {
-                    galleryContainer.style.display = 'flex';
-                    messageInput.placeholder = currentLanguage === 'hi' 
-                        ? 'चित्र बनाने के लिए विवरण दर्ज करें...' 
-                        : 'Enter description for image generation...';
-                    imageGenButton.innerHTML = '<i class="material-icons">close</i>';
-                } else {
-                    galleryContainer.style.display = 'none';
-                    messageInput.placeholder = currentLanguage === 'hi' 
-                        ? 'मुझसे कुछ भी पूछें...' 
-                        : 'Ask me anything...';
-                    imageGenButton.innerHTML = '<i class="material-icons">image</i>';
-                }
-            }
-
-            async function generateImage(prompt) {
-                try {
-                    // Show loading state
-                    sendButton.disabled = true;
-                    sendButton.innerHTML = '<div class="loader"></div>';
-                    
-                    // This is a mock implementation since we can't make actual API calls
-                    // In a real app, you would call the Stable Horde API here
-                    
-                    // Simulate API delay
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    // Generate a mock image URL (in a real app, this would be the actual generated image)
-                    const mockImageUrl = `https://placehold.co/512x512/4285f4/ffffff?text=${encodeURIComponent(prompt.substring(0, 10))}`;
-                    
-                    // Add image to gallery
-                    addImageToGallery(mockImageUrl, prompt);
-                    
-                    // Reset button state
-                    sendButton.disabled = false;
-                    sendButton.innerHTML = '<i class="material-icons">send</i>';
-                    
-                    return mockImageUrl;
-                } catch (error) {
-                    console.error("Error generating image:", error);
-                    sendButton.disabled = false;
-                    sendButton.innerHTML = '<i class="material-icons">send</i>';
-                    alert(currentLanguage === 'hi' 
-                        ? 'चित्र उत्पन्न करने में त्रुटि। कृपया पुनः प्रयास करें।' 
-                        : 'Error generating image. Please try again.');
-                }
-            }
-
-            function addImageToGallery(imageUrl, prompt) {
-                const galleryItem = document.createElement('div');
-                galleryItem.className = 'gallery-item';
-                galleryItem.innerHTML = `
-                    <img src="${imageUrl}" alt="${prompt}" class="gallery-image">
-                    <div class="gallery-actions">
-                        <button class="gallery-action-btn" onclick="downloadImage('${imageUrl}', '${prompt}')">
-                            <i class="material-icons">download</i>
-                        </button>
-                        <button class="gallery-action-btn" onclick="copyImage('${imageUrl}')">
-                            <i class="material-icons">content_copy</i>
-                        </button>
-                    </div>
-                `;
-                galleryContainer.appendChild(galleryItem);
-                galleryContainer.scrollTop = galleryContainer.scrollHeight;
-            }
-
-            function downloadImage(imageUrl, prompt) {
-                // Create a temporary link element
-                const link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = `milli-ai-${prompt.substring(0, 20).replace(/[^a-z0-9]/gi, '-')}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            function copyImage(imageUrl) {
-                // Fetch the image and copy to clipboard
-                fetch(imageUrl)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const item = new ClipboardItem({ 'image/png': blob });
-                        navigator.clipboard.write([item]).then(() => {
-                            alert(currentLanguage === 'hi' ? 'चित्र क्लिपबोर्ड पर कॉपी किया गया!' : 'Image copied to clipboard!');
-                        });
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy image: ', err);
-                        alert(currentLanguage === 'hi' 
-                            ? 'चित्र कॉपी करने में विफल। कृपया डाउनलोड करें।' 
-                            : 'Failed to copy image. Please download instead.');
-                    });
-            }
-
-            function renameCurrentChat() {
-                const newName = prompt(currentLanguage === 'hi' 
-                    ? 'चैट का नया नाम दर्ज करें:' 
-                    : 'Enter new chat name:', 
-                    document.querySelector('.message')?.querySelector('div')?.textContent?.substring(0, 30) || 'New Chat'
-                );
-                
-                if (newName && newName.trim()) {
-                    updateChatName(newName.trim());
-                }
-            }
-
-            async function updateChatName(newName) {
-                if (!currentUser || !currentChatId) return;
-                
-                try {
-                    await db.collection('users').doc(currentUser.uid)
-                        .collection('chats').doc(currentChatId).update({
-                            title: newName
-                        });
-                    
-                    alert(currentLanguage === 'hi' ? 'चैट का नाम सफलतापूर्वक बदल दिया गया!' : 'Chat renamed successfully!');
-                } catch (error) {
-                    console.error("Error renaming chat:", error);
-                    alert(currentLanguage === 'hi' 
-                        ? 'चैट का नाम बदलने में त्रुटि। कृपया पुनः प्रयास करें।' 
-                        : 'Error renaming chat. Please try again.');
-                }
-            }
-
-            function showDeleteConfirmation() {
-                window.confirmAction = 'deleteChat';
-                dialogTitle.textContent = currentLanguage === 'hi' ? 'चैट हटाएं' : 'Delete Chat';
-                dialogMessage.textContent = currentLanguage === 'hi' 
-                    ? 'क्या आप वाकई इस चैट को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।' 
-                    : 'Are you sure you want to delete this chat? This action cannot be undone.';
-                confirmationDialog.style.display = 'block';
-                overlay.style.display = 'block';
-            }
-
-            async function deleteCurrentChat() {
-                if (!currentUser || !currentChatId) return;
-                
-                try {
-                    // Delete all messages in the chat
-                    const messagesSnapshot = await db.collection('users').doc(currentUser.uid)
-                        .collection('chats').doc(currentChatId).collection('messages').get();
-                    
-                    const batch = db.batch();
-                    messagesSnapshot.docs.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
-                    
-                    await batch.commit();
-                    
-                    // Delete the chat document
-                    await db.collection('users').doc(currentUser.uid)
-                        .collection('chats').doc(currentChatId).delete();
-                    
-                    // Clear the UI and start a new chat
-                    chatContainer.innerHTML = '';
-                    currentChatId = null;
-                    addWelcomeMessage();
-                    
-                    alert(currentLanguage === 'hi' ? 'चैट सफलतापूर्वक हटा दी गई!' : 'Chat deleted successfully!');
-                } catch (error) {
-                    console.error("Error deleting chat:", error);
-                    alert(currentLanguage === 'hi' 
-                        ? 'चैट हटाने में त्रुटि। कृपया पुनः प्रयास करें।' 
-                        : 'Error deleting chat. Please try again.');
-                }
-            }
-
-            // Override console.error to prevent errors in the demo
-            const originalConsoleError = console.error;
-            console.error = function(...args) {
-                // Don't show Firebase permission errors in console for demo
-                if (typeof args[0] === 'string' && args[0].includes('FirebaseError: Missing or insufficient permissions')) {
-                    return;
-                }
-                originalConsoleError.apply(console, args);
-            };
-        </script>
+  <!-- Maintenance banner (hidden by default) -->
+  <div class="maintenance-banner" style="display: none;" id="maintenanceBanner">
+    System is currently under maintenance. Please try again later.
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-title">
+      <span class="material-icons">school</span>
+      <span>Milli AI</span>
     </div>
+    <div class="header-actions">
+      <button class="icon-button notification-badge" id="notificationButton">
+        <span class="material-icons">notifications</span>
+        <span class="notification-count" id="notificationCount" style="display: none;">0</span>
+      </button>
+      <button class="icon-button" id="settingsButton">
+        <span class="material-icons">settings</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- Greeting section -->
+    <div class="greeting" id="greetingSection">
+      <h2 class="greeting-title" id="greetingTitle">
+        <span class="material-icons">light_mode</span>
+        <span id="greetingText">Good morning</span>
+      </h2>
+      <p class="greeting-subtitle">Ask me anything about study...</p>
+    </div>
+
+    <!-- Chat list -->
+    <div class="chat-list" id="chatList">
+      <!-- Chat items will be dynamically inserted here -->
+      <div class="empty-state" id="emptyState">
+        <span class="material-icons empty-state-icon">chat</span>
+        <h3 class="empty-state-title">No conversations yet</h3>
+        <p class="empty-state-message">Start a new chat to get study help, explanations, or practice questions.</p>
+      </div>
+    </div>
+
+    <!-- Start new chat button -->
+    <button class="start-chat" id="startChatButton">
+      <span class="material-icons">add</span>
+      Start New Chat
+    </button>
+
+    <!-- Suggestions -->
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-chip" data-suggestion="Explain this topic simply">Explain this topic simply</div>
+      <div class="suggestion-chip" data-suggestion="Create practice questions">Create practice questions</div>
+      <div class="suggestion-chip" data-suggestion="Summarize text">Summarize text</div>
+      <div class="suggestion-chip" data-suggestion="Help with homework">Help with homework</div>
+      <div class="suggestion-chip" data-suggestion="Explain like I'm 10">Explain like I'm 10</div>
+      <div class="suggestion-chip" data-suggestion="Give examples">Give examples</div>
+    </div>
+  </main>
+
+  <!-- Composer -->
+  <div class="composer">
+    <div class="composer-input-container">
+      <input type="text" class="composer-input" id="messageInput" placeholder="Type your question..." autocomplete="off">
+      <div class="composer-actions">
+        <button class="composer-action" id="micButton">
+          <span class="material-icons">mic</span>
+        </button>
+        <button class="composer-action" id="attachButton">
+          <span class="material-icons">attach_file</span>
+        </button>
+        <button class="composer-action" id="sendButton">
+          <span class="material-icons">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu overlay -->
+  <div class="menu-overlay" id="menuOverlay">
+    <div class="menu" id="chatMenu">
+      <div class="menu-item" id="renameChat">
+        <span class="material-icons">edit</span>
+        <span>Rename</span>
+      </div>
+      <div class="menu-item" id="favoriteChat">
+        <span class="material-icons">star_outline</span>
+        <span>Mark as Favorite</span>
+      </div>
+      <div class="menu-item" id="pinChat">
+        <span class="material-icons">push_pin</span>
+        <span>Pin</span>
+      </div>
+      <div class="menu-item" id="exportChat">
+        <span class="material-icons">file_download</span>
+        <span>Export Chat</span>
+      </div>
+      <div class="menu-item" id="shareChat">
+        <span class="material-icons">share</span>
+        <span>Share Link</span>
+      </div>
+      <div class="menu-item" id="deleteChat">
+        <span class="material-icons">delete</span>
+        <span>Delete</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirmation modal -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Delete Conversation</h3>
+      <p>Are you sure? This is permanent.</p>
+      <div class="modal-actions">
+        <button class="modal-button cancel" id="cancelDelete">Cancel</button>
+        <button class="modal-button confirm" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename modal -->
+  <div class="modal" id="renameModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Rename Conversation</h3>
+      <input type="text" class="login-input" id="renameInput" placeholder="Enter new name">
+      <div class="modal-actions">
+        <button class="modal-button cancel" id="cancelRename">Cancel</button>
+        <button class="modal-button confirm" id="confirmRename">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login modal -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Sign in to Milli AI</h3>
+      <div class="login-container">
+        <input type="email" class="login-input" id="emailInput" placeholder="Email">
+        <input type="password" class="login-input" id="passwordInput" placeholder="Password">
+        <button class="login-button" id="loginButton">Sign In</button>
+        <div class="login-divider">
+          <span>or</span>
+        </div>
+        <button class="login-button guest-login" id="guestButton">Continue as Guest</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Settings panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <h3 class="settings-title">Settings</h3>
+      <button class="settings-close" id="closeSettings">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    
+    <div class="settings-section">
+      <h4 class="settings-section-title">Appearance</h4>
+      <div class="settings-option">
+        <span class="settings-label">Dark Mode</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="darkModeToggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h4 class="settings-section-title">Language</h4>
+      <div class="settings-option">
+        <div class="language-selector">
+          <div class="language-option active" id="englishLang">EN</div>
+          <div class="language-option" id="hindiLang">HI</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h4 class="settings-section-title">Notifications</h4>
+      <div class="settings-option">
+        <span class="settings-label">Enable Notifications</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notificationsToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h4 class="settings-section-title">Account</h4>
+      <div class="settings-option" id="accountInfo">
+        <span class="settings-label">Account Information</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h4 class="settings-section-title">About</h4>
+      <div class="settings-option" id="aboutDeveloper">
+        <span class="settings-label">About Developer</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+      <div class="settings-option" id="aboutSchool">
+        <span class="settings-label">About School</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+      <div class="settings-option" id="termsConditions">
+        <span class="settings-label">Terms & Conditions</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+      <div class="settings-option" id="privacyPolicy">
+        <span class="settings-label">Privacy Policy</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+      <div class="settings-option" id="contactSupport">
+        <span class="settings-label">Contact Support</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
+      authDomain: "mkps-balrampur.firebaseapp.com",
+      projectId: "mkps-balrampur",
+      storageBucket: "mkps-balrampur.appspot.com",
+      messagingSenderId: "469227187804",
+      appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
+    };
+
+    // Mock Firebase initialization (in real app, you would import Firebase SDK)
+    let firebaseInitialized = false;
+    let currentUser = null;
+    let currentChatId = null;
+    let currentMenuChatId = null;
+    let isDarkMode = false;
+    let currentLanguage = 'en';
+    let notificationPermissionGranted = false;
+    let notificationCount = 0;
+
+    // DOM Elements
+    const greetingText = document.getElementById('greetingText');
+    const greetingTitle = document.getElementById('greetingTitle');
+    const chatList = document.getElementById('chatList');
+    const emptyState = document.getElementById('emptyState');
+    const startChatButton = document.getElementById('startChatButton');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const micButton = document.getElementById('micButton');
+    const attachButton = document.getElementById('attachButton');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const chatMenu = document.getElementById('chatMenu');
+    const deleteModal = document.getElementById('deleteModal');
+    const renameModal = document.getElementById('renameModal');
+    const loginModal = document.getElementById('loginModal');
+    const toastContainer = document.getElementById('toastContainer');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsButton = document.getElementById('settingsButton');
+    const closeSettings = document.getElementById('closeSettings');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const notificationsToggle = document.getElementById('notificationsToggle');
+    const englishLang = document.getElementById('englishLang');
+    const hindiLang = document.getElementById('hindiLang');
+    const notificationButton = document.getElementById('notificationButton');
+    const notificationCountEl = document.getElementById('notificationCount');
+    const maintenanceBanner = document.getElementById('maintenanceBanner');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginButton = document.getElementById('loginButton');
+    const guestButton = document.getElementById('guestButton');
+    const cancelDelete = document.getElementById('cancelDelete');
+    const confirmDelete = document.getElementById('confirmDelete');
+    const cancelRename = document.getElementById('cancelRename');
+    const confirmRename = document.getElementById('confirmRename');
+    const renameInput = document.getElementById('renameInput');
+
+    // Mock data
+    let mockChats = [
+      {
+        id: 'chat1',
+        title: 'Mathematics Help',
+        lastMessage: 'The Pythagorean theorem states that in a right triangle, the square of the hypotenuse...',
+        time: '2 min ago',
+        unread: 0,
+        isEphemeral: false,
+        isFavorite: false,
+        isPinned: false
+      },
+      {
+        id: 'chat2',
+        title: 'Science Project',
+        lastMessage: 'For your science project, I recommend focusing on renewable energy sources...',
+        time: '1 hour ago',
+        unread: 3,
+        isEphemeral: true,
+        isFavorite: true,
+        isPinned: false
+      },
+      {
+        id: 'chat3',
+        title: 'History Assignment',
+        lastMessage: 'The Mughal Empire was founded in 1526 by Babur after his victory at the Battle of Panipat...',
+        time: 'Yesterday',
+        unread: 0,
+        isEphemeral: false,
+        isFavorite: false,
+        isPinned: true
+      }
+    ];
+
+    // Initialize app
+    function initApp() {
+      // Set greeting based on time
+      updateGreeting();
+      
+      // Check for dark mode preference
+      const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+      if (savedDarkMode) {
+        enableDarkMode();
+      }
+      
+      // Check for saved language
+      const savedLanguage = localStorage.getItem('language') || 'en';
+      setLanguage(savedLanguage);
+      
+      // Show login modal if no user
+      if (!currentUser) {
+        showLoginModal();
+      }
+      
+      // Load chats
+      loadChats();
+      
+      // Add event listeners
+      addEventListeners();
+      
+      // Request notification permission
+      requestNotificationPermission();
+      
+      // Check for maintenance mode
+      checkMaintenanceMode();
+    }
+
+    // Update greeting based on time
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      let greeting = '';
+      let icon = '';
+      
+      if (hour < 12) {
+        greeting = currentLanguage === 'hi' ? 'शुभ प्रभात' : 'Good morning';
+        icon = 'light_mode';
+      } else if (hour < 17) {
+        greeting = currentLanguage === 'hi' ? 'शुभ अपराह्न' : 'Good afternoon';
+        icon = 'sunny';
+      } else {
+        greeting = currentLanguage === 'hi' ? 'शुभ संध्या' : 'Good evening';
+        icon = 'nightlight';
+      }
+      
+      greetingText.textContent = greeting;
+      greetingTitle.innerHTML = `<span class="material-icons">${icon}</span> <span>${greeting}</span>`;
+    }
+
+    // Load chats
+    function loadChats() {
+      if (mockChats.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      emptyState.style.display = 'none';
+      chatList.innerHTML = '';
+      
+      mockChats.forEach(chat => {
+        const chatElement = createChatElement(chat);
+        chatList.appendChild(chatElement);
+      });
+    }
+
+    // Create chat element
+    function createChatElement(chat) {
+      const chatItem = document.createElement('div');
+      chatItem.className = 'chat-item';
+      chatItem.dataset.chatId = chat.id;
+      
+      let ephemeralHTML = '';
+      if (chat.isEphemeral) {
+        ephemeralHTML = '<div class="ephemeral-indicator">Temporary</div>';
+      }
+      
+      let unreadHTML = '';
+      if (chat.unread > 0) {
+        unreadHTML = `<div class="chat-unread">${chat.unread}</div>`;
+      }
+      
+      let favoriteHTML = chat.isFavorite ? '<span class="material-icons" style="color: #FFD700; font-size: 18px;">star</span>' : '';
+      let pinnedHTML = chat.isPinned ? '<span class="material-icons" style="color: #4285F4; font-size: 18px;">push_pin</span>' : '';
+      
+      chatItem.innerHTML = `
+        ${ephemeralHTML}
+        ${unreadHTML}
+        <div class="chat-item-header">
+          <div class="chat-title">${chat.title} ${favoriteHTML} ${pinnedHTML}</div>
+          <div class="chat-time">${chat.time}</div>
+        </div>
+        <div class="chat-preview">${chat.lastMessage}</div>
+      `;
+      
+      // Add click event
+      chatItem.addEventListener('click', () => {
+        openChat(chat.id);
+      });
+      
+      // Add context menu event
+      chatItem.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        showChatMenu(e, chat.id);
+      });
+      
+      return chatItem;
+    }
+
+    // Open chat
+    function openChat(chatId) {
+      currentChatId = chatId;
+      showToast('Opening chat...', 'success');
+      
+      // In a real app, this would load the chat messages
+      // For now, we'll just show a toast
+    }
+
+    // Show chat menu
+    function showChatMenu(event, chatId) {
+      currentMenuChatId = chatId;
+      const rect = event.target.getBoundingClientRect();
+      
+      chatMenu.style.top = `${rect.bottom + window.scrollY}px`;
+      chatMenu.style.left = `${rect.left + window.scrollX}px`;
+      
+      menuOverlay.style.display = 'block';
+      
+      // Position menu to avoid going off screen
+      const menuRect = chatMenu.getBoundingClientRect();
+      if (menuRect.right > window.innerWidth) {
+        chatMenu.style.left = `${window.innerWidth - menuRect.width - 16}px`;
+      }
+    }
+
+    // Add event listeners
+    function addEventListeners() {
+      // Start new chat
+      startChatButton.addEventListener('click', () => {
+        createNewChat();
+      });
+      
+      // Send message
+      sendButton.addEventListener('click', sendMessage);
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      // Microphone button
+      micButton.addEventListener('click', () => {
+        startSpeechRecognition();
+      });
+      
+      // Attach button
+      attachButton.addEventListener('click', () => {
+        showToast('File attachment feature coming soon!', 'info');
+      });
+      
+      // Menu overlay click (to close)
+      menuOverlay.addEventListener('click', (e) => {
+        if (e.target === menuOverlay) {
+          hideMenu();
+        }
+      });
+      
+      // Chat menu actions
+      document.getElementById('renameChat').addEventListener('click', () => {
+        showRenameModal();
+      });
+      
+      document.getElementById('deleteChat').addEventListener('click', () => {
+        showDeleteModal();
+      });
+      
+      document.getElementById('favoriteChat').addEventListener('click', () => {
+        toggleFavoriteChat();
+      });
+      
+      document.getElementById('pinChat').addEventListener('click', () => {
+        togglePinChat();
+      });
+      
+      document.getElementById('exportChat').addEventListener('click', () => {
+        showToast('Exporting chat...', 'info');
+        hideMenu();
+      });
+      
+      document.getElementById('shareChat').addEventListener('click', () => {
+        showToast('Sharing chat link...', 'info');
+        hideMenu();
+      });
+      
+      // Delete modal actions
+      cancelDelete.addEventListener('click', hideDeleteModal);
+      confirmDelete.addEventListener('click', deleteChat);
+      
+      // Rename modal actions
+      cancelRename.addEventListener('click', hideRenameModal);
+      confirmRename.addEventListener('click', renameChat);
+      
+      // Login modal actions
+      loginButton.addEventListener('click', handleLogin);
+      guestButton.addEventListener('click', handleGuestLogin);
+      
+      // Settings
+      settingsButton.addEventListener('click', () => {
+        settingsPanel.classList.add('active');
+      });
+      
+      closeSettings.addEventListener('click', () => {
+        settingsPanel.classList.remove('active');
+      });
+      
+      darkModeToggle.addEventListener('change', toggleDarkMode);
+      
+      notificationsToggle.addEventListener('change', toggleNotifications);
+      
+      englishLang.addEventListener('click', () => {
+        setLanguage('en');
+      });
+      
+      hindiLang.addEventListener('click', () => {
+        setLanguage('hi');
+      });
+      
+      // Notification button
+      notificationButton.addEventListener('click', () => {
+        showToast('Notification center coming soon!', 'info');
+      });
+      
+      // Suggestions
+      document.querySelectorAll('.suggestion-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const suggestion = chip.getAttribute('data-suggestion');
+          messageInput.value = suggestion;
+          messageInput.focus();
+        });
+      });
+    }
+
+    // Create new chat
+    function createNewChat() {
+      const newChat = {
+        id: 'chat' + (mockChats.length + 1),
+        title: currentLanguage === 'hi' ? 'नया चैट' : 'New chat',
+        lastMessage: currentLanguage === 'hi' ? 'पहला संदेश भेजें...' : 'Send your first message...',
+        time: 'Just now',
+        unread: 0,
+        isEphemeral: false,
+        isFavorite: false,
+        isPinned: false
+      };
+      
+      mockChats.unshift(newChat);
+      loadChats();
+      openChat(newChat.id);
+    }
+
+    // Send message
+    function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) return;
+      
+      if (!currentChatId) {
+        createNewChat();
+      }
+      
+      // Show typing indicator
+      showTypingIndicator();
+      
+      // Clear input
+      messageInput.value = '';
+      
+      // Simulate AI response after delay
+      setTimeout(() => {
+        hideTypingIndicator();
+        
+        // Find current chat and update it
+        const chatIndex = mockChats.findIndex(chat => chat.id === currentChatId);
+        if (chatIndex !== -1) {
+          // Update chat with AI response
+          mockChats[chatIndex].lastMessage = getAIResponse(message);
+          mockChats[chatIndex].time = 'Just now';
+          
+          // Auto-rename chat if it's still "New chat"
+          if (mockChats[chatIndex].title === 'New chat' || mockChats[chatIndex].title === 'नया चैट') {
+            mockChats[chatIndex].title = generateChatTitle(message);
+          }
+          
+          loadChats();
+          
+          // Show success toast
+          showToast('Response received!', 'success');
+        }
+      }, 2000);
+    }
+
+    // Get AI response (mock)
+    function getAIResponse(message) {
+      const responses = [
+        "I'd be happy to help with that! Let me explain it step by step.",
+        "That's an interesting question. Here's what you need to know...",
+        "Based on my knowledge, the answer is related to fundamental concepts in this subject.",
+        "Let me break this down for you in simple terms...",
+        "This topic is important for your studies. Here's a detailed explanation...",
+        "I understand you're asking about this concept. Let me provide some examples...",
+        "Great question! This is something many students find challenging at first.",
+        "To answer your question, we need to consider a few key principles...",
+        "I can help you with that. Let's start with the basics and build from there.",
+        "This is a common question in your curriculum. Here's what the textbooks say..."
+      ];
+      
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // Generate chat title based on message
+    function generateChatTitle(message) {
+      if (message.length < 30) {
+        return message;
+      }
+      
+      const words = message.split(' ');
+      if (words.length <= 5) {
+        return message;
+      }
+      
+      return words.slice(0, 5).join(' ') + '...';
+    }
+
+    // Show typing indicator
+    function showTypingIndicator() {
+      const typingIndicator = document.createElement('div');
+      typingIndicator.className = 'chat-item';
+      typingIndicator.id = 'typingIndicator';
+      typingIndicator.innerHTML = `
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      `;
+      chatList.prepend(typingIndicator);
+    }
+
+    // Hide typing indicator
+    function hideTypingIndicator() {
+      const typingIndicator = document.getElementById('typingIndicator');
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    // Show rename modal
+    function showRenameModal() {
+      const chat = mockChats.find(c => c.id === currentMenuChatId);
+      if (chat) {
+        renameInput.value = chat.title;
+        renameModal.style.display = 'flex';
+      }
+      hideMenu();
+    }
+
+    // Hide rename modal
+    function hideRenameModal() {
+      renameModal.style.display = 'none';
+    }
+
+    // Rename chat
+    function renameChat() {
+      const newTitle = renameInput.value.trim();
+      if (!newTitle) return;
+      
+      const chatIndex = mockChats.findIndex(chat => chat.id === currentMenuChatId);
+      if (chatIndex !== -1) {
+        mockChats[chatIndex].title = newTitle;
+        loadChats();
+        showToast('Chat renamed successfully!', 'success');
+      }
+      
+      hideRenameModal();
+    }
+
+    // Show delete modal
+    function showDeleteModal() {
+      deleteModal.style.display = 'flex';
+      hideMenu();
+    }
+
+    // Hide delete modal
+    function hideDeleteModal() {
+      deleteModal.style.display = 'none';
+    }
+
+    // Delete chat
+    function deleteChat() {
+      mockChats = mockChats.filter(chat => chat.id !== currentMenuChatId);
+      loadChats();
+      showToast('Chat deleted successfully!', 'success');
+      hideDeleteModal();
+    }
+
+    // Toggle favorite chat
+    function toggleFavoriteChat() {
+      const chatIndex = mockChats.findIndex(chat => chat.id === currentMenuChatId);
+      if (chatIndex !== -1) {
+        mockChats[chatIndex].isFavorite = !mockChats[chatIndex].isFavorite;
+        const action = mockChats[chatIndex].isFavorite ? 'favorited' : 'unfavorited';
+        showToast(`Chat ${action}!`, 'success');
+        loadChats();
+      }
+      hideMenu();
+    }
+
+    // Toggle pin chat
+    function togglePinChat() {
+      const chatIndex = mockChats.findIndex(chat => chat.id === currentMenuChatId);
+      if (chatIndex !== -1) {
+        mockChats[chatIndex].isPinned = !mockChats[chatIndex].isPinned;
+        const action = mockChats[chatIndex].isPinned ? 'pinned' : 'unpinned';
+        showToast(`Chat ${action}!`, 'success');
+        loadChats();
+      }
+      hideMenu();
+    }
+
+    // Hide menu
+    function hideMenu() {
+      menuOverlay.style.display = 'none';
+    }
+
+    // Handle login
+    function handleLogin() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      if (!email || !password) {
+        showToast('Please enter email and password', 'error');
+        return;
+      }
+      
+      // Mock login - in real app, this would call Firebase Auth
+      currentUser = {
+        uid: 'mockUserId',
+        email: email,
+        displayName: email.split('@')[0]
+      };
+      
+      // Check if admin
+      if (email === 'madamsir066@gmail.com' && password === 'Abutalha5088@') {
+        currentUser.uid = 'PEjvSCXzScXA2q0NnVo7CUWnXrj1';
+        currentUser.isAdmin = true;
+      }
+      
+      loginModal.style.display = 'none';
+      showToast(`Welcome back, ${currentUser.displayName}!`, 'success');
+      
+      // Update greeting with user name
+      updateGreeting();
+    }
+
+    // Handle guest login
+    function handleGuestLogin() {
+      currentUser = {
+        uid: 'guest' + Date.now(),
+        displayName: currentLanguage === 'hi' ? 'अतिथि' : 'Guest',
+        isGuest: true
+      };
+      
+      loginModal.style.display = 'none';
+      showToast('Welcome! You are using Milli AI as a guest.', 'info');
+      
+      // Update greeting with user name
+      updateGreeting();
+    }
+
+    // Show login modal
+    function showLoginModal() {
+      loginModal.style.display = 'flex';
+    }
+
+    // Start speech recognition
+    function startSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        showToast('Speech recognition not supported in this browser', 'error');
+        return;
+      }
+      
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      
+      recognition.start();
+      
+      showToast('Listening... Speak now', 'info');
+      
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        messageInput.value = transcript;
+        showToast('Speech recognized!', 'success');
+      };
+      
+      recognition.onerror = function(event) {
+        showToast('Speech recognition error: ' + event.error, 'error');
+      };
+      
+      recognition.onend = function() {
+        // Recognition ended
+      };
+    }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+      if (darkModeToggle.checked) {
+        enableDarkMode();
+      } else {
+        disableDarkMode();
+      }
+    }
+
+    // Enable dark mode
+    function enableDarkMode() {
+      document.body.classList.add('dark-theme');
+      isDarkMode = true;
+      localStorage.setItem('darkMode', 'true');
+    }
+
+    // Disable dark mode
+    function disableDarkMode() {
+      document.body.classList.remove('dark-theme');
+      isDarkMode = false;
+      localStorage.setItem('darkMode', 'false');
+    }
+
+    // Toggle notifications
+    function toggleNotifications() {
+      if (notificationsToggle.checked) {
+        requestNotificationPermission();
+      } else {
+        notificationPermissionGranted = false;
+      }
+    }
+
+    // Request notification permission
+    function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        showToast('Notifications not supported in this browser', 'error');
+        return;
+      }
+      
+      if (Notification.permission === 'granted') {
+        notificationPermissionGranted = true;
+        showToast('Notifications enabled', 'success');
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(function(permission) {
+          if (permission === 'granted') {
+            notificationPermissionGranted = true;
+            showToast('Notifications enabled', 'success');
+          } else {
+            notificationPermissionGranted = false;
+            showToast('Notifications disabled', 'info');
+          }
+        });
+      }
+    }
+
+    // Set language
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      localStorage.setItem('language', lang);
+      
+      if (lang === 'hi') {
+        englishLang.classList.remove('active');
+        hindiLang.classList.add('active');
+        document.title = 'मिल्ली एआई - आपका अध्ययन सहायक';
+      } else {
+        hindiLang.classList.remove('active');
+        englishLang.classList.add('active');
+        document.title = 'Milli AI - Your Study Assistant';
+      }
+      
+      updateGreeting();
+      updateUIText();
+    }
+
+    // Update UI text based on language
+    function updateUIText() {
+      if (currentLanguage === 'hi') {
+        startChatButton.innerHTML = '<span class="material-icons">add</span> नया चैट शुरू करें';
+        messageInput.placeholder = 'अपना प्रश्न टाइप करें...';
+        document.querySelector('.greeting-subtitle').textContent = 'अध्ययन के बारे में कुछ भी पूछें...';
+        document.getElementById('emptyState').querySelector('.empty-state-title').textContent = 'अभी तक कोई वार्तालाप नहीं';
+        document.getElementById('emptyState').querySelector('.empty-state-message').textContent = 'अध्ययन सहायता, स्पष्टीकरण या अभ्यास प्रश्नों के लिए एक नया चैट शुरू करें।';
+      } else {
+        startChatButton.innerHTML = '<span class="material-icons">add</span> Start New Chat';
+        messageInput.placeholder = 'Type your question...';
+        document.querySelector('.greeting-subtitle').textContent = 'Ask me anything about study...';
+        document.getElementById('emptyState').querySelector('.empty-state-title').textContent = 'No conversations yet';
+        document.getElementById('emptyState').querySelector('.empty-state-message').textContent = 'Start a new chat to get study help, explanations, or practice questions.';
+      }
+    }
+
+    // Check maintenance mode
+    function checkMaintenanceMode() {
+      // In a real app, this would check Firestore system collection
+      // For demo, we'll leave it hidden
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      let icon = 'info';
+      if (type === 'success') icon = 'check_circle';
+      if (type === 'error') icon = 'error';
+      if (type === 'warning') icon = 'warning';
+      
+      toast.innerHTML = `
+        <div class="toast-title">
+          <span class="material-icons">${icon}</span>
+          ${type.charAt(0).toUpperCase() + type.slice(1)}
+        </div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Remove after animation
+      setTimeout(() => {
+        toast.remove();
+      }, 3300);
+      
+      // If notification permission granted, show system notification
+      if (notificationPermissionGranted && type !== 'info') {
+        try {
+          new Notification('Milli AI', {
+            body: message,
+            icon: 'https://via.placeholder.com/128x128/4285f4/ffffff?text=MA'
+          });
+        } catch (e) {
+          console.log('System notification failed:', e);
+        }
+      }
+    }
+
+    // Initialize app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
 </body>
 </html>
