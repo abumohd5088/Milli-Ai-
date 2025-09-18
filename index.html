@@ -12,7 +12,10 @@
     .msg { padding: 10px; margin: 5px 0; border-radius: 5px; }
     .user { background: #d1e7dd; }
     .ai { background: #f8d7da; }
-    #notifications, #maintenance, #stats { margin-top: 20px; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+    #notifications, #maintenance, #stats {
+      margin-top: 20px; padding: 10px; background: #fff;
+      border-radius: 8px; box-shadow: 0 0 5px #ccc;
+    }
   </style>
 </head>
 <body>
@@ -27,6 +30,9 @@
   <div id="stats"><h3>📊 Stats</h3><div id="statsList">Loading...</div></div>
 
   <script>
+    // 🔑 Gemini API Key (सबसे ऊपर रखना है)
+    const GEMINI_API_KEY = "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs";
+
     // 🔥 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
@@ -40,9 +46,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 🔑 Gemini API Key
-    const GEMINI_API_KEY = "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs";
-
     // Auto login (anonymous)
     auth.signInAnonymously().catch(err => console.error("Auth error:", err));
 
@@ -55,8 +58,8 @@
       const chat = document.getElementById("chat");
       chat.innerHTML += `<div class="msg user">You: ${q}</div>`;
       
-      // Gemini API Call
       try {
+        // Gemini API Call
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
           {
