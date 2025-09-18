@@ -1,82 +1,69 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="hi" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Milli AI - Your Study Assistant</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>Milli AI - AI School Assistant</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --primary-color: #4285f4;
-      --secondary-color: #34a853;
-      --background-color: #ffffff;
-      --card-color: #f8f9fa;
-      --text-color: #202124;
-      --border-color: #dadce0;
-      --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-      --shadow-hover: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-      --menu-bg: rgba(255,255,255,0.95);
-      --error-color: #ea4335;
-      --success-color: #34a853;
+      --primary: #4338ca;
+      --primary-light: #665fd1;
+      --secondary: #f59e0b;
+      --dark: #1f2937;
+      --light: #f9fafb;
+      --gray: #6b7280;
+      --danger: #ef4444;
+      --success: #10b981;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --radius: 12px;
     }
 
     .dark-theme {
-      --background-color: #121212;
-      --card-color: #1e1e1e;
-      --text-color: #e8eaed;
-      --border-color: #3c4043;
-      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
-      --shadow-hover: 0 3px 6px rgba(0,0,0,0.3), 0 3px 6px rgba(0,0,0,0.4);
-      --menu-bg: rgba(30,30,30,0.95);
+      --dark: #f9fafb;
+      --light: #1f2937;
+      --gray: #9ca3af;
+      --shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06);
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Roboto', Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
     }
 
     body {
-      background-color: var(--background-color);
-      color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-      font-size: 16px;
-      line-height: 1.5;
-      padding-bottom: env(safe-area-inset-bottom);
+      background-color: var(--light);
+      color: var(--dark);
+      transition: all 0.3s ease;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 4px;
+    body.dark-theme {
+      background-color: var(--dark);
+      color: var(--light);
     }
 
     /* Header */
     .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      background-color: var(--background-color);
-      padding: 12px 16px;
-      box-shadow: var(--shadow);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 64px;
+      padding: 16px;
+      background-color: var(--primary);
+      color: white;
+      box-shadow: var(--shadow);
+      z-index: 100;
     }
 
     .header-title {
-      font-size: 1.25rem;
-      font-weight: 500;
+      font-size: 1.2rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -87,705 +74,265 @@
       gap: 16px;
     }
 
-    .icon-button {
-      background: none;
-      border: none;
-      color: var(--text-color);
+    .material-icons {
       cursor: pointer;
       font-size: 24px;
-      padding: 8px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.2s;
     }
 
-    .icon-button:hover {
-      background-color: rgba(255,255,255,0.1);
-    }
-
-    /* Main content */
-    .main {
-      margin-top: 64px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      min-height: calc(100vh - 64px - 72px);
-    }
-
-    /* Greeting section */
-    .greeting {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      color: white;
-      padding: 24px 16px;
-      border-radius: 16px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .greeting::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200px;
-      height: 200px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50%;
-    }
-
-    .greeting-title {
-      font-size: 1.5rem;
-      font-weight: 500;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .greeting-subtitle {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-
-    /* Chat list */
-    .chat-list {
+    /* Main Chat Area */
+    .chat-container {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 16px;
-    }
-
-    .chat-item {
-      background-color: var(--card-color);
-      border-radius: 12px;
       padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-    }
-
-    .chat-item:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .chat-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .chat-title {
-      font-weight: 500;
-      font-size: 1.1rem;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .chat-time {
-      font-size: 0.8rem;
-      opacity: 0.7;
-      margin-left: 8px;
-    }
-
-    .chat-preview {
-      font-size: 0.9rem;
-      opacity: 0.8;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .chat-unread {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background-color: var(--primary-color);
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      font-weight: bold;
-    }
-
-    .ephemeral-indicator {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background-color: var(--secondary-color);
-      color: white;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 0.7rem;
-    }
-
-    /* Start new chat button */
-    .start-chat {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 24px;
-      padding: 16px;
-      width: 100%;
-      font-size: 1rem;
-      font-weight: 500;
-      margin-top: 16px;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .start-chat:hover {
-      background-color: #3367d6;
-    }
-
-    .start-chat:active {
-      transform: scale(0.98);
-    }
-
-    /* Composer */
-    .composer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: var(--background-color);
-      padding: 12px 16px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      border-top: 1px solid var(--border-color);
-      z-index: 90;
-    }
-
-    .composer-input-container {
-      display: flex;
-      align-items: center;
-      background-color: var(--card-color);
-      border-radius: 24px;
-      padding: 8px 16px;
-      box-shadow: var(--shadow);
-    }
-
-    .composer-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 8px 0;
-      font-size: 1rem;
-      color: var(--text-color);
-      outline: none;
-    }
-
-    .composer-actions {
-      display: flex;
-      gap: 8px;
-      margin-left: 8px;
-    }
-
-    .composer-action {
-      background: none;
-      border: none;
-      color: var(--text-color);
-      cursor: pointer;
-      font-size: 24px;
-      padding: 4px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.2s;
-    }
-
-    .composer-action:hover {
-      background-color: rgba(255,255,255,0.1);
-    }
-
-    /* Suggestions */
-    .suggestions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0;
-      padding: 0 16px;
-    }
-
-    .suggestion-chip {
-      background-color: var(--card-color);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
-      box-shadow: var(--shadow);
-    }
-
-    .suggestion-chip:hover {
-      background-color: rgba(66, 133, 244, 0.1);
-      transform: translateY(-1px);
-    }
-
-    /* Menu overlay */
-    .menu-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 200;
-      display: none;
-      animation: fadeIn 0.2s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .menu {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background-color: var(--menu-bg);
-      border-radius: 8px;
-      box-shadow: var(--shadow-hover);
-      padding: 8px 0;
-      min-width: 200px;
-      z-index: 201;
-      transform: translateX(100%);
-      animation: slideIn 0.2s ease forwards;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
-    }
-
-    .menu-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.95rem;
-    }
-
-    .menu-item:hover {
-      background-color: rgba(0,0,0,0.05);
-    }
-
-    .menu-item .material-icons {
-      font-size: 20px;
-    }
-
-    /* Modal */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 300;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .modal-content {
-      background-color: var(--background-color);
-      border-radius: 12px;
-      padding: 24px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: var(--shadow-hover);
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .modal-button {
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .modal-button.cancel {
-      background-color: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-color);
-    }
-
-    .modal-button.confirm {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-    }
-
-    /* Toast notifications */
-    .toast-container {
-      position: fixed;
-      top: 80px;
-      right: 16px;
-      z-index: 400;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .toast {
-      background-color: var(--card-color);
-      color: var(--text-color);
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-      max-width: 300px;
-      animation: slideInFromRight 0.3s ease, fadeOut 0.3s ease 3s forwards;
-    }
-
-    @keyframes slideInFromRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-
-    .toast-title {
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-
-    .toast-message {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-
-    /* Login modal */
-    .login-container {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
-    .login-input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background-color: var(--card-color);
-      color: var(--text-color);
-      font-size: 1rem;
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.3s ease;
     }
 
-    .login-button {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary-color);
+    .user-message {
+      align-self: flex-end;
+      background-color: var(--primary-light);
       color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
     }
 
-    .login-button:hover {
-      background-color: #3367d6;
+    .ai-message {
+      align-self: flex-start;
+      background-color: var(--light);
+      color: var(--dark);
     }
 
-    .login-divider {
+    .dark-theme .ai-message {
+      background-color: #374151;
+      color: var(--light);
+    }
+
+    .message-options {
       display: flex;
-      align-items: center;
-      text-align: center;
-      margin: 16px 0;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 14px;
     }
 
-    .login-divider::before,
-    .login-divider::after {
-      content: "";
-      flex: 1;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .login-divider span {
-      padding: 0 16px;
-      color: var(--text-color);
-      opacity: 0.7;
-    }
-
-    .guest-login {
-      background-color: transparent;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-    }
-
-    /* Loading indicator */
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Skeleton loader */
-    .skeleton {
-      background: linear-gradient(90deg, var(--card-color) 25%, rgba(255,255,255,0.1) 50%, var(--card-color) 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: 8px;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    .skeleton-text {
-      height: 16px;
-      margin-bottom: 8px;
-    }
-
-    .skeleton-line {
-      height: 12px;
-      width: 80%;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 480px) {
-      .header {
-        padding: 8px 12px;
-        height: 56px;
-      }
-      
-      .greeting {
-        padding: 16px 12px;
-        margin-bottom: 16px;
-      }
-      
-      .greeting-title {
-        font-size: 1.25rem;
-      }
-      
-      .start-chat {
-        padding: 12px;
-        font-size: 0.95rem;
-      }
-      
-      .composer {
-        padding: 8px 12px;
-      }
-      
-      .composer-input-container {
-        padding: 6px 12px;
-      }
-      
-      .suggestion-chip {
-        padding: 6px 10px;
-        font-size: 0.85rem;
-      }
-    }
-
-    /* Dark mode toggle animation */
-    body {
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    /* Message typing indicator */
-    .typing-indicator {
+    .message-option {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background-color: rgba(0, 0, 0, 0.05);
       display: flex;
       align-items: center;
       gap: 4px;
-      padding: 8px 16px;
+    }
+
+    .dark-theme .message-option {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .message-option:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .dark-theme .message-option:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .typing-indicator {
+      align-self: flex-start;
+      background-color: var(--light);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 4px;
+    }
+
+    .dark-theme .typing-indicator {
+      background-color: #374151;
     }
 
     .typing-dot {
       width: 8px;
       height: 8px;
+      background-color: var(--gray);
       border-radius: 50%;
-      background-color: var(--text-color);
-      opacity: 0.6;
-      animation: typing 1.4s infinite ease-in-out;
+      animation: typingAnimation 1.4s infinite ease-in-out;
     }
 
     .typing-dot:nth-child(1) { animation-delay: 0s; }
     .typing-dot:nth-child(2) { animation-delay: 0.2s; }
     .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-    @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-5px); }
+    /* Input Area */
+    .input-container {
+      padding: 16px;
+      background-color: var(--light);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
-    /* Image generation status */
-    .image-status {
+    .dark-theme .input-container {
+      background-color: #1f2937;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--radius);
+      font-size: 16px;
+      outline: none;
+      background-color: var(--light);
+      color: var(--dark);
+    }
+
+    .dark-theme .input-field {
+      background-color: #374151;
+      color: var(--light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.2);
+    }
+
+    .send-btn, .action-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px;
-      background-color: var(--card-color);
-      border-radius: 8px;
-      margin: 8px 0;
-    }
-
-    /* Maintenance banner */
-    .maintenance-banner {
-      background-color: var(--error-color);
-      color: white;
-      padding: 12px 16px;
-      text-align: center;
-      font-weight: 500;
-      position: fixed;
-      top: 64px;
-      left: 0;
-      right: 0;
-      z-index: 99;
-      box-shadow: var(--shadow);
-    }
-
-    /* Language selector */
-    .language-selector {
-      display: flex;
-      background-color: var(--card-color);
-      border-radius: 20px;
-      padding: 4px;
-      box-shadow: var(--shadow);
-    }
-
-    .language-option {
-      padding: 6px 12px;
-      border-radius: 16px;
+      justify-content: center;
       cursor: pointer;
-      font-size: 0.9rem;
-      transition: background-color 0.2s;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
     }
 
-    .language-option.active {
-      background-color: var(--primary-color);
+    .send-btn:hover, .action-btn:hover {
+      background-color: var(--primary-light);
+      transform: scale(1.05);
+    }
+
+    .action-btn {
+      background-color: var(--light);
+      color: var(--dark);
+    }
+
+    .dark-theme .action-btn {
+      background-color: #374151;
+      color: var(--light);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: var(--primary);
+      padding: 12px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 90;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       color: white;
+      font-size: 12px;
+      cursor: pointer;
     }
 
-    /* Settings panel */
-    .settings-panel {
+    .nav-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    /* Panels (Settings, Notifications) */
+    .panel {
       position: fixed;
       top: 0;
-      right: 0;
-      bottom: 0;
+      right: -100%;
       width: 80%;
-      max-width: 320px;
-      background-color: var(--background-color);
-      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-      z-index: 250;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      padding: 16px;
+      max-width: 400px;
+      height: 100vh;
+      background-color: var(--light);
+      color: var(--dark);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 200;
+      transition: right 0.3s ease;
+      padding: 20px;
       overflow-y: auto;
     }
 
-    .settings-panel.active {
-      transform: translateX(0);
+    .dark-theme .panel {
+      background-color: #1f2937;
+      color: var(--light);
     }
 
-    .settings-header {
+    .panel.active {
+      right: 0;
+    }
+
+    .panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }
 
-    .settings-title {
-      font-size: 1.25rem;
-      font-weight: 500;
+    .dark-theme .panel-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .settings-close {
-      background: none;
-      border: none;
-      font-size: 24px;
+    .close-panel {
       cursor: pointer;
-      color: var(--text-color);
+      font-size: 24px;
     }
 
-    .settings-section {
+    .panel-section {
       margin-bottom: 24px;
     }
 
-    .settings-section-title {
-      font-size: 1rem;
-      font-weight: 500;
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
       margin-bottom: 12px;
-      color: var(--text-color);
-      opacity: 0.9;
     }
 
-    .settings-option {
+    .setting-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    .settings-option:last-child {
-      border-bottom: none;
-    }
-
-    .settings-label {
-      font-size: 0.95rem;
+    .dark-theme .setting-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .toggle-switch {
       position: relative;
       display: inline-block;
-      width: 48px;
+      width: 50px;
       height: 24px;
     }
 
@@ -795,19 +342,19 @@
       height: 0;
     }
 
-    .toggle-slider {
+    .slider {
       position: absolute;
       cursor: pointer;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: var(--border-color);
+      background-color: #ccc;
       transition: .4s;
       border-radius: 24px;
     }
 
-    .toggle-slider:before {
+    .slider:before {
       position: absolute;
       content: "";
       height: 18px;
@@ -819,1032 +366,906 @@
       border-radius: 50%;
     }
 
-    input:checked + .toggle-slider {
-      background-color: var(--primary-color);
+    input:checked + .slider {
+      background-color: var(--primary);
     }
 
-    input:checked + .toggle-slider:before {
-      transform: translateX(24px);
+    input:checked + .slider:before {
+      transform: translateX(26px);
     }
 
-    /* Notification badge */
+    /* Notification Badge */
     .notification-badge {
       position: relative;
     }
 
-    .notification-count {
+    .badge {
       position: absolute;
       top: -4px;
       right: -4px;
-      background-color: var(--error-color);
+      background-color: var(--danger);
       color: white;
-      border-radius: 50%;
+      font-size: 10px;
       width: 16px;
       height: 16px;
-      font-size: 0.7rem;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-color);
-      opacity: 0.7;
+    /* Maintenance Screen */
+    .maintenance-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--light);
+      color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      display: none;
     }
 
-    .empty-state-icon {
+    .dark-theme .maintenance-screen {
+      background-color: #1f2937;
+      color: var(--light);
+    }
+
+    .maintenance-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .maintenance-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .maintenance-message {
+      text-align: center;
+      max-width: 80%;
+      margin-bottom: 20px;
+    }
+
+    /* Greeting Message */
+    .greeting-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px;
+      text-align: center;
+      background-color: var(--light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 0 auto;
+      max-width: 80%;
+    }
+
+    .dark-theme .greeting-message {
+      background-color: #374151;
+    }
+
+    .greeting-icon {
       font-size: 48px;
       margin-bottom: 16px;
-      opacity: 0.5;
+      color: var(--primary);
     }
 
-    .empty-state-title {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
+    .greeting-text {
+      font-size: 18px;
       font-weight: 500;
+      margin-bottom: 8px;
     }
 
-    .empty-state-message {
-      font-size: 0.9rem;
-      line-height: 1.5;
+    .greeting-subtext {
+      font-size: 14px;
+      color: var(--gray);
+    }
+
+    /* Related Questions */
+    .related-questions {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: var(--light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .dark-theme .related-questions {
+      background-color: #374151;
+    }
+
+    .related-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    .related-question {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background-color: rgba(67, 56, 202, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .related-question:hover {
+      background-color: rgba(67, 56, 202, 0.2);
+    }
+
+    /* Top Questions */
+    .top-questions {
+      margin-bottom: 24px;
+    }
+
+    .top-question {
+      padding: 12px;
+      background-color: var(--light);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dark-theme .top-question {
+      background-color: #374151;
+    }
+
+    .top-question:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .message {
+        max-width: 90%;
+      }
+      
+      .panel {
+        width: 90%;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Maintenance banner (hidden by default) -->
-  <div class="maintenance-banner" style="display: none;" id="maintenanceBanner">
-    System is currently under maintenance. Please try again later.
+  <!-- Maintenance Screen -->
+  <div class="maintenance-screen" id="maintenanceScreen">
+    <span class="material-icons maintenance-icon">construction</span>
+    <h2 class="maintenance-title">App Under Maintenance</h2>
+    <p class="maintenance-message">We're making improvements to serve you better. Please check back soon!</p>
+    <p>Milli AI Team</p>
   </div>
 
   <!-- Header -->
-  <header class="header">
+  <div class="header">
     <div class="header-title">
       <span class="material-icons">school</span>
       <span>Milli AI</span>
     </div>
     <div class="header-actions">
-      <button class="icon-button notification-badge" id="notificationButton">
+      <div class="notification-badge" id="notificationBadge">
         <span class="material-icons">notifications</span>
-        <span class="notification-count" id="notificationCount" style="display: none;">0</span>
-      </button>
-      <button class="icon-button" id="settingsButton">
-        <span class="material-icons">settings</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main content -->
-  <main class="main">
-    <!-- Greeting section -->
-    <div class="greeting" id="greetingSection">
-      <h2 class="greeting-title" id="greetingTitle">
-        <span class="material-icons">light_mode</span>
-        <span id="greetingText">Good morning</span>
-      </h2>
-      <p class="greeting-subtitle">Ask me anything about study...</p>
-    </div>
-
-    <!-- Chat list -->
-    <div class="chat-list" id="chatList">
-      <!-- Chat items will be dynamically inserted here -->
-      <div class="empty-state" id="emptyState">
-        <span class="material-icons empty-state-icon">chat</span>
-        <h3 class="empty-state-title">No conversations yet</h3>
-        <p class="empty-state-message">Start a new chat to get study help, explanations, or practice questions.</p>
+        <span class="badge" id="notificationCount">0</span>
       </div>
+      <span class="material-icons" id="menuBtn">more_vert</span>
     </div>
+  </div>
 
-    <!-- Start new chat button -->
-    <button class="start-chat" id="startChatButton">
-      <span class="material-icons">add</span>
-      Start New Chat
+  <!-- Chat Container -->
+  <div class="chat-container" id="chatContainer">
+    <!-- Greeting Message will be inserted here by JavaScript -->
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-container">
+    <button class="action-btn" id="micBtn">
+      <span class="material-icons">mic</span>
     </button>
+    <button class="action-btn" id="fileBtn">
+      <span class="material-icons">attach_file</span>
+    </button>
+    <button class="action-btn" id="imageBtn">
+      <span class="material-icons">image</span>
+    </button>
+    <input type="text" class="input-field" id="messageInput" placeholder="Ask me anything about study..." />
+    <button class="send-btn" id="sendBtn">
+      <span class="material-icons">send</span>
+    </button>
+  </div>
 
-    <!-- Suggestions -->
-    <div class="suggestions" id="suggestions">
-      <div class="suggestion-chip" data-suggestion="Explain this topic simply">Explain this topic simply</div>
-      <div class="suggestion-chip" data-suggestion="Create practice questions">Create practice questions</div>
-      <div class="suggestion-chip" data-suggestion="Summarize text">Summarize text</div>
-      <div class="suggestion-chip" data-suggestion="Help with homework">Help with homework</div>
-      <div class="suggestion-chip" data-suggestion="Explain like I'm 10">Explain like I'm 10</div>
-      <div class="suggestion-chip" data-suggestion="Give examples">Give examples</div>
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item" id="chatsNav">
+      <span class="material-icons nav-icon">chat</span>
+      <span>Chats</span>
     </div>
-  </main>
-
-  <!-- Composer -->
-  <div class="composer">
-    <div class="composer-input-container">
-      <input type="text" class="composer-input" id="messageInput" placeholder="Type your question..." autocomplete="off">
-      <div class="composer-actions">
-        <button class="composer-action" id="micButton">
-          <span class="material-icons">mic</span>
-        </button>
-        <button class="composer-action" id="attachButton">
-          <span class="material-icons">attach_file</span>
-        </button>
-        <button class="composer-action" id="sendButton">
-          <span class="material-icons">send</span>
-        </button>
-      </div>
+    <div class="nav-item" id="topQuestionsNav">
+      <span class="material-icons nav-icon">question_answer</span>
+      <span>Top Questions</span>
+    </div>
+    <div class="nav-item" id="settingsNav">
+      <span class="material-icons nav-icon">settings</span>
+      <span>Settings</span>
     </div>
   </div>
 
-  <!-- Menu overlay -->
-  <div class="menu-overlay" id="menuOverlay">
-    <div class="menu" id="chatMenu">
-      <div class="menu-item" id="renameChat">
-        <span class="material-icons">edit</span>
-        <span>Rename</span>
-      </div>
-      <div class="menu-item" id="favoriteChat">
-        <span class="material-icons">star_outline</span>
-        <span>Mark as Favorite</span>
-      </div>
-      <div class="menu-item" id="pinChat">
-        <span class="material-icons">push_pin</span>
-        <span>Pin</span>
-      </div>
-      <div class="menu-item" id="exportChat">
-        <span class="material-icons">file_download</span>
-        <span>Export Chat</span>
-      </div>
-      <div class="menu-item" id="shareChat">
-        <span class="material-icons">share</span>
-        <span>Share Link</span>
-      </div>
-      <div class="menu-item" id="deleteChat">
-        <span class="material-icons">delete</span>
-        <span>Delete</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete confirmation modal -->
-  <div class="modal" id="deleteModal">
-    <div class="modal-content">
-      <h3 class="modal-title">Delete Conversation</h3>
-      <p>Are you sure? This is permanent.</p>
-      <div class="modal-actions">
-        <button class="modal-button cancel" id="cancelDelete">Cancel</button>
-        <button class="modal-button confirm" id="confirmDelete">Delete</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Rename modal -->
-  <div class="modal" id="renameModal">
-    <div class="modal-content">
-      <h3 class="modal-title">Rename Conversation</h3>
-      <input type="text" class="login-input" id="renameInput" placeholder="Enter new name">
-      <div class="modal-actions">
-        <button class="modal-button cancel" id="cancelRename">Cancel</button>
-        <button class="modal-button confirm" id="confirmRename">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Login modal -->
-  <div class="modal" id="loginModal">
-    <div class="modal-content">
-      <h3 class="modal-title">Sign in to Milli AI</h3>
-      <div class="login-container">
-        <input type="email" class="login-input" id="emailInput" placeholder="Email">
-        <input type="password" class="login-input" id="passwordInput" placeholder="Password">
-        <button class="login-button" id="loginButton">Sign In</button>
-        <div class="login-divider">
-          <span>or</span>
-        </div>
-        <button class="login-button guest-login" id="guestButton">Continue as Guest</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast container -->
-  <div class="toast-container" id="toastContainer"></div>
-
-  <!-- Settings panel -->
-  <div class="settings-panel" id="settingsPanel">
-    <div class="settings-header">
-      <h3 class="settings-title">Settings</h3>
-      <button class="settings-close" id="closeSettings">
-        <span class="material-icons">close</span>
-      </button>
+  <!-- Settings Panel -->
+  <div class="panel" id="settingsPanel">
+    <div class="panel-header">
+      <h3>Settings</h3>
+      <span class="material-icons close-panel" id="closeSettings">close</span>
     </div>
     
-    <div class="settings-section">
-      <h4 class="settings-section-title">Appearance</h4>
-      <div class="settings-option">
-        <span class="settings-label">Dark Mode</span>
+    <div class="panel-section">
+      <h4 class="panel-title">Appearance</h4>
+      <div class="setting-item">
+        <span>Dark Mode</span>
         <label class="toggle-switch">
-          <input type="checkbox" id="darkModeToggle">
-          <span class="toggle-slider"></span>
+          <input type="checkbox" id="themeToggle">
+          <span class="slider"></span>
         </label>
       </div>
-    </div>
-    
-    <div class="settings-section">
-      <h4 class="settings-section-title">Language</h4>
-      <div class="settings-option">
-        <div class="language-selector">
-          <div class="language-option active" id="englishLang">EN</div>
-          <div class="language-option" id="hindiLang">HI</div>
-        </div>
+      <div class="setting-item">
+        <span>Language</span>
+        <select id="languageSelect">
+          <option value="en">English</option>
+          <option value="hi">हिंदी</option>
+        </select>
       </div>
     </div>
     
-    <div class="settings-section">
-      <h4 class="settings-section-title">Notifications</h4>
-      <div class="settings-option">
-        <span class="settings-label">Enable Notifications</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="notificationsToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
+    <div class="panel-section">
+      <h4 class="panel-title">About</h4>
+      <div class="setting-item">
+        <span>Developer</span>
+        <span class="material-icons">chevron_right</span>
       </div>
-    </div>
-    
-    <div class="settings-section">
-      <h4 class="settings-section-title">Account</h4>
-      <div class="settings-option" id="accountInfo">
-        <span class="settings-label">Account Information</span>
+      <div class="setting-item">
+        <span>School</span>
+        <span class="material-icons">chevron_right</span>
+      </div>
+      <div class="setting-item">
+        <span>Terms & Conditions</span>
         <span class="material-icons">chevron_right</span>
       </div>
     </div>
     
-    <div class="settings-section">
-      <h4 class="settings-section-title">About</h4>
-      <div class="settings-option" id="aboutDeveloper">
-        <span class="settings-label">About Developer</span>
-        <span class="material-icons">chevron_right</span>
+    <div class="panel-section">
+      <div class="setting-item">
+        <span>Logout</span>
+        <span class="material-icons">logout</span>
       </div>
-      <div class="settings-option" id="aboutSchool">
-        <span class="settings-label">About School</span>
-        <span class="material-icons">chevron_right</span>
-      </div>
-      <div class="settings-option" id="termsConditions">
-        <span class="settings-label">Terms & Conditions</span>
-        <span class="material-icons">chevron_right</span>
-      </div>
-      <div class="settings-option" id="privacyPolicy">
-        <span class="settings-label">Privacy Policy</span>
-        <span class="material-icons">chevron_right</span>
-      </div>
-      <div class="settings-option" id="contactSupport">
-        <span class="settings-label">Contact Support</span>
-        <span class="material-icons">chevron_right</span>
-      </div>
+    </div>
+  </div>
+
+  <!-- Notifications Panel -->
+  <div class="panel" id="notificationsPanel">
+    <div class="panel-header">
+      <h3>Notifications</h3>
+      <span class="material-icons close-panel" id="closeNotifications">close</span>
+    </div>
+    <div id="notificationsList">
+      <!-- Notifications will be added here by JavaScript -->
+    </div>
+  </div>
+
+  <!-- About Developer Panel -->
+  <div class="panel" id="aboutDeveloperPanel">
+    <div class="panel-header">
+      <h3>About Developer</h3>
+      <span class="material-icons close-panel" id="closeAboutDeveloper">close</span>
+    </div>
+    <div class="panel-section">
+      <h4 class="panel-title">Abutalha</h4>
+      <p>Class: 6, Student of MKPS Balrampur</p>
+      <p>Contact: 9839469669</p>
+      <p class="greeting-subtext">"Milli AI has been developed by Abutalha, a young visionary student of class 6. This project reflects innovation, future learning, and creativity."</p>
+    </div>
+  </div>
+
+  <!-- About School Panel -->
+  <div class="panel" id="aboutSchoolPanel">
+    <div class="panel-header">
+      <h3>About School</h3>
+      <span class="material-icons close-panel" id="closeAboutSchool">close</span>
+    </div>
+    <div class="panel-section">
+      <h4 class="panel-title">Milli Karwaan Public School, Balrampur (MKPS)</h4>
+      <p>Address: Baluha Police Chowki, Balrampur (Uttar Pradesh)</p>
+      <p>Contact: 9758919151</p>
+      <p class="greeting-subtext">"Education for the future, powered by AI."</p>
+    </div>
+  </div>
+
+  <!-- Terms Panel -->
+  <div class="panel" id="termsPanel">
+    <div class="panel-header">
+      <h3>Terms & Conditions</h3>
+      <span class="material-icons close-panel" id="closeTerms">close</span>
+    </div>
+    <div class="panel-section">
+      <p>By using Milli AI, you agree to our terms and conditions:</p>
+      <ol>
+        <li>Use the service for educational purposes only.</li>
+        <li>Do not misuse or attempt to hack the system.</li>
+        <li>All generated content is for educational assistance.</li>
+        <li>The school and developer are not responsible for misuse.</li>
+        <li>Terms may be updated periodically.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Top Questions Panel -->
+  <div class="panel" id="topQuestionsPanel">
+    <div class="panel-header">
+      <h3>Top 10 Questions</h3>
+      <span class="material-icons close-panel" id="closeTopQuestions">close</span>
+    </div>
+    <div class="panel-section top-questions" id="topQuestionsList">
+      <!-- Top questions will be added here by JavaScript -->
     </div>
   </div>
 
   <script>
-    // Initialize Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
-      authDomain: "mkps-balrampur.firebaseapp.com",
-      projectId: "mkps-balrampur",
-      storageBucket: "mkps-balrampur.appspot.com",
-      messagingSenderId: "469227187804",
-      appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
-    };
-
-    // Mock Firebase initialization (in real app, you would import Firebase SDK)
-    let firebaseInitialized = false;
-    let currentUser = null;
-    let currentChatId = null;
-    let currentMenuChatId = null;
-    let isDarkMode = false;
-    let currentLanguage = 'en';
-    let notificationPermissionGranted = false;
-    let notificationCount = 0;
-
     // DOM Elements
-    const greetingText = document.getElementById('greetingText');
-    const greetingTitle = document.getElementById('greetingTitle');
-    const chatList = document.getElementById('chatList');
-    const emptyState = document.getElementById('emptyState');
-    const startChatButton = document.getElementById('startChatButton');
+    const chatContainer = document.getElementById('chatContainer');
     const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const micButton = document.getElementById('micButton');
-    const attachButton = document.getElementById('attachButton');
-    const menuOverlay = document.getElementById('menuOverlay');
-    const chatMenu = document.getElementById('chatMenu');
-    const deleteModal = document.getElementById('deleteModal');
-    const renameModal = document.getElementById('renameModal');
-    const loginModal = document.getElementById('loginModal');
-    const toastContainer = document.getElementById('toastContainer');
+    const sendBtn = document.getElementById('sendBtn');
+    const micBtn = document.getElementById('micBtn');
+    const fileBtn = document.getElementById('fileBtn');
+    const imageBtn = document.getElementById('imageBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const languageSelect = document.getElementById('languageSelect');
+    const menuBtn = document.getElementById('menuBtn');
     const settingsPanel = document.getElementById('settingsPanel');
-    const settingsButton = document.getElementById('settingsButton');
+    const notificationsPanel = document.getElementById('notificationsPanel');
+    const aboutDeveloperPanel = document.getElementById('aboutDeveloperPanel');
+    const aboutSchoolPanel = document.getElementById('aboutSchoolPanel');
+    const termsPanel = document.getElementById('termsPanel');
+    const topQuestionsPanel = document.getElementById('topQuestionsPanel');
     const closeSettings = document.getElementById('closeSettings');
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const notificationsToggle = document.getElementById('notificationsToggle');
-    const englishLang = document.getElementById('englishLang');
-    const hindiLang = document.getElementById('hindiLang');
-    const notificationButton = document.getElementById('notificationButton');
-    const notificationCountEl = document.getElementById('notificationCount');
-    const maintenanceBanner = document.getElementById('maintenanceBanner');
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginButton = document.getElementById('loginButton');
-    const guestButton = document.getElementById('guestButton');
-    const cancelDelete = document.getElementById('cancelDelete');
-    const confirmDelete = document.getElementById('confirmDelete');
-    const cancelRename = document.getElementById('cancelRename');
-    const confirmRename = document.getElementById('confirmRename');
-    const renameInput = document.getElementById('renameInput');
+    const closeNotifications = document.getElementById('closeNotifications');
+    const closeAboutDeveloper = document.getElementById('closeAboutDeveloper');
+    const closeAboutSchool = document.getElementById('closeAboutSchool');
+    const closeTerms = document.getElementById('closeTerms');
+    const closeTopQuestions = document.getElementById('closeTopQuestions');
+    const notificationBadge = document.getElementById('notificationBadge');
+    const notificationCount = document.getElementById('notificationCount');
+    const maintenanceScreen = document.getElementById('maintenanceScreen');
+    const settingsNav = document.getElementById('settingsNav');
+    const topQuestionsNav = document.getElementById('topQuestionsNav');
+    const chatsNav = document.getElementById('chatsNav');
 
     // Mock data
-    let mockChats = [
-      {
-        id: 'chat1',
-        title: 'Mathematics Help',
-        lastMessage: 'The Pythagorean theorem states that in a right triangle, the square of the hypotenuse...',
-        time: '2 min ago',
-        unread: 0,
-        isEphemeral: false,
-        isFavorite: false,
-        isPinned: false
-      },
-      {
-        id: 'chat2',
-        title: 'Science Project',
-        lastMessage: 'For your science project, I recommend focusing on renewable energy sources...',
-        time: '1 hour ago',
-        unread: 3,
-        isEphemeral: true,
-        isFavorite: true,
-        isPinned: false
-      },
-      {
-        id: 'chat3',
-        title: 'History Assignment',
-        lastMessage: 'The Mughal Empire was founded in 1526 by Babur after his victory at the Battle of Panipat...',
-        time: 'Yesterday',
-        unread: 0,
-        isEphemeral: false,
-        isFavorite: false,
-        isPinned: true
-      }
+    const topQuestions = [
+      "What is photosynthesis?",
+      "Explain Newton's laws of motion",
+      "What are the parts of a plant?",
+      "How to solve quadratic equations?",
+      "What is the water cycle?",
+      "Explain the human digestive system",
+      "What are fractions in mathematics?",
+      "What is the solar system?",
+      "How does electricity work?",
+      "What are the states of matter?"
     ];
+
+    const notifications = [
+      { title: "New Feature", message: "Image generation is now available!", time: "2 hours ago" },
+      { title: "Maintenance", message: "Scheduled maintenance on Sunday at 2 AM", time: "1 day ago" },
+      { title: "Update", message: "New study materials added for Class 6", time: "3 days ago" }
+    ];
+
+    // State
+    let isMaintenanceMode = false;
+    let notificationCountValue = 0;
+    let chatHistory = [];
+    let currentChatId = null;
 
     // Initialize app
     function initApp() {
-      // Set greeting based on time
-      updateGreeting();
+      // Check for maintenance mode (would normally come from Firebase)
+      checkMaintenanceMode();
       
-      // Check for dark mode preference
-      const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-      if (savedDarkMode) {
-        enableDarkMode();
-      }
+      // Show greeting message
+      showGreetingMessage();
       
-      // Check for saved language
-      const savedLanguage = localStorage.getItem('language') || 'en';
-      setLanguage(savedLanguage);
+      // Load top questions
+      loadTopQuestions();
       
-      // Show login modal if no user
-      if (!currentUser) {
-        showLoginModal();
-      }
-      
-      // Load chats
-      loadChats();
-      
-      // Add event listeners
-      addEventListeners();
+      // Load notifications
+      loadNotifications();
       
       // Request notification permission
       requestNotificationPermission();
       
-      // Check for maintenance mode
-      checkMaintenanceMode();
+      // Event listeners
+      setupEventListeners();
+      
+      // Set theme from localStorage or system preference
+      setInitialTheme();
+      
+      // Set language
+      setInitialLanguage();
     }
 
-    // Update greeting based on time
-    function updateGreeting() {
+    // Show greeting message based on time of day
+    function showGreetingMessage() {
       const hour = new Date().getHours();
-      let greeting = '';
-      let icon = '';
+      let greeting = "";
+      let icon = "";
       
-      if (hour < 12) {
-        greeting = currentLanguage === 'hi' ? 'शुभ प्रभात' : 'Good morning';
-        icon = 'light_mode';
-      } else if (hour < 17) {
-        greeting = currentLanguage === 'hi' ? 'शुभ अपराह्न' : 'Good afternoon';
-        icon = 'sunny';
+      if (hour >= 5 && hour < 12) {
+        greeting = "Good Morning ✨";
+        icon = "wb_sunny";
+      } else if (hour >= 12 && hour < 17) {
+        greeting = "Good Afternoon ✨";
+        icon = "brightness_5";
+      } else if (hour >= 17 && hour < 21) {
+        greeting = "Good Evening ✨";
+        icon = "brightness_3";
       } else {
-        greeting = currentLanguage === 'hi' ? 'शुभ संध्या' : 'Good evening';
-        icon = 'nightlight';
+        greeting = "Good Night ✨";
+        icon = "bedtime";
       }
       
-      greetingText.textContent = greeting;
-      greetingTitle.innerHTML = `<span class="material-icons">${icon}</span> <span>${greeting}</span>`;
-    }
-
-    // Load chats
-    function loadChats() {
-      if (mockChats.length === 0) {
-        emptyState.style.display = 'block';
-        return;
-      }
-      
-      emptyState.style.display = 'none';
-      chatList.innerHTML = '';
-      
-      mockChats.forEach(chat => {
-        const chatElement = createChatElement(chat);
-        chatList.appendChild(chatElement);
-      });
-    }
-
-    // Create chat element
-    function createChatElement(chat) {
-      const chatItem = document.createElement('div');
-      chatItem.className = 'chat-item';
-      chatItem.dataset.chatId = chat.id;
-      
-      let ephemeralHTML = '';
-      if (chat.isEphemeral) {
-        ephemeralHTML = '<div class="ephemeral-indicator">Temporary</div>';
-      }
-      
-      let unreadHTML = '';
-      if (chat.unread > 0) {
-        unreadHTML = `<div class="chat-unread">${chat.unread}</div>`;
-      }
-      
-      let favoriteHTML = chat.isFavorite ? '<span class="material-icons" style="color: #FFD700; font-size: 18px;">star</span>' : '';
-      let pinnedHTML = chat.isPinned ? '<span class="material-icons" style="color: #4285F4; font-size: 18px;">push_pin</span>' : '';
-      
-      chatItem.innerHTML = `
-        ${ephemeralHTML}
-        ${unreadHTML}
-        <div class="chat-item-header">
-          <div class="chat-title">${chat.title} ${favoriteHTML} ${pinnedHTML}</div>
-          <div class="chat-time">${chat.time}</div>
-        </div>
-        <div class="chat-preview">${chat.lastMessage}</div>
+      const greetingMessage = document.createElement('div');
+      greetingMessage.className = 'greeting-message';
+      greetingMessage.innerHTML = `
+        <span class="material-icons greeting-icon">${icon}</span>
+        <h3 class="greeting-text">${greeting}</h3>
+        <p class="greeting-subtext">Ask me anything about study</p>
       `;
       
-      // Add click event
-      chatItem.addEventListener('click', () => {
-        openChat(chat.id);
-      });
-      
-      // Add context menu event
-      chatItem.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        showChatMenu(e, chat.id);
-      });
-      
-      return chatItem;
+      chatContainer.appendChild(greetingMessage);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Open chat
-    function openChat(chatId) {
-      currentChatId = chatId;
-      showToast('Opening chat...', 'success');
+    // Load top questions
+    function loadTopQuestions() {
+      const topQuestionsList = document.getElementById('topQuestionsList');
+      topQuestionsList.innerHTML = '';
       
-      // In a real app, this would load the chat messages
-      // For now, we'll just show a toast
+      topQuestions.forEach((question, index) => {
+        const questionElement = document.createElement('div');
+        questionElement.className = 'top-question';
+        questionElement.textContent = `${index + 1}. ${question}`;
+        questionElement.addEventListener('click', () => {
+          sendMessage(question);
+          closePanel(topQuestionsPanel);
+        });
+        topQuestionsList.appendChild(questionElement);
+      });
     }
 
-    // Show chat menu
-    function showChatMenu(event, chatId) {
-      currentMenuChatId = chatId;
-      const rect = event.target.getBoundingClientRect();
+    // Load notifications
+    function loadNotifications() {
+      const notificationsList = document.getElementById('notificationsList');
+      notificationsList.innerHTML = '';
       
-      chatMenu.style.top = `${rect.bottom + window.scrollY}px`;
-      chatMenu.style.left = `${rect.left + window.scrollX}px`;
+      notifications.forEach(notification => {
+        const notificationElement = document.createElement('div');
+        notificationElement.className = 'setting-item';
+        notificationElement.innerHTML = `
+          <div>
+            <strong>${notification.title}</strong>
+            <p>${notification.message}</p>
+            <small>${notification.time}</small>
+          </div>
+        `;
+        notificationsList.appendChild(notificationElement);
+      });
       
-      menuOverlay.style.display = 'block';
-      
-      // Position menu to avoid going off screen
-      const menuRect = chatMenu.getBoundingClientRect();
-      if (menuRect.right > window.innerWidth) {
-        chatMenu.style.left = `${window.innerWidth - menuRect.width - 16}px`;
+      // Set notification count
+      notificationCountValue = notifications.length;
+      notificationCount.textContent = notificationCountValue;
+    }
+
+    // Request browser notification permission
+    function requestNotificationPermission() {
+      if ('Notification' in window) {
+        Notification.requestPermission();
       }
     }
 
-    // Add event listeners
-    function addEventListeners() {
-      // Start new chat
-      startChatButton.addEventListener('click', () => {
-        createNewChat();
-      });
-      
-      // Send message
-      sendButton.addEventListener('click', sendMessage);
-      messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          sendMessage();
-        }
-      });
-      
-      // Microphone button
-      micButton.addEventListener('click', () => {
-        startSpeechRecognition();
-      });
-      
-      // Attach button
-      attachButton.addEventListener('click', () => {
-        showToast('File attachment feature coming soon!', 'info');
-      });
-      
-      // Menu overlay click (to close)
-      menuOverlay.addEventListener('click', (e) => {
-        if (e.target === menuOverlay) {
-          hideMenu();
-        }
-      });
-      
-      // Chat menu actions
-      document.getElementById('renameChat').addEventListener('click', () => {
-        showRenameModal();
-      });
-      
-      document.getElementById('deleteChat').addEventListener('click', () => {
-        showDeleteModal();
-      });
-      
-      document.getElementById('favoriteChat').addEventListener('click', () => {
-        toggleFavoriteChat();
-      });
-      
-      document.getElementById('pinChat').addEventListener('click', () => {
-        togglePinChat();
-      });
-      
-      document.getElementById('exportChat').addEventListener('click', () => {
-        showToast('Exporting chat...', 'info');
-        hideMenu();
-      });
-      
-      document.getElementById('shareChat').addEventListener('click', () => {
-        showToast('Sharing chat link...', 'info');
-        hideMenu();
-      });
-      
-      // Delete modal actions
-      cancelDelete.addEventListener('click', hideDeleteModal);
-      confirmDelete.addEventListener('click', deleteChat);
-      
-      // Rename modal actions
-      cancelRename.addEventListener('click', hideRenameModal);
-      confirmRename.addEventListener('click', renameChat);
-      
-      // Login modal actions
-      loginButton.addEventListener('click', handleLogin);
-      guestButton.addEventListener('click', handleGuestLogin);
-      
-      // Settings
-      settingsButton.addEventListener('click', () => {
-        settingsPanel.classList.add('active');
-      });
-      
-      closeSettings.addEventListener('click', () => {
-        settingsPanel.classList.remove('active');
-      });
-      
-      darkModeToggle.addEventListener('change', toggleDarkMode);
-      
-      notificationsToggle.addEventListener('change', toggleNotifications);
-      
-      englishLang.addEventListener('click', () => {
-        setLanguage('en');
-      });
-      
-      hindiLang.addEventListener('click', () => {
-        setLanguage('hi');
-      });
-      
-      // Notification button
-      notificationButton.addEventListener('click', () => {
-        showToast('Notification center coming soon!', 'info');
-      });
-      
-      // Suggestions
-      document.querySelectorAll('.suggestion-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-          const suggestion = chip.getAttribute('data-suggestion');
-          messageInput.value = suggestion;
-          messageInput.focus();
+    // Show browser notification
+    function showBrowserNotification(title, message) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, {
+          body: message,
+          icon: 'https://placehold.co/64x64/4338ca/white?text=MAI'
         });
-      });
+      }
     }
 
-    // Create new chat
-    function createNewChat() {
-      const newChat = {
-        id: 'chat' + (mockChats.length + 1),
-        title: currentLanguage === 'hi' ? 'नया चैट' : 'New chat',
-        lastMessage: currentLanguage === 'hi' ? 'पहला संदेश भेजें...' : 'Send your first message...',
-        time: 'Just now',
-        unread: 0,
-        isEphemeral: false,
-        isFavorite: false,
-        isPinned: false
-      };
-      
-      mockChats.unshift(newChat);
-      loadChats();
-      openChat(newChat.id);
+    // Check maintenance mode (would normally check Firebase)
+    function checkMaintenanceMode() {
+      // This would normally check a Firebase value
+      if (isMaintenanceMode) {
+        maintenanceScreen.style.display = 'flex';
+      } else {
+        maintenanceScreen.style.display = 'none';
+      }
     }
 
     // Send message
-    function sendMessage() {
-      const message = messageInput.value.trim();
-      if (!message) return;
+    function sendMessage(text) {
+      if (!text.trim()) return;
       
-      if (!currentChatId) {
-        createNewChat();
-      }
-      
-      // Show typing indicator
-      showTypingIndicator();
+      // Add user message
+      addMessage(text, 'user');
       
       // Clear input
       messageInput.value = '';
       
-      // Simulate AI response after delay
+      // Show typing indicator
+      showTypingIndicator();
+      
+      // Simulate AI response (would normally call Gemini API)
       setTimeout(() => {
-        hideTypingIndicator();
-        
-        // Find current chat and update it
-        const chatIndex = mockChats.findIndex(chat => chat.id === currentChatId);
-        if (chatIndex !== -1) {
-          // Update chat with AI response
-          mockChats[chatIndex].lastMessage = getAIResponse(message);
-          mockChats[chatIndex].time = 'Just now';
-          
-          // Auto-rename chat if it's still "New chat"
-          if (mockChats[chatIndex].title === 'New chat' || mockChats[chatIndex].title === 'नया चैट') {
-            mockChats[chatIndex].title = generateChatTitle(message);
-          }
-          
-          loadChats();
-          
-          // Show success toast
-          showToast('Response received!', 'success');
+        // Hide typing indicator
+        const typingIndicator = document.querySelector('.typing-indicator');
+        if (typingIndicator) {
+          typingIndicator.remove();
         }
+        
+        // Generate AI response
+        const aiResponse = generateAIResponse(text);
+        addMessage(aiResponse, 'ai');
+        
+        // Show related questions
+        showRelatedQuestions(text);
+        
+        // Auto-rename chat (would normally use AI to generate title)
+        autoRenameChat(text);
       }, 2000);
     }
 
-    // Get AI response (mock)
-    function getAIResponse(message) {
+    // Generate AI response (mock)
+    function generateAIResponse(userMessage) {
+      // This would normally call the Gemini API
       const responses = [
-        "I'd be happy to help with that! Let me explain it step by step.",
-        "That's an interesting question. Here's what you need to know...",
-        "Based on my knowledge, the answer is related to fundamental concepts in this subject.",
-        "Let me break this down for you in simple terms...",
-        "This topic is important for your studies. Here's a detailed explanation...",
-        "I understand you're asking about this concept. Let me provide some examples...",
-        "Great question! This is something many students find challenging at first.",
-        "To answer your question, we need to consider a few key principles...",
-        "I can help you with that. Let's start with the basics and build from there.",
-        "This is a common question in your curriculum. Here's what the textbooks say..."
+        "That's a great question! Let me explain this concept in detail for you.",
+        "I understand what you're asking. Here's a comprehensive answer to help you learn better.",
+        "This is an important topic in your curriculum. Let me break it down step by step.",
+        "I'm happy to help you with this! Here's what you need to know about this subject.",
+        "Excellent question! This concept is fundamental to understanding more advanced topics."
       ];
       
-      return responses[Math.floor(Math.random() * responses.length)];
+      return responses[Math.floor(Math.random() * responses.length)] + " " + userMessage.split(' ').slice(0, 5).join(' ') + "... (This is a simulated response. In the real app, this would come from the Gemini API.)";
     }
 
-    // Generate chat title based on message
-    function generateChatTitle(message) {
-      if (message.length < 30) {
-        return message;
+    // Add message to chat
+    function addMessage(text, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.className = `message ${sender}-message`;
+      messageElement.textContent = text;
+      
+      if (sender === 'ai') {
+        // Add message options for AI messages
+        const optionsElement = document.createElement('div');
+        optionsElement.className = 'message-options';
+        optionsElement.innerHTML = `
+          <div class="message-option" onclick="regenerateResponse(this)">
+            <span class="material-icons">refresh</span>
+            <span>Regenerate</span>
+          </div>
+          <div class="message-option" onclick="copyToClipboard(this)">
+            <span class="material-icons">content_copy</span>
+            <span>Copy</span>
+          </div>
+          <div class="message-option" onclick="likeMessage(this)">
+            <span class="material-icons">thumb_up</span>
+            <span>Like</span>
+          </div>
+          <div class="message-option" onclick="dislikeMessage(this)">
+            <span class="material-icons">thumb_down</span>
+            <span>Dislike</span>
+          </div>
+          <div class="message-option" onclick="shareMessage(this)">
+            <span class="material-icons">share</span>
+            <span>Share</span>
+          </div>
+        `;
+        messageElement.appendChild(optionsElement);
       }
       
-      const words = message.split(' ');
-      if (words.length <= 5) {
-        return message;
-      }
+      chatContainer.appendChild(messageElement);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
       
-      return words.slice(0, 5).join(' ') + '...';
+      // Add to chat history
+      chatHistory.push({
+        id: Date.now(),
+        text: text,
+        sender: sender,
+        timestamp: new Date()
+      });
     }
 
     // Show typing indicator
     function showTypingIndicator() {
       const typingIndicator = document.createElement('div');
-      typingIndicator.className = 'chat-item';
-      typingIndicator.id = 'typingIndicator';
+      typingIndicator.className = 'typing-indicator';
       typingIndicator.innerHTML = `
-        <div class="typing-indicator">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-        </div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
       `;
-      chatList.prepend(typingIndicator);
+      chatContainer.appendChild(typingIndicator);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Hide typing indicator
-    function hideTypingIndicator() {
-      const typingIndicator = document.getElementById('typingIndicator');
-      if (typingIndicator) {
-        typingIndicator.remove();
-      }
-    }
-
-    // Show rename modal
-    function showRenameModal() {
-      const chat = mockChats.find(c => c.id === currentMenuChatId);
-      if (chat) {
-        renameInput.value = chat.title;
-        renameModal.style.display = 'flex';
-      }
-      hideMenu();
-    }
-
-    // Hide rename modal
-    function hideRenameModal() {
-      renameModal.style.display = 'none';
-    }
-
-    // Rename chat
-    function renameChat() {
-      const newTitle = renameInput.value.trim();
-      if (!newTitle) return;
+    // Show related questions
+    function showRelatedQuestions(topic) {
+      const relatedQuestions = document.createElement('div');
+      relatedQuestions.className = 'related-questions';
+      relatedQuestions.innerHTML = `
+        <h4 class="related-title">Related Questions</h4>
+        <div class="related-question">What is the basic concept of ${topic.split(' ')[0]}?</div>
+        <div class="related-question">How does ${topic.split(' ')[0]} work in real life?</div>
+        <div class="related-question">What are examples of ${topic.split(' ')[0]}?</div>
+      `;
       
-      const chatIndex = mockChats.findIndex(chat => chat.id === currentMenuChatId);
-      if (chatIndex !== -1) {
-        mockChats[chatIndex].title = newTitle;
-        loadChats();
-        showToast('Chat renamed successfully!', 'success');
-      }
-      
-      hideRenameModal();
-    }
-
-    // Show delete modal
-    function showDeleteModal() {
-      deleteModal.style.display = 'flex';
-      hideMenu();
-    }
-
-    // Hide delete modal
-    function hideDeleteModal() {
-      deleteModal.style.display = 'none';
-    }
-
-    // Delete chat
-    function deleteChat() {
-      mockChats = mockChats.filter(chat => chat.id !== currentMenuChatId);
-      loadChats();
-      showToast('Chat deleted successfully!', 'success');
-      hideDeleteModal();
-    }
-
-    // Toggle favorite chat
-    function toggleFavoriteChat() {
-      const chatIndex = mockChats.findIndex(chat => chat.id === currentMenuChatId);
-      if (chatIndex !== -1) {
-        mockChats[chatIndex].isFavorite = !mockChats[chatIndex].isFavorite;
-        const action = mockChats[chatIndex].isFavorite ? 'favorited' : 'unfavorited';
-        showToast(`Chat ${action}!`, 'success');
-        loadChats();
-      }
-      hideMenu();
-    }
-
-    // Toggle pin chat
-    function togglePinChat() {
-      const chatIndex = mockChats.findIndex(chat => chat.id === currentMenuChatId);
-      if (chatIndex !== -1) {
-        mockChats[chatIndex].isPinned = !mockChats[chatIndex].isPinned;
-        const action = mockChats[chatIndex].isPinned ? 'pinned' : 'unpinned';
-        showToast(`Chat ${action}!`, 'success');
-        loadChats();
-      }
-      hideMenu();
-    }
-
-    // Hide menu
-    function hideMenu() {
-      menuOverlay.style.display = 'none';
-    }
-
-    // Handle login
-    function handleLogin() {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      
-      if (!email || !password) {
-        showToast('Please enter email and password', 'error');
-        return;
-      }
-      
-      // Mock login - in real app, this would call Firebase Auth
-      currentUser = {
-        uid: 'mockUserId',
-        email: email,
-        displayName: email.split('@')[0]
-      };
-      
-      // Check if admin
-      if (email === 'madamsir066@gmail.com' && password === 'Abutalha5088@') {
-        currentUser.uid = 'PEjvSCXzScXA2q0NnVo7CUWnXrj1';
-        currentUser.isAdmin = true;
-      }
-      
-      loginModal.style.display = 'none';
-      showToast(`Welcome back, ${currentUser.displayName}!`, 'success');
-      
-      // Update greeting with user name
-      updateGreeting();
-    }
-
-    // Handle guest login
-    function handleGuestLogin() {
-      currentUser = {
-        uid: 'guest' + Date.now(),
-        displayName: currentLanguage === 'hi' ? 'अतिथि' : 'Guest',
-        isGuest: true
-      };
-      
-      loginModal.style.display = 'none';
-      showToast('Welcome! You are using Milli AI as a guest.', 'info');
-      
-      // Update greeting with user name
-      updateGreeting();
-    }
-
-    // Show login modal
-    function showLoginModal() {
-      loginModal.style.display = 'flex';
-    }
-
-    // Start speech recognition
-    function startSpeechRecognition() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        showToast('Speech recognition not supported in this browser', 'error');
-        return;
-      }
-      
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      
-      recognition.start();
-      
-      showToast('Listening... Speak now', 'info');
-      
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        messageInput.value = transcript;
-        showToast('Speech recognized!', 'success');
-      };
-      
-      recognition.onerror = function(event) {
-        showToast('Speech recognition error: ' + event.error, 'error');
-      };
-      
-      recognition.onend = function() {
-        // Recognition ended
-      };
-    }
-
-    // Toggle dark mode
-    function toggleDarkMode() {
-      if (darkModeToggle.checked) {
-        enableDarkMode();
-      } else {
-        disableDarkMode();
-      }
-    }
-
-    // Enable dark mode
-    function enableDarkMode() {
-      document.body.classList.add('dark-theme');
-      isDarkMode = true;
-      localStorage.setItem('darkMode', 'true');
-    }
-
-    // Disable dark mode
-    function disableDarkMode() {
-      document.body.classList.remove('dark-theme');
-      isDarkMode = false;
-      localStorage.setItem('darkMode', 'false');
-    }
-
-    // Toggle notifications
-    function toggleNotifications() {
-      if (notificationsToggle.checked) {
-        requestNotificationPermission();
-      } else {
-        notificationPermissionGranted = false;
-      }
-    }
-
-    // Request notification permission
-    function requestNotificationPermission() {
-      if (!('Notification' in window)) {
-        showToast('Notifications not supported in this browser', 'error');
-        return;
-      }
-      
-      if (Notification.permission === 'granted') {
-        notificationPermissionGranted = true;
-        showToast('Notifications enabled', 'success');
-      } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then(function(permission) {
-          if (permission === 'granted') {
-            notificationPermissionGranted = true;
-            showToast('Notifications enabled', 'success');
-          } else {
-            notificationPermissionGranted = false;
-            showToast('Notifications disabled', 'info');
-          }
+      // Add click handlers to related questions
+      const questionElements = relatedQuestions.querySelectorAll('.related-question');
+      questionElements.forEach(question => {
+        question.addEventListener('click', () => {
+          sendMessage(question.textContent);
         });
-      }
+      });
+      
+      chatContainer.appendChild(relatedQuestions);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Set language
-    function setLanguage(lang) {
-      currentLanguage = lang;
-      localStorage.setItem('language', lang);
-      
-      if (lang === 'hi') {
-        englishLang.classList.remove('active');
-        hindiLang.classList.add('active');
-        document.title = 'मिल्ली एआई - आपका अध्ययन सहायक';
-      } else {
-        hindiLang.classList.remove('active');
-        englishLang.classList.add('active');
-        document.title = 'Milli AI - Your Study Assistant';
-      }
-      
-      updateGreeting();
-      updateUIText();
+    // Auto-rename chat
+    function autoRenameChat(firstMessage) {
+      // This would normally use AI to generate a title
+      const words = firstMessage.split(' ');
+      const title = words.slice(0, 3).join(' ') + (words.length > 3 ? '...' : '');
+      console.log('Chat auto-renamed to:', title);
     }
 
-    // Update UI text based on language
-    function updateUIText() {
-      if (currentLanguage === 'hi') {
-        startChatButton.innerHTML = '<span class="material-icons">add</span> नया चैट शुरू करें';
-        messageInput.placeholder = 'अपना प्रश्न टाइप करें...';
-        document.querySelector('.greeting-subtitle').textContent = 'अध्ययन के बारे में कुछ भी पूछें...';
-        document.getElementById('emptyState').querySelector('.empty-state-title').textContent = 'अभी तक कोई वार्तालाप नहीं';
-        document.getElementById('emptyState').querySelector('.empty-state-message').textContent = 'अध्ययन सहायता, स्पष्टीकरण या अभ्यास प्रश्नों के लिए एक नया चैट शुरू करें।';
-      } else {
-        startChatButton.innerHTML = '<span class="material-icons">add</span> Start New Chat';
-        messageInput.placeholder = 'Type your question...';
-        document.querySelector('.greeting-subtitle').textContent = 'Ask me anything about study...';
-        document.getElementById('emptyState').querySelector('.empty-state-title').textContent = 'No conversations yet';
-        document.getElementById('emptyState').querySelector('.empty-state-message').textContent = 'Start a new chat to get study help, explanations, or practice questions.';
-      }
-    }
-
-    // Check maintenance mode
-    function checkMaintenanceMode() {
-      // In a real app, this would check Firestore system collection
-      // For demo, we'll leave it hidden
-    }
-
-    // Show toast notification
-    function showToast(message, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
+    // Regenerate response
+    function regenerateResponse(element) {
+      const messageElement = element.closest('.message');
+      const originalText = messageElement.childNodes[0].textContent;
       
-      let icon = 'info';
-      if (type === 'success') icon = 'check_circle';
-      if (type === 'error') icon = 'error';
-      if (type === 'warning') icon = 'warning';
+      // Show typing indicator
+      const optionsElement = messageElement.querySelector('.message-options');
+      messageElement.removeChild(optionsElement);
       
-      toast.innerHTML = `
-        <div class="toast-title">
-          <span class="material-icons">${icon}</span>
-          ${type.charAt(0).toUpperCase() + type.slice(1)}
-        </div>
-        <div class="toast-message">${message}</div>
+      const typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing-indicator';
+      typingIndicator.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
       `;
+      messageElement.appendChild(typingIndicator);
       
-      toastContainer.appendChild(toast);
-      
-      // Remove after animation
+      // Simulate regeneration
       setTimeout(() => {
-        toast.remove();
-      }, 3300);
+        typingIndicator.remove();
+        messageElement.childNodes[0].textContent = "Here's a regenerated response: " + originalText;
+        messageElement.appendChild(optionsElement);
+      }, 1500);
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(element) {
+      const messageElement = element.closest('.message');
+      const text = messageElement.childNodes[0].textContent;
       
-      // If notification permission granted, show system notification
-      if (notificationPermissionGranted && type !== 'info') {
-        try {
-          new Notification('Milli AI', {
-            body: message,
-            icon: 'https://via.placeholder.com/128x128/4285f4/ffffff?text=MA'
-          });
-        } catch (e) {
-          console.log('System notification failed:', e);
-        }
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => {
+        console.error('Could not copy text: ', err);
+      });
+    }
+
+    // Like message
+    function likeMessage(element) {
+      element.innerHTML = '<span class="material-icons">thumb_up</span><span>Liked</span>';
+      element.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+    }
+
+    // Dislike message
+    function dislikeMessage(element) {
+      element.innerHTML = '<span class="material-icons">thumb_down</span><span>Disliked</span>';
+      element.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+    }
+
+    // Share message
+    function shareMessage(element) {
+      const messageElement = element.closest('.message');
+      const text = messageElement.childNodes[0].textContent;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'Milli AI Response',
+          text: text,
+          url: window.location.href
+        }).catch(err => {
+          console.error('Error sharing:', err);
+        });
+      } else {
+        alert('Share this message: ' + text);
       }
     }
 
-    // Initialize app when DOM is loaded
+    // Toggle theme
+    function toggleTheme() {
+      document.body.classList.toggle('dark-theme');
+      // Save to localStorage
+      localStorage.setItem('darkTheme', document.body.classList.contains('dark-theme'));
+    }
+
+    // Set initial theme
+    function setInitialTheme() {
+      const savedTheme = localStorage.getItem('darkTheme');
+      if (savedTheme === 'true') {
+        document.body.classList.add('dark-theme');
+        themeToggle.checked = true;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark-theme');
+        themeToggle.checked = true;
+      }
+    }
+
+    // Set initial language
+    function setInitialLanguage() {
+      const savedLanguage = localStorage.getItem('language');
+      if (savedLanguage) {
+        languageSelect.value = savedLanguage;
+      }
+    }
+
+    // Open panel
+    function openPanel(panel) {
+      panel.classList.add('active');
+    }
+
+    // Close panel
+    function closePanel(panel) {
+      panel.classList.remove('active');
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Send message
+      sendBtn.addEventListener('click', () => {
+        sendMessage(messageInput.value);
+      });
+      
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage(messageInput.value);
+        }
+      });
+      
+      // Mic button (would implement speech recognition)
+      micBtn.addEventListener('click', () => {
+        alert('Voice input feature would be implemented here');
+      });
+      
+      // File upload button
+      fileBtn.addEventListener('click', () => {
+        alert('File upload feature would be implemented here');
+      });
+      
+      // Image generation button
+      imageBtn.addEventListener('click', () => {
+        alert('Image generation using Stable Horde API would be implemented here');
+      });
+      
+      // Theme toggle
+      themeToggle.addEventListener('change', toggleTheme);
+      
+      // Language change
+      languageSelect.addEventListener('change', () => {
+        localStorage.setItem('language', languageSelect.value);
+        alert(`Language changed to ${languageSelect.value === 'en' ? 'English' : 'Hindi'}`);
+      });
+      
+      // Menu button
+      menuBtn.addEventListener('click', () => {
+        openPanel(settingsPanel);
+      });
+      
+      // Navigation buttons
+      settingsNav.addEventListener('click', () => {
+        openPanel(settingsPanel);
+      });
+      
+      topQuestionsNav.addEventListener('click', () => {
+        openPanel(topQuestionsPanel);
+      });
+      
+      // Close buttons
+      closeSettings.addEventListener('click', () => {
+        closePanel(settingsPanel);
+      });
+      
+      closeNotifications.addEventListener('click', () => {
+        closePanel(notificationsPanel);
+      });
+      
+      closeAboutDeveloper.addEventListener('click', () => {
+        closePanel(aboutDeveloperPanel);
+      });
+      
+      closeAboutSchool.addEventListener('click', () => {
+        closePanel(aboutSchoolPanel);
+      });
+      
+      closeTerms.addEventListener('click', () => {
+        closePanel(termsPanel);
+      });
+      
+      closeTopQuestions.addEventListener('click', () => {
+        closePanel(topQuestionsPanel);
+      });
+      
+      // Settings panel items
+      const aboutDeveloperItem = document.querySelector('.setting-item:nth-child(1)');
+      aboutDeveloperItem.addEventListener('click', () => {
+        closePanel(settingsPanel);
+        setTimeout(() => openPanel(aboutDeveloperPanel), 300);
+      });
+      
+      const aboutSchoolItem = document.querySelector('.setting-item:nth-child(2)');
+      aboutSchoolItem.addEventListener('click', () => {
+        closePanel(settingsPanel);
+        setTimeout(() => openPanel(aboutSchoolPanel), 300);
+      });
+      
+      const termsItem = document.querySelector('.setting-item:nth-child(3)');
+      termsItem.addEventListener('click', () => {
+        closePanel(settingsPanel);
+        setTimeout(() => openPanel(termsPanel), 300);
+      });
+      
+      // Notification badge
+      notificationBadge.addEventListener('click', () => {
+        openPanel(notificationsPanel);
+        // Reset notification count
+        notificationCountValue = 0;
+        notificationCount.textContent = notificationCountValue;
+      });
+      
+      // Logout
+      const logoutItem = document.querySelector('.setting-item:last-child');
+      logoutItem.addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+          alert('Logout functionality would be implemented here with Firebase Auth');
+        }
+      });
+    }
+
+    // Initialize the app when page loads
     document.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
