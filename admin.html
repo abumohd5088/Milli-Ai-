@@ -4,12 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { color: #333; }
+    .box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
+    button { padding: 8px 15px; margin-top: 10px; }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, onSnapshot, query, orderBy, limit 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { 
+      getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // Firebase Config
+    // 🔹 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
       authDomain: "mkps-balrampur.firebaseapp.com",
@@ -23,91 +33,98 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Admin Login
-    async function loginAdmin() {
+    // 🔐 Admin Login
+    async function login() {
       const email = document.getElementById("email").value;
-      const pass = document.getElementById("pass").value;
+      const pass = document.getElementById("password").value;
       try {
         await signInWithEmailAndPassword(auth, email, pass);
         document.getElementById("loginBox").style.display = "none";
         document.getElementById("adminBox").style.display = "block";
-        alert("✅ Admin Logged In");
       } catch (e) {
-        alert("❌ Login Failed: " + e.message);
+        alert("Login failed: " + e.message);
       }
     }
+    window.login = login;
 
-    // Send Notification
+    function logout() {
+      signOut(auth);
+      document.getElementById("loginBox").style.display = "block";
+      document.getElementById("adminBox").style.display = "none";
+    }
+    window.logout = logout;
+
+    // 🔔 Send Notification
     async function sendNotif() {
-      const category = document.getElementById("category").value;
       const title = document.getElementById("title").value;
-      const message = document.getElementById("message").value;
+      const msg = document.getElementById("message").value;
+      if (!title || !msg) return alert("Fill all fields!");
+
       await addDoc(collection(db, "notifications"), {
-        category,
-        title,
-        message,
-        createdAt: serverTimestamp()
+        title, message: msg, createdAt: serverTimestamp()
       });
-      alert("✅ Notification Sent");
+      alert("Notification Sent ✅");
     }
+    window.sendNotif = sendNotif;
 
-    // Toggle Maintenance
-    async function toggleMaintenance(active) {
-      await setDoc(doc(db, "system", "maintenance"), { active }, { merge: true });
-      alert(`✅ Maintenance ${active ? "Activated" : "Deactivated"}`);
+    // 🛠 Maintenance Mode Toggle
+    async function toggleMaint() {
+      const status = document.getElementById("maint").checked;
+      await setDoc(doc(db, "system", "maintenance"), { active: status });
+      alert("Maintenance updated ✅");
     }
+    window.toggleMaint = toggleMaint;
 
-    // Listen AI Stats (Most asked question)
-    onSnapshot(doc(db, "stats", "mostAsked"), (docSnap) => {
-      if (docSnap.exists()) {
-        document.getElementById("statsBox").innerText = "🔥 Most Asked Question: " + docSnap.data().question;
-      }
+    // 📊 Most Asked Question
+    const q = query(collection(db, "stats"), orderBy("count", "desc"), limit(1));
+    onSnapshot(q, (snap) => {
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        document.getElementById("statsBox").innerText =
+          "🔥 Most Asked: " + data.question + " (" + data.count + " times)";
+      });
     });
 
-    window.loginAdmin = loginAdmin;
-    window.sendNotif = sendNotif;
-    window.toggleMaintenance = toggleMaintenance;
+    // Auth Listener
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        document.getElementById("loginBox").style.display = "block";
+        document.getElementById("adminBox").style.display = "none";
+      }
+    });
   </script>
 </head>
 <body>
-  <h2>🔐 Admin Panel</h2>
+  <h2>⚙️ Admin Panel</h2>
 
   <!-- Login -->
-  <div id="loginBox">
-    <input type="email" id="email" placeholder="Admin Email"><br>
-    <input type="password" id="pass" placeholder="Password"><br>
-    <button onclick="loginAdmin()">Login</button>
+  <div id="loginBox" class="box">
+    <h3>Admin Login</h3>
+    <input type="email" id="email" placeholder="Email"><br><br>
+    <input type="password" id="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
   </div>
 
   <!-- Admin Functions -->
-  <div id="adminBox" style="display:none; margin-top:20px;">
-    <h3>📢 Send Notification</h3>
-    <select id="category">
-      <option>General</option>
-      <option>Homework</option>
-      <option>Holiday</option>
-      <option>Maintenance</option>
-    </select><br>
-    <input type="text" id="title" placeholder="Title"><br>
-    <input type="text" id="message" placeholder="Message"><br>
-    <button onclick="sendNotif()">Send Notification</button>
+  <div id="adminBox" class="box" style="display:none;">
+    <button onclick="logout()">Logout</button>
 
-    <h3>🛠️ Maintenance Control</h3>
-    <button onclick="toggleMaintenance(true)">Activate Maintenance</button>
-    <button onclick="toggleMaintenance(false)">Deactivate Maintenance</button>
+    <div class="box">
+      <h3>🔔 Send Notification</h3>
+      <input type="text" id="title" placeholder="Title"><br><br>
+      <textarea id="message" placeholder="Message"></textarea><br><br>
+      <button onclick="sendNotif()">Send</button>
+    </div>
 
-    <h3>📊 AI Stats</h3>
-    <div id="statsBox">Loading...</div>
-    import { collection, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <div class="box">
+      <h3>🛠 Maintenance Mode</h3>
+      <label><input type="checkbox" id="maint" onchange="toggleMaint()"> Active</label>
+    </div>
 
-// Most asked question live
-const q = query(collection(db, "stats"), orderBy("count", "desc"), limit(1));
-onSnapshot(q, (snap) => {
-  snap.forEach(doc => {
-    document.getElementById("statsBox").innerText =
-      "🔥 Most Asked Question: " + doc.data().question + " (" + doc.data().count + " times)";
-  });
-});
+    <div class="box">
+      <h3>📊 Stats</h3>
+      <p id="statsBox">Loading...</p>
+    </div>
   </div>
 </body>
 </html>
