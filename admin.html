@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Send Notifications</title>
+  <title>Admin Panel</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     // Firebase Config
@@ -19,20 +19,19 @@
       appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
     };
 
-    // Init
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Login (Admin email/password)
+    // Admin Login
     async function loginAdmin() {
       const email = document.getElementById("email").value;
       const pass = document.getElementById("pass").value;
       try {
-        const userCred = await signInWithEmailAndPassword(auth, email, pass);
-        alert("✅ Admin Logged In");
+        await signInWithEmailAndPassword(auth, email, pass);
         document.getElementById("loginBox").style.display = "none";
-        document.getElementById("sendBox").style.display = "block";
+        document.getElementById("adminBox").style.display = "block";
+        alert("✅ Admin Logged In");
       } catch (e) {
         alert("❌ Login Failed: " + e.message);
       }
@@ -40,39 +39,65 @@
 
     // Send Notification
     async function sendNotif() {
+      const category = document.getElementById("category").value;
       const title = document.getElementById("title").value;
       const message = document.getElementById("message").value;
-      try {
-        await addDoc(collection(db, "notifications"), {
-          title,
-          message,
-          createdAt: serverTimestamp()
-        });
-        alert("✅ Notification Sent");
-      } catch (e) {
-        alert("❌ Failed: " + e.message);
-      }
+      await addDoc(collection(db, "notifications"), {
+        category,
+        title,
+        message,
+        createdAt: serverTimestamp()
+      });
+      alert("✅ Notification Sent");
     }
+
+    // Toggle Maintenance
+    async function toggleMaintenance(active) {
+      await setDoc(doc(db, "system", "maintenance"), { active }, { merge: true });
+      alert(`✅ Maintenance ${active ? "Activated" : "Deactivated"}`);
+    }
+
+    // Listen AI Stats (Most asked question)
+    onSnapshot(doc(db, "stats", "mostAsked"), (docSnap) => {
+      if (docSnap.exists()) {
+        document.getElementById("statsBox").innerText = "🔥 Most Asked Question: " + docSnap.data().question;
+      }
+    });
 
     window.loginAdmin = loginAdmin;
     window.sendNotif = sendNotif;
+    window.toggleMaintenance = toggleMaintenance;
   </script>
 </head>
 <body>
   <h2>🔐 Admin Panel</h2>
 
-  <!-- Login Box -->
+  <!-- Login -->
   <div id="loginBox">
     <input type="email" id="email" placeholder="Admin Email"><br>
     <input type="password" id="pass" placeholder="Password"><br>
     <button onclick="loginAdmin()">Login</button>
   </div>
 
-  <!-- Send Notification Box -->
-  <div id="sendBox" style="display:none;">
-    <input type="text" id="title" placeholder="Notification Title"><br>
-    <input type="text" id="message" placeholder="Notification Message"><br>
+  <!-- Admin Functions -->
+  <div id="adminBox" style="display:none; margin-top:20px;">
+    <h3>📢 Send Notification</h3>
+    <select id="category">
+      <option>General</option>
+      <option>Homework</option>
+      <option>Holiday</option>
+      <option>Maintenance</option>
+    </select><br>
+    <input type="text" id="title" placeholder="Title"><br>
+    <input type="text" id="message" placeholder="Message"><br>
     <button onclick="sendNotif()">Send Notification</button>
+
+    <h3>🛠️ Maintenance Control</h3>
+    <button onclick="toggleMaintenance(true)">Activate Maintenance</button>
+    <button onclick="toggleMaintenance(false)">Deactivate Maintenance</button>
+
+    <h3>📊 AI Stats</h3>
+    <div id="statsBox">Loading...</div>
   </div>
 </body>
 </html>
