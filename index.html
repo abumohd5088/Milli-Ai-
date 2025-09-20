@@ -1,474 +1,419 @@
-
 <!DOCTYPE html>
-<html lang="en" id="htmlRoot">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milli AI - School Assistant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <title>Milli AI - Your Study Buddy</title>
     <style>
         :root {
-            --primary-color: #4285f4;
-            --secondary-color: #34a853;
-            --background-color: #ffffff;
-            --card-color: #f8f9fa;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --notification-color: #ff3b30;
-            --suggestion-bg: #f1f3f4;
-        }
-
-        .dark-mode {
-            --primary-color: #5a99ff;
-            --secondary-color: #4ade80;
-            --background-color: #121212;
-            --card-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --border-color: #333333;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --notification-color: #ff5252;
-            --suggestion-bg: #2d2d2d;
+            --primary-color: #2e7d32;
+            --secondary-color: #4caf50;
+            --light-color: #f5f5f5;
+            --dark-color: #333;
+            --white: #fff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --border-radius: 12px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
         }
 
         .container {
-            max-width: 100%;
-            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            position: relative;
+            min-height: 100vh;
         }
 
-        /* Header Styles */
-        .header {
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            background-color: var(--card-color);
-            box-shadow: 0 2px 5px var(--shadow-color);
-            z-index: 100;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
-        .header-title {
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: 500;
-            font-size: 1.2rem;
         }
 
-        .greeting-icon {
-            font-size: 1.5rem;
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
         }
 
         .header-actions {
             display: flex;
+            gap: 20px;
             align-items: center;
-            gap: 15px;
         }
 
-        .icon-button {
+        .icon-btn {
             background: none;
             border: none;
+            font-size: 20px;
             cursor: pointer;
-            color: var(--text-color);
-            font-size: 1.5rem;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.2s;
-        }
-
-        .icon-button:hover {
-            background-color: var(--border-color);
-        }
-
-        .notification-badge {
+            color: var(--dark-color);
             position: relative;
         }
 
-        .badge-counter {
+        .icon-btn.dark-mode .notification-badge {
+            background-color: #ff4081;
+        }
+
+        .notification-badge {
             position: absolute;
             top: -5px;
             right: -5px;
-            background-color: var(--notification-color);
+            background-color: #ff5722;
             color: white;
             border-radius: 50%;
             width: 18px;
             height: 18px;
-            font-size: 0.7rem;
+            font-size: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
         }
 
-        /* Chat Container */
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 15px;
+        .landing-screen {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 70vh;
+            padding: 20px;
+        }
+
+        .landing-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .landing-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .new-chat-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-container {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 18px;
+            max-width: 80%;
+            padding: 15px;
+            border-radius: var(--border-radius);
             position: relative;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .user-message {
-            align-self: flex-end;
-            background-color: var(--primary-color);
+            background-color: var(--secondary-color);
             color: white;
+            align-self: flex-end;
             border-bottom-right-radius: 5px;
         }
 
         .ai-message {
+            background-color: var(--white);
+            color: var(--dark-color);
             align-self: flex-start;
-            background-color: var(--card-color);
-            color: var(--text-color);
             border-bottom-left-radius: 5px;
-            box-shadow: 0 1px 3px var(--shadow-color);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .ai-message {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .message-content {
+            line-height: 1.5;
+        }
+
+        .suggestion {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid var(--secondary-color);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            font-style: italic;
+            font-size: 0.9rem;
         }
 
         .message-actions {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,255,255,0.9);
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .ai-message:hover .message-actions {
             display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            justify-content: flex-end;
-        }
-
-        .action-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-color);
-            font-size: 0.9rem;
-            padding: 4px 8px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .user-message .action-button {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .action-button:hover {
-            background-color: var(--border-color);
-        }
-
-        .typing-indicator {
-            align-self: flex-start;
-            background-color: var(--card-color);
-            padding: 12px 16px;
-            border-radius: 18px;
-            border-bottom-left-radius: 5px;
-            box-shadow: 0 1px 3px var(--shadow-color);
-            display: flex;
-            align-items: center;
             gap: 5px;
         }
 
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--text-color);
-            border-radius: 50%;
-            opacity: 0.6;
-            animation: typingAnimation 1.4s infinite ease-in-out;
-        }
-
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingAnimation {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: 15px;
-            background-color: var(--card-color);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .suggestions-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 8px 0;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-
-        .suggestion-chip {
-            background-color: var(--suggestion-bg);
-            padding: 8px 12px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            white-space: nowrap;
-        }
-
-        .suggestion-chip:hover {
-            background-color: var(--border-color);
-        }
-
-        .input-container {
-            display: flex;
-            align-items: center;
-            background-color: var(--background-color);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 8px 15px;
-            box-shadow: 0 1px 3px var(--shadow-color);
-        }
-
-        .input-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-right: 10px;
-        }
-
-        .input-field {
-            flex: 1;
+        .action-btn {
+            background: none;
             border: none;
-            outline: none;
-            background: transparent;
-            font-size: 1rem;
-            color: var(--text-color);
-            padding: 8px 0;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 3px 5px;
+            border-radius: 3px;
+            color: var(--dark-color);
         }
 
-        .send-button {
+        .action-btn:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 15px 0;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .send-btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            transition: background-color 0.2s;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
 
-        .send-button:hover {
-            background-color: #3367d6;
+        .send-btn:hover {
+            background-color: #1b5e20;
         }
 
-        .send-button:disabled {
-            background-color: var(--border-color);
-            cursor: not-allowed;
-        }
-
-        /* Menu */
-        .menu-container {
-            position: absolute;
-            top: 60px;
-            right: 15px;
-            background-color: var(--card-color);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            padding: 10px 0;
-            min-width: 200px;
-            z-index: 1000;
+        .stop-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
             display: none;
-            flex-direction: column;
+        }
+
+        .file-upload {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            opacity: 0.6;
+        }
+
+        .chat-options {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 5;
+        }
+
+        .options-menu {
+            display: none;
+            position: absolute;
+            top: 35px;
+            right: 0;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+            min-width: 150px;
+            z-index: 100;
+        }
+
+        .options-menu.show {
+            display: block;
         }
 
         .menu-item {
-            padding: 12px 16px;
+            padding: 10px 20px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
             transition: background-color 0.2s;
         }
 
         .menu-item:hover {
-            background-color: var(--border-color);
+            background-color: #f0f0f0;
         }
 
-        /* Image Gallery */
-        .image-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .generated-image {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .generated-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .image-actions {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
-            padding: 10px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .image-action-button {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            transition: background-color 0.2s;
-        }
-
-        .image-action-button:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        /* Modal */
-        .modal-overlay {
+        .settings-modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
             justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            align-items: center;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background-color: var(--card-color);
-            border-radius: 12px;
+        .settings-content {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
             width: 90%;
             max-width: 500px;
-            max-height: 90vh;
+            max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            transform: translateY(20px);
-            transition: transform 0.3s;
         }
 
-        .modal-overlay.active .modal {
-            transform: translateY(0);
+        body.dark-mode .settings-content {
+            background-color: #1e1e1e;
         }
 
         .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 500;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
         .close-modal {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 24px;
             cursor: pointer;
-            color: var(--text-color);
+            color: var(--dark-color);
         }
 
-        .modal-content {
-            padding: 20px;
+        .settings-section {
+            margin-bottom: 25px;
         }
 
-        .modal-section {
-            margin-bottom: 20px;
+        .settings-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
         }
 
-        .modal-section-title {
-            font-weight: 500;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .setting-item {
+        .toggle-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .toggle-label {
+            font-weight: 500;
         }
 
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 50px;
-            height: 24px;
+            width: 60px;
+            height: 30px;
         }
 
         .toggle-switch input {
@@ -486,16 +431,16 @@
             bottom: 0;
             background-color: #ccc;
             transition: .4s;
-            border-radius: 24px;
+            border-radius: 34px;
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
@@ -506,1522 +451,827 @@
         }
 
         input:checked + .slider:before {
-            transform: translateX(26px);
+            transform: translateX(30px);
         }
 
-        .language-options {
+        .info-section {
+            background-color: rgba(46, 125, 50, 0.05);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .maintenance-banner {
+            background-color: #ff5722;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: none;
+        }
+
+        .image-container {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .generated-image {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .image-actions {
             display: flex;
+            justify-content: center;
             gap: 10px;
+            margin-top: 10px;
         }
 
-        .language-option {
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .language-option.active {
+        .image-btn {
             background-color: var(--primary-color);
             color: white;
-        }
-
-        .about-info {
-            line-height: 1.6;
-        }
-
-        .terms-text {
-            line-height: 1.6;
-            font-size: 0.9rem;
-        }
-
-        /* Notification Toast */
-        .notification-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--notification-color);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 3000;
-            transform: translateX(150%);
-            transition: transform 0.3s ease;
-            max-width: 300px;
-        }
-
-        .notification-toast.show {
-            transform: translateX(0);
-        }
-
-        .notification-content {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .notification-title {
-            font-weight: 500;
-            font-size: 1rem;
-        }
-
-        .notification-message {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .notification-close {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: none;
             border: none;
-            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 14px;
         }
 
-        /* Responsive Design */
-        @media (min-width: 768px) {
-            .container {
-                max-width: 768px;
-                margin: 0 auto;
+        .image-btn:hover {
+            background-color: #1b5e20;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .landing-title {
+                font-size: 2rem;
             }
-        }
-
-        @media (max-width: 480px) {
+            
+            .landing-subtitle {
+                font-size: 1rem;
+            }
+            
+            .new-chat-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
             .message {
                 max-width: 90%;
             }
         }
-
-        /* Chat Management */
-        .chat-list-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--background-color);
-            z-index: 1500;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-list-container.active {
-            transform: translateX(0);
-        }
-
-        .chat-list-header {
-            padding: 15px;
-            background-color: var(--card-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
-
-        .chat-list-title {
-            font-weight: 500;
-            font-size: 1.1rem;
-        }
-
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 0;
-        }
-
-        .chat-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .chat-item:hover {
-            background-color: var(--border-color);
-        }
-
-        .chat-item-title {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .chat-item-preview {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-actions {
-            display: flex;
-            gap: 10px;
-            margin-left: auto;
-        }
-
-        .chat-action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-color);
-            font-size: 1rem;
-            padding: 5px;
-            border-radius: 50%;
-        }
-
-        .chat-action-btn:hover {
-            background-color: var(--border-color);
-        }
-
-        .new-chat-btn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            z-index: 100;
-            transition: background-color 0.2s;
-        }
-
-        .new-chat-btn:hover {
-            background-color: #3367d6;
-        }
-
-        /* Loading Animation */
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #ffffff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* File Upload Styles */
-        .file-upload-container {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .file-upload-input {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-        }
     </style>
 </head>
 <body>
+    <div class="maintenance-banner" id="maintenanceBanner">
+        ⚠️ System Maintenance in Progress - Some features may be temporarily unavailable
+    </div>
+
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-title">
-                <span class="greeting-icon material-icons">auto_awesome</span>
-                <span id="greeting-text">Good Morning</span>
+        <header>
+            <div class="logo">
+                <div class="logo-icon">M</div>
+                Milli AI
             </div>
             <div class="header-actions">
-                <div class="notification-badge" id="notificationBell">
-                    <span class="material-icons icon-button">notifications</span>
-                    <span class="badge-counter" id="notificationCount">0</span>
-                </div>
-                <button class="icon-button" id="menuButton">
-                    <span class="material-icons">more_vert</span>
+                <button class="icon-btn" id="notificationBtn">
+                    🔔
+                    <span class="notification-badge" id="notificationCount">0</span>
                 </button>
+                <button class="icon-btn" id="settingsBtn">⚙️</button>
             </div>
         </header>
 
-        <!-- Chat Container -->
+        <div class="landing-screen" id="landingScreen">
+            <h1 class="landing-title">Ask me anything about study (Mill Karwaan Public School)</h1>
+            <p class="landing-subtitle">Powered by Milli AI — Your Study Buddy</p>
+            <button class="new-chat-btn" id="newChatBtn">+</button>
+        </div>
+
         <div class="chat-container" id="chatContainer">
-            <!-- Messages will be inserted here dynamically -->
-        </div>
-
-        <!-- Input Area -->
-        <div class="input-area">
-            <div class="suggestions-container" id="suggestionsContainer">
-                <!-- Suggestions will be inserted here dynamically -->
-            </div>
-            <div class="input-container">
-                <div class="input-actions">
-                    <div class="file-upload-container">
-                        <button class="icon-button">
-                            <span class="material-icons">attach_file</span>
-                        </button>
-                        <input type="file" class="file-upload-input" id="fileUpload">
-                    </div>
-                    <div class="file-upload-container">
-                        <button class="icon-button">
-                            <span class="material-icons">image</span>
-                        </button>
-                        <input type="file" class="file-upload-input" id="imageUpload" accept="image/*">
-                    </div>
-                    <button class="icon-button" id="micButton">
-                        <span class="material-icons">mic</span>
-                    </button>
-                </div>
-                <input type="text" class="input-field" id="userInput" placeholder="Ask me anything about school..." maxlength="1000">
-                <button class="send-button" id="sendButton" disabled>
-                    <span class="material-icons">send</span>
-                </button>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-container">
+                <button class="file-upload" title="Upload file (coming soon)">📎</button>
+                <input type="text" class="chat-input" id="chatInput" placeholder="What can I help with study?" autocomplete="off">
+                <button class="send-btn" id="sendBtn">Send</button>
+                <button class="stop-btn" id="stopBtn">Stop</button>
             </div>
         </div>
 
-        <!-- Menu -->
-        <div class="menu-container" id="menuContainer">
-            <div class="menu-item" id="newChatMenuItem">
-                <span class="material-icons">add</span>
-                <span>New Chat</span>
-            </div>
-            <div class="menu-item" id="chatHistoryMenuItem">
-                <span class="material-icons">history</span>
-                <span>Chat History</span>
-            </div>
-            <div class="menu-item" id="settingsMenuItem">
-                <span class="material-icons">settings</span>
-                <span>Settings</span>
-            </div>
-            <div class="menu-item" id="aboutMenuItem">
-                <span class="material-icons">info</span>
-                <span>About</span>
-            </div>
-            <div class="menu-item" id="termsMenuItem">
-                <span class="material-icons">description</span>
-                <span>Terms & Conditions</span>
-            </div>
+        <div class="footer">
+            Designed for MKPS by Abutalha ❤️
         </div>
+    </div>
 
-        <!-- Chat List Sidebar -->
-        <div class="chat-list-container" id="chatListContainer">
-            <div class="chat-list-header">
-                <h3 class="chat-list-title">Chat History</h3>
-                <button class="icon-button" id="closeChatList">
-                    <span class="material-icons">close</span>
-                </button>
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-modal" id="closeSettings">&times;</button>
             </div>
-            <div class="chat-list" id="chatList">
-                <!-- Chat items will be inserted here dynamically -->
-            </div>
-        </div>
-
-        <!-- Settings Modal -->
-        <div class="modal-overlay" id="settingsModal">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3 class="modal-title">Settings</h3>
-                    <button class="close-modal" id="closeSettingsModal">
-                        <span class="material-icons">close</span>
-                    </button>
-                </div>
-                <div class="modal-content">
-                    <div class="modal-section">
-                        <h4 class="modal-section-title">Appearance</h4>
-                        <div class="setting-item">
-                            <span>Dark Mode</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="darkModeToggle">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-section">
-                        <h4 class="modal-section-title">Language</h4>
-                        <div class="language-options">
-                            <div class="language-option active" data-lang="en">English</div>
-                            <div class="language-option" data-lang="hi">हिंदी</div>
-                        </div>
-                    </div>
-                    <div class="modal-section">
-                        <h4 class="modal-section-title">About Developer</h4>
-                        <div class="about-info">
-                            <p><strong>Name:</strong> Abutalha</p>
-                            <p><strong>Class:</strong> 6</p>
-                            <p><strong>School:</strong> Milli Karwaan Public School Balrampur</p>
-                            <p><strong>Phone:</strong> 9839469669</p>
-                            <p><strong>Bio:</strong> "Young passionate developer who created Milli AI for school & learning support."</p>
-                        </div>
-                    </div>
-                    <div class="modal-section">
-                        <h4 class="modal-section-title">About School</h4>
-                        <div class="about-info">
-                            <p><strong>Name:</strong> Milli Karwaan Public School Balrampur (MKPS)</p>
-                            <p><strong>Address:</strong> Baluha Police Chowki, Balrampur (U.P.)</p>
-                            <p><strong>Contact:</strong> 9758919151</p>
-                        </div>
-                    </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title">Appearance</h3>
+                <div class="toggle-container">
+                    <span class="toggle-label">Dark Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
-        </div>
-
-        <!-- Terms Modal -->
-        <div class="modal-overlay" id="termsModal">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3 class="modal-title">Terms & Conditions</h3>
-                    <button class="close-modal" id="closeTermsModal">
-                        <span class="material-icons">close</span>
-                    </button>
+            
+            <div class="settings-section">
+                <h3 class="settings-title">Language</h3>
+                <div class="toggle-container">
+                    <span class="toggle-label">UI Language: English</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="languageToggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <div class="modal-content">
-                    <div class="terms-text">
-                        <p><strong>Milli AI Terms & Conditions</strong></p>
-                        <p>Welcome to Milli AI, the school assistant developed for Milli Karwaan Public School Balrampur students.</p>
-                        <br>
-                        <p>1. This AI assistant is designed to help students with their academic queries and school-related information.</p>
-                        <p>2. The content generated by the AI should be verified with teachers or official sources before use in assignments or exams.</p>
-                        <p>3. Do not use this platform to generate inappropriate content or for any purpose that violates school policies.</p>
-                        <p>4. The developer and school are not responsible for any misinformation that may be generated by the AI system.</p>
-                        <p>5. All notifications sent through this system are official school communications and should be treated as important.</p>
-                        <p>6. The image generation feature should only be used for educational purposes.</p>
-                        <p>7. Your chat history is stored locally on your device and is not shared with anyone.</p>
-                        <p>8. By using this application, you agree to abide by the school's code of conduct and policies.</p>
-                        <br>
-                        <p>Thank you for using Milli AI. Happy learning!</p>
-                    </div>
+                <p style="font-size: 0.8rem; margin-top: 5px; color: #666;">Toggle to switch between English and Hindi</p>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title">About School</h3>
+                <div class="info-section">
+                    <div class="info-title">Mill Karwaan Public School, Balrampur</div>
+                    <p>Principal: Md Arshad Alig</p>
+                    <p>Contact: 9758919151</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Notification Toast -->
-        <div class="notification-toast" id="notificationToast">
-            <button class="notification-close" id="closeNotification">
-                <span class="material-icons">close</span>
-            </button>
-            <div class="notification-content">
-                <div class="notification-title" id="notificationTitle">Notification</div>
-                <div class="notification-message" id="notificationMessage">You have a new notification.</div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title">About Dev</h3>
+                <div class="info-section">
+                    <div class="info-title">Created by Abutalha — Proud Student of MKPS 🎓</div>
+                    <p>Genius Developer | AI Enthusiast | Future Tech Leader</p>
+                    <p>Contact: 9839469669</p>
+                    <p>"Built with love for my school!"</p>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title">Terms & Conditions</h3>
+                <div class="info-section">
+                    <p>1. Milli AI is designed for educational purposes only.</p>
+                    <p>2. Do not use for cheating or academic dishonesty.</p>
+                    <p>3. The school is not responsible for content generated by AI.</p>
+                    <p>4. Use responsibly and ethically.</p>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title">Archived Chats</h3>
+                <div id="archivedChats" class="info-section">
+                    <p>No archived chats yet.</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBMqHxkw8bo6iClp5cNukEgEFKwnqpQp7c",
-            authDomain: "milli-ai-school.firebaseapp.com",
-            projectId: "milli-ai-school",
-            storageBucket: "milli-ai-school.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdefghijklmno"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        // Global variables
-        let currentChatId = null;
-        let chatHistory = [];
-        let notificationCount = 0;
-        let isDarkMode = false;
-        let currentLanguage = 'en';
-        let notificationPermissionGranted = false;
-        let notificationListener = null;
-
         // DOM Elements
+        const landingScreen = document.getElementById('landingScreen');
         const chatContainer = document.getElementById('chatContainer');
-        const userInput = document.getElementById('userInput');
-        const sendButton = document.getElementById('sendButton');
-        const menuButton = document.getElementById('menuButton');
-        const menuContainer = document.getElementById('menuContainer');
-        const greetingText = document.getElementById('greeting-text');
-        const greetingIcon = document.querySelector('.greeting-icon');
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationCountEl = document.getElementById('notificationCount');
-        const notificationToast = document.getElementById('notificationToast');
-        const notificationTitle = document.getElementById('notificationTitle');
-        const notificationMessage = document.getElementById('notificationMessage');
-        const closeNotification = document.getElementById('closeNotification');
-        const suggestionsContainer = document.getElementById('suggestionsContainer');
-        const micButton = document.getElementById('micButton');
-        const fileUpload = document.getElementById('fileUpload');
-        const imageUpload = document.getElementById('imageUpload');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const closeSettings = document.getElementById('closeSettings');
         const settingsModal = document.getElementById('settingsModal');
-        const termsModal = document.getElementById('termsModal');
-        const closeSettingsModal = document.getElementById('closeSettingsModal');
-        const closeTermsModal = document.getElementById('closeTermsModal');
         const darkModeToggle = document.getElementById('darkModeToggle');
-        const languageOptions = document.querySelectorAll('.language-option');
-        const newChatMenuItem = document.getElementById('newChatMenuItem');
-        const chatHistoryMenuItem = document.getElementById('chatHistoryMenuItem');
-        const settingsMenuItem = document.getElementById('settingsMenuItem');
-        const aboutMenuItem = document.getElementById('aboutMenuItem');
-        const termsMenuItem = document.getElementById('termsMenuItem');
-        const chatListContainer = document.getElementById('chatListContainer');
-        const closeChatList = document.getElementById('closeChatList');
-        const chatList = document.getElementById('chatList');
-        const newChatBtn = document.createElement('button');
-        newChatBtn.className = 'new-chat-btn';
-        newChatBtn.innerHTML = '<span class="material-icons">add</span>';
-        document.body.appendChild(newChatBtn);
+        const languageToggle = document.getElementById('languageToggle');
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationCount = document.getElementById('notificationCount');
+        const maintenanceBanner = document.getElementById('maintenanceBanner');
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Set greeting based on time
-            updateGreeting();
-            
-            // Check for saved preferences
-            loadPreferences();
-            
-            // Initialize chat
-            await initializeChat();
-            
-            // Request notification permission
-            requestNotificationPermission();
-            
-            // Set up event listeners
+        // State variables
+        let isGenerating = false;
+        let currentAbortController = null;
+        let chats = JSON.parse(localStorage.getItem('milliAI_chats') || '[]');
+        let archivedChats = JSON.parse(localStorage.getItem('milliAI_archived') || '[]');
+        let notifications = [];
+        let unreadNotifications = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChats();
+            checkDarkMode();
             setupEventListeners();
-            
-            // Load suggestions
-            loadSuggestions();
-            
-            // Start listening for notifications if permission granted
-            if (notificationPermissionGranted) {
-                startNotificationListener();
-            }
+            checkForMaintenance();
+            simulateNotifications();
         });
 
-        // Update greeting based on time
-        function updateGreeting() {
-            const hour = new Date().getHours();
-            let greeting = 'Good Day';
-            let icon = 'auto_awesome';
+        function setupEventListeners() {
+            // New Chat button
+            newChatBtn.addEventListener('click', startNewChat);
             
-            if (hour < 12) {
-                greeting = currentLanguage === 'hi' ? 'शुभ प्रभात' : 'Good Morning';
-                icon = 'wb_sunny';
-            } else if (hour < 18) {
-                greeting = currentLanguage === 'hi' ? 'शुभ अपराह्न' : 'Good Afternoon';
-                icon = 'wb_sunny';
-            } else {
-                greeting = currentLanguage === 'hi' ? 'शुभ संध्या' : 'Good Evening';
-                icon = 'nightlight_round';
-            }
-            
-            greetingText.textContent = greeting;
-            greetingIcon.textContent = icon;
-        }
-
-        // Load user preferences
-        function loadPreferences() {
-            // Dark mode
-            const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-            isDarkMode = savedDarkMode;
-            if (savedDarkMode) {
-                document.body.classList.add('dark-mode');
-                darkModeToggle.checked = true;
-            }
-            
-            // Language
-            const savedLanguage = localStorage.getItem('language') || 'en';
-            currentLanguage = savedLanguage;
-            updateLanguageSelection(savedLanguage);
-        }
-
-        // Initialize chat system
-        async function initializeChat() {
-            // Try to get current user or create anonymous
-            try {
-                let user = auth.currentUser;
-                if (!user) {
-                    user = await auth.signInAnonymously();
+            // Send message
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
                 }
-                
-                // Load chat history
-                await loadChatHistory(user.uid);
-                
-                // Create a new chat if no current chat
-                if (!currentChatId) {
-                    await createNewChat();
+            });
+            
+            // Stop generating
+            stopBtn.addEventListener('click', stopGenerating);
+            
+            // Settings
+            settingsBtn.addEventListener('click', openSettings);
+            closeSettings.addEventListener('click', closeSettingsModal);
+            
+            // Dark mode toggle
+            darkModeToggle.addEventListener('change', toggleDarkMode);
+            
+            // Language toggle
+            languageToggle.addEventListener('change', toggleLanguage);
+            
+            // Click outside settings modal to close
+            window.addEventListener('click', function(e) {
+                if (e.target === settingsModal) {
+                    closeSettingsModal();
                 }
-                
-                // Load messages for current chat
-                await loadChatMessages();
-            } catch (error) {
-                console.error('Error initializing chat:', error);
-                addSystemMessage('Sorry, there was an error initializing the chat. Please try again later.');
-            }
+            });
+            
+            // Notification button
+            notificationBtn.addEventListener('click', showNotifications);
         }
 
-        // Load chat history
-        async function loadChatHistory(userId) {
+        function startNewChat() {
+            landingScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            chatInput.focus();
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || isGenerating) return;
+            
+            // Add user message
+            addMessageToChat('user', message);
+            chatInput.value = '';
+            
+            // Show stop button
+            sendBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
+            
+            // Set generating state
+            isGenerating = true;
+            currentAbortController = new AbortController();
+            
             try {
-                const chatsRef = db.collection('users').doc(userId).collection('chats');
-                const snapshot = await chatsRef.orderBy('lastUpdated', 'desc').get();
-                
-                chatHistory = [];
-                snapshot.forEach(doc => {
-                    chatHistory.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                renderChatHistory();
+                // Check if it's an image generation request
+                if (message.toLowerCase().includes('generate image for') || message.toLowerCase().includes('generate image of')) {
+                    await generateImage(message);
+                } else {
+                    // Use Gemini API for text response
+                    await generateTextResponse(message);
+                }
             } catch (error) {
-                console.error('Error loading chat history:', error);
+                console.error('Error:', error);
+                addMessageToChat('ai', 'Sorry, I encountered an error. Please try again.');
+            } finally {
+                // Hide stop button, show send button
+                stopBtn.style.display = 'none';
+                sendBtn.style.display = 'block';
+                isGenerating = false;
+                currentAbortController = null;
             }
         }
 
-        // Render chat history in sidebar
-        function renderChatHistory() {
-            chatList.innerHTML = '';
+        async function generateTextResponse(prompt) {
+            const apiKey1 = 'AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs';
+            const apiKey2 = 'AIzaSyCqGS8gb5kh7Jr0pv8d84LxCLhgHU-O_VU';
             
-            if (chatHistory.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'chat-item';
-                emptyItem.innerHTML = '<div class="chat-item-title">No chats yet</div>';
-                chatList.appendChild(emptyItem);
-                return;
+            let responseText = '';
+            let usedApiKey = apiKey1;
+            
+            try {
+                // Try first API key
+                responseText = await callGeminiAPI(prompt, apiKey1);
+            } catch (error) {
+                console.log('First API key failed, trying fallback...');
+                usedApiKey = apiKey2;
+                try {
+                    responseText = await callGeminiAPI(prompt, apiKey2);
+                } catch (error) {
+                    console.error('Both API keys failed:', error);
+                    responseText = 'I\'m having trouble connecting right now. Please try again later.';
+                }
             }
             
-            chatHistory.forEach(chat => {
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item';
-                chatItem.dataset.chatId = chat.id;
+            // Check if it's a non-study question
+            const studyTopics = ['math', 'science', 'history', 'geography', 'english', 'hindi', 'physics', 'chemistry', 'biology', 'computer', 'study', 'learn', 'education', 'school', 'homework', 'assignment', 'exam', 'test', 'quiz', 'subject', 'chapter', 'lesson', 'topic', 'concept', 'theory', 'formula', 'equation', 'problem', 'solution', 'answer', 'explain', 'describe', 'define', 'what is', 'how to', 'why', 'when', 'where', 'who', 'which'];
+            const isStudyRelated = studyTopics.some(topic => prompt.toLowerCase().includes(topic));
+            
+            if (!isStudyRelated && !prompt.toLowerCase().includes('milli ai') && !prompt.toLowerCase().includes('who are you')) {
+                responseText = "I'm designed to help with study topics. Try asking about Science, Math, History etc. 😊";
+            } else if (prompt.toLowerCase().includes('who are you') || prompt.toLowerCase().includes('milli ai')) {
+                responseText = "I'm Milli AI, your study assistant from MKPS Balrampur! I'm here to help you with your studies, explain concepts, and make learning easier and more fun. What would you like to learn today?";
+            }
+            
+            // Add AI response
+            addMessageToChat('ai', responseText);
+            
+            // Add suggestion
+            const suggestions = [
+                "--- Try asking: 'Explain Newton's Laws' or 'Generate image for photosynthesis'",
+                "--- Want to test your knowledge? Ask me for a quiz on this topic!",
+                "--- Need more details? Ask me to explain this in simpler terms.",
+                "--- Want an image for this topic? Just say 'generate image for [topic]'",
+                "--- Try asking: 'What are the key points I should remember about this topic?'"
+            ];
+            const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+            addSuggestionToLastMessage(randomSuggestion);
+        }
+
+        async function callGeminiAPI(prompt, apiKey) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }]
+                }),
+                signal: currentAbortController.signal
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        async function generateImage(prompt) {
+            try {
+                // Extract the topic from the prompt
+                let topic = prompt.replace(/generate image for|generate image of/gi, '').trim();
                 
-                const previewText = chat.messages && chat.messages.length > 0 
-                    ? chat.messages[0].text.substring(0, 50) + (chat.messages[0].text.length > 50 ? '...' : '')
-                    : 'Empty chat';
-                
-                chatItem.innerHTML = `
-                    <div class="chat-item-title">${chat.title || 'New Chat'}</div>
-                    <div class="chat-item-preview">${previewText}</div>
-                    <div class="chat-actions">
-                        <button class="chat-action-btn rename-chat" data-chat-id="${chat.id}">
-                            <span class="material-icons">edit</span>
-                        </button>
-                        <button class="chat-action-btn delete-chat" data-chat-id="${chat.id}">
-                            <span class="material-icons">delete</span>
-                        </button>
+                // Create loading message
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'message ai-message';
+                loadingDiv.innerHTML = `
+                    <div class="message-header">Milli AI • ${getCurrentDateTime()}</div>
+                    <div class="message-content">
+                        <div class="loading"></div> Generating image for "${topic}"...
                     </div>
                 `;
+                chatMessages.appendChild(loadingDiv);
+                scrollToBottom();
                 
-                chatList.appendChild(chatItem);
-            });
-            
-            // Add event listeners to chat items
-            document.querySelectorAll('.chat-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (!e.target.closest('.chat-action-btn')) {
-                        const chatId = this.dataset.chatId;
-                        switchToChat(chatId);
-                    }
-                });
-            });
-            
-            // Add event listeners to action buttons
-            document.querySelectorAll('.rename-chat').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const chatId = this.dataset.chatId;
-                    renameChat(chatId);
-                });
-            });
-            
-            document.querySelectorAll('.delete-chat').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const chatId = this.dataset.chatId;
-                    deleteChat(chatId);
-                });
-            });
-        }
-
-        // Create a new chat
-        async function createNewChat() {
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                const chatsRef = db.collection('users').doc(user.uid).collection('chats');
-                const newChatRef = chatsRef.doc();
-                
-                const newChat = {
-                    title: 'New Chat',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                    messages: []
-                };
-                
-                await newChatRef.set(newChat);
-                
-                currentChatId = newChatRef.id;
-                chatHistory.unshift({
-                    id: currentChatId,
-                    ...newChat
+                // Call Stable Horde API
+                let submitRes = await fetch("https://stablehorde.net/api/v2/generate/async", {
+                    method: "POST",
+                    headers: {
+                        "apikey": "4y9VQUFr3wiwNJOOnnuh1w",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        prompt: topic,
+                        params: { steps: 20, width: 512, height: 512 },
+                        nsfw: false
+                    })
                 });
                 
-                renderChatHistory();
-                clearChatContainer();
-                
-                // Add welcome message
-                addSystemMessage("Hello! I'm Milli AI, your school assistant. How can I help you today?");
-            } catch (error) {
-                console.error('Error creating new chat:', error);
-                addSystemMessage('Sorry, there was an error creating a new chat. Please try again later.');
-            }
-        }
-
-        // Switch to existing chat
-        async function switchToChat(chatId) {
-            currentChatId = chatId;
-            await loadChatMessages();
-            closeChatListContainer();
-        }
-
-        // Load messages for current chat
-        async function loadChatMessages() {
-            try {
-                const user = auth.currentUser;
-                if (!user || !currentChatId) return;
-                
-                const chatRef = db.collection('users').doc(user.uid).collection('chats').doc(currentChatId);
-                const doc = await chatRef.get();
-                
-                if (doc.exists) {
-                    const chatData = doc.data();
-                    const messages = chatData.messages || [];
-                    
-                    // Update document title
-                    if (chatData.title) {
-                        document.title = `Milli AI - ${chatData.title}`;
-                    }
-                    
-                    // Clear and render messages
-                    clearChatContainer();
-                    messages.forEach(message => {
-                        if (message.role === 'user') {
-                            addUserMessage(message.text);
-                        } else if (message.role === 'assistant') {
-                            addAIMessage(message.text, message.imageUrls);
-                        }
-                    });
-                    
-                    // Scroll to bottom
-                    scrollToBottom();
+                let submitData = await submitRes.json();
+                if (!submitRes.ok) {
+                    loadingDiv.innerHTML = `
+                        <div class="message-header">Milli AI • ${getCurrentDateTime()}</div>
+                        <div class="message-content">
+                            ❌ Error: ${submitData.message || 'Failed to generate image'}
+                        </div>
+                    `;
+                    return;
                 }
-            } catch (error) {
-                console.error('Error loading chat messages:', error);
-                addSystemMessage('Sorry, there was an error loading the chat messages. Please try again later.');
-            }
-        }
-
-        // Clear chat container
-        function clearChatContainer() {
-            chatContainer.innerHTML = '';
-        }
-
-        // Add user message to UI
-        function addUserMessage(text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message user-message';
-            messageDiv.innerHTML = `
-                <div>${text}</div>
-                <div class="message-actions">
-                    <button class="action-button like-btn">
-                        <span class="material-icons">thumb_up</span>
-                        <span>Like</span>
-                    </button>
-                    <button class="action-button dislike-btn">
-                        <span class="material-icons">thumb_down</span>
-                        <span>Dislike</span>
-                    </button>
-                </div>
-            `;
-            chatContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        // Add AI message to UI
-        function addAIMessage(text, imageUrls = []) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message ai-message';
-            
-            let content = `<div>${text}</div>`;
-            
-            // Add image gallery if there are images
-            if (imageUrls && imageUrls.length > 0) {
-                content += '<div class="image-gallery">';
-                imageUrls.forEach(url => {
-                    content += `
-                        <div class="generated-image">
-                            <img src="${url}" alt="Generated image">
-                            <div class="image-actions">
-                                <button class="image-action-button download-btn" data-url="${url}">
-                                    <span class="material-icons">download</span>
-                                </button>
+                
+                const jobId = submitData.id;
+                
+                // Poll for completion
+                let imageUrl = null;
+                let attempts = 0;
+                const maxAttempts = 24; // 2 minutes max (5 sec * 24)
+                
+                while (!imageUrl && attempts < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 5000));
+                    attempts++;
+                    
+                    let checkRes = await fetch(`https://stablehorde.net/api/v2/generate/status/${jobId}`);
+                    let checkData = await checkRes.json();
+                    
+                    if (checkData.done && checkData.generations.length > 0) {
+                        imageUrl = checkData.generations[0].img;
+                        break;
+                    }
+                    
+                    // Update loading message with progress
+                    if (attempts < maxAttempts) {
+                        loadingDiv.innerHTML = `
+                            <div class="message-header">Milli AI • ${getCurrentDateTime()}</div>
+                            <div class="message-content">
+                                <div class="loading"></div> Generating image... (${attempts * 5} seconds elapsed)
+                            </div>
+                        `;
+                    }
+                }
+                
+                if (imageUrl) {
+                    // Replace loading message with image
+                    loadingDiv.innerHTML = `
+                        <div class="message-header">Milli AI • ${getCurrentDateTime()}</div>
+                        <div class="message-content">
+                            Here's an image for "${topic}":
+                            <div class="image-container">
+                                <img src="${imageUrl}" alt="${topic}" class="generated-image" />
+                                <div class="image-actions">
+                                    <button class="image-btn" onclick="downloadImage('${imageUrl}', '${topic}')">Download</button>
+                                    <button class="image-btn" onclick="openImagePreview('${imageUrl}')">Full Preview</button>
+                                    <button class="image-btn" onclick="shareImage('${imageUrl}')">Share</button>
+                                </div>
                             </div>
                         </div>
                     `;
-                });
-                content += '</div>';
+                    
+                    // Add suggestion
+                    addSuggestionToLastMessage("--- Need another image? Try being more specific with your request!");
+                } else {
+                    loadingDiv.innerHTML = `
+                        <div class="message-header">Milli AI • ${getCurrentDateTime()}</div>
+                        <div class="message-content">
+                            ❌ Sorry, image generation took too long. Please try again with a simpler prompt.
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Image generation error:', error);
+                addMessageToChat('ai', '❌ Sorry, there was an error generating the image. Please try again later.');
             }
-            
-            content += `
-                <div class="message-actions">
-                    <button class="action-button copy-btn">
-                        <span class="material-icons">content_copy</span>
-                        <span>Copy</span>
-                    </button>
-                    <button class="action-button regenerate-btn">
-                        <span class="material-icons">refresh</span>
-                        <span>Regenerate</span>
-                    </button>
-                    <button class="action-button like-btn">
-                        <span class="material-icons">thumb_up</span>
-                        <span>Like</span>
-                    </button>
-                    <button class="action-button dislike-btn">
-                        <span class="material-icons">thumb_down</span>
-                        <span>Dislike</span>
-                    </button>
-                </div>
-            `;
-            
-            messageDiv.innerHTML = content;
-            chatContainer.appendChild(messageDiv);
-            
-            // Add event listeners for image actions
-            messageDiv.querySelectorAll('.download-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const url = this.dataset.url;
-                    downloadImage(url);
-                });
-            });
-            
-            // Add event listeners for message actions
-            const copyBtn = messageDiv.querySelector('.copy-btn');
-            const regenerateBtn = messageDiv.querySelector('.regenerate-btn');
-            const likeBtns = messageDiv.querySelectorAll('.like-btn');
-            const dislikeBtns = messageDiv.querySelectorAll('.dislike-btn');
-            
-            copyBtn.addEventListener('click', function() {
-                copyToClipboard(text);
-                showToast('Copied to clipboard!');
-            });
-            
-            regenerateBtn.addEventListener('click', function() {
-                regenerateResponse(text);
-            });
-            
-            likeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Handle like feedback
-                    this.style.color = 'green';
-                    showToast('Thanks for your feedback!');
-                });
-            });
-            
-            dislikeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Handle dislike feedback
-                    this.style.color = 'red';
-                    showToast('Sorry to hear that. We\'ll try to improve!');
-                });
-            });
-            
-            scrollToBottom();
         }
 
-        // Add system message
-        function addSystemMessage(text) {
+        function addMessageToChat(sender, content) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'message ai-message';
-            messageDiv.innerHTML = `<div>${text}</div>`;
-            chatContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        // Show typing indicator
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message ai-message typing-indicator';
-            typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
+            messageDiv.className = `message ${sender}-message`;
+            
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(',', '');
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">${sender === 'user' ? 'You' : 'Milli AI • ' + formattedDate}</div>
+                <div class="message-content">${formatMessageContent(content)}</div>
+                ${sender === 'ai' ? `
+                    <div class="message-actions">
+                        <button class="action-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+                        <button class="action-btn" onclick="regenerateResponse(this)">🔄 Regenerate</button>
+                        <button class="action-btn" onclick="likeMessage(this)">👍 Like</button>
+                        <button class="action-btn" onclick="dislikeMessage(this)">👎 Dislike</button>
+                        <button class="action-btn" onclick="shareMessage(this)">↗️ Share</button>
+                    </div>
+                ` : ''}
             `;
-            chatContainer.appendChild(typingDiv);
+            
+            chatMessages.appendChild(messageDiv);
             scrollToBottom();
+            
+            // Save to localStorage
+            if (sender === 'user') {
+                chats.push({
+                    type: 'user',
+                    content: content,
+                    timestamp: new Date().toISOString()
+                });
+            } else {
+                chats.push({
+                    type: 'ai',
+                    content: content,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            saveChats();
         }
 
-        // Hide typing indicator
-        function hideTypingIndicator() {
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                typingIndicator.remove();
+        function addSuggestionToLastMessage(suggestion) {
+            const messages = chatMessages.querySelectorAll('.message');
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && lastMessage.querySelector('.message-content')) {
+                const suggestionDiv = document.createElement('div');
+                suggestionDiv.className = 'suggestion';
+                suggestionDiv.textContent = suggestion;
+                lastMessage.querySelector('.message-content').appendChild(suggestionDiv);
             }
         }
 
-        // Scroll to bottom of chat
+        function formatMessageContent(content) {
+            // Convert URLs to links
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return content.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color: var(--primary-color); text-decoration: underline;">${url}</a>`);
+        }
+
         function scrollToBottom() {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Send message
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
-            
-            // Add user message to UI
-            addUserMessage(text);
-            
-            // Clear input
-            userInput.value = '';
-            sendButton.disabled = true;
-            
-            // Show typing indicator
-            showTypingIndicator();
-            
-            try {
-                // Get AI response
-                const aiResponse = await getAIResponse(text);
+        function stopGenerating() {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                isGenerating = false;
+                stopBtn.style.display = 'none';
+                sendBtn.style.display = 'block';
                 
-                // Check if response contains image generation request
-                if (text.toLowerCase().includes('generate image') || text.toLowerCase().includes('create image')) {
-                    const imagePrompt = text.replace(/generate image|create image/gi, '').trim();
-                    const imageUrls = await generateImages(imagePrompt);
-                    addAIMessage(aiResponse, imageUrls);
-                    
-                    // Save message with images to Firestore
-                    await saveMessageToFirestore('assistant', aiResponse, imageUrls);
-                } else {
-                    // Add AI message to UI
-                    addAIMessage(aiResponse);
-                    
-                    // Save message to Firestore
-                    await saveMessageToFirestore('assistant', aiResponse);
-                }
-            } catch (error) {
-                console.error('Error getting AI response:', error);
-                hideTypingIndicator();
-                addSystemMessage('Sorry, there was an error processing your request. Please try again later.');
-            }
-            
-            // Hide typing indicator
-            hideTypingIndicator();
-            
-            // Update chat title if it's still "New Chat"
-            await updateChatTitleIfNeeded(text);
-        }
-
-        // Get AI response using Gemini API
-        async function getAIResponse(prompt) {
-            try {
-                // This is a simplified implementation
-                // In a real app, you would make an API call to Gemini
-                
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Simple responses based on prompt (for demo purposes)
-                if (prompt.toLowerCase().includes('hello') || prompt.toLowerCase().includes('hi')) {
-                    return "Hello! I'm Milli AI, your school assistant. How can I help you with your studies today?";
-                } else if (prompt.toLowerCase().includes('homework')) {
-                    return "I can help you with your homework! Please tell me which subject and what specific questions you need help with.";
-                } else if (prompt.toLowerCase().includes('math') || prompt.toLowerCase().includes('maths')) {
-                    return "Mathematics is all about practice! Tell me which topic you're working on - algebra, geometry, calculus, or something else - and I'll guide you through it.";
-                } else if (prompt.toLowerCase().includes('science')) {
-                    return "Science is fascinating! Whether you need help with physics, chemistry, biology, or any other science topic, I'm here to explain concepts and solve problems with you.";
-                } else if (prompt.toLowerCase().includes('english')) {
-                    return "English language and literature can be fun to learn! I can help you with grammar, writing essays, understanding literature, or improving your vocabulary.";
-                } else if (prompt.toLowerCase().includes('history')) {
-                    return "History helps us understand our world better! Ask me about any historical period, event, or figure, and I'll provide you with detailed information and context.";
-                } else if (prompt.toLowerCase().includes('school timing') || prompt.toLowerCase().includes('school time')) {
-                    return "School timings at Milli Karwaan Public School Balrampur are from 8:00 AM to 2:30 PM on weekdays. Please arrive a few minutes early to be prepared for the first class.";
-                } else if (prompt.toLowerCase().includes('exam') || prompt.toLowerCase().includes('test')) {
-                    return "Exams can be stressful, but I'm here to help you prepare! Tell me which subject you're studying for, and I can provide study tips, practice questions, and explanations of difficult concepts.";
-                } else if (prompt.toLowerCase().includes('generate image') || prompt.toLowerCase().includes('create image')) {
-                    return "I'll generate an image based on your description. This may take a moment.";
-                } else {
-                    return "I understand you're asking about '" + prompt + "'. Let me help you with that. Could you please provide more details about what you need to know? I'm here to assist with any school-related questions!";
-                }
-            } catch (error) {
-                console.error('Error getting AI response:', error);
-                throw error;
+                // Add message that generation was stopped
+                addMessageToChat('ai', 'Generation stopped. You can ask another question now.');
             }
         }
 
-        // Generate images using Stable Horde API
-        async function generateImages(prompt) {
-            try {
-                // This is a simplified implementation
-                // In a real app, you would make an API call to Stable Horde
-                
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                
-                // Return placeholder images for demo (in a real app, these would be actual generated images)
-                return [
-                    "https://source.unsplash.com/random/300x300?education",
-                    "https://source.unsplash.com/random/300x300?school"
-                ];
-            } catch (error) {
-                console.error('Error generating images:', error);
-                return [];
+        function openSettings() {
+            settingsModal.style.display = 'flex';
+            updateArchivedChatsDisplay();
+        }
+
+        function closeSettingsModal() {
+            settingsModal.style.display = 'none';
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('milliAI_darkMode', darkModeToggle.checked);
+        }
+
+        function checkDarkMode() {
+            const isDarkMode = localStorage.getItem('milliAI_darkMode') === 'true';
+            darkModeToggle.checked = isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
             }
         }
 
-        // Save message to Firestore
-        async function saveMessageToFirestore(role, text, imageUrls = []) {
-            try {
-                const user = auth.currentUser;
-                if (!user || !currentChatId) return;
+        function toggleLanguage() {
+            // This would toggle between English and Hindi UI
+            // For now, we'll just show an alert since full translation would require more work
+            alert('Language toggle feature would switch the UI between English and Hindi. This is a demo implementation.');
+        }
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            return now.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(',', '');
+        }
+
+        function saveChats() {
+            localStorage.setItem('milliAI_chats', JSON.stringify(chats));
+        }
+
+        function loadChats() {
+            if (chats.length > 0) {
+                landingScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
                 
-                const chatRef = db.collection('users').doc(user.uid).collection('chats').doc(currentChatId);
-                
-                // Add message to array
-                await chatRef.update({
-                    messages: firebase.firestore.FieldValue.arrayUnion({
-                        role,
-                        text,
-                        imageUrls,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    }),
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                chats.forEach(chat => {
+                    addMessageToChat(chat.type, chat.content);
                 });
-                
-                // Update chat history
-                const chatIndex = chatHistory.findIndex(chat => chat.id === currentChatId);
-                if (chatIndex !== -1) {
-                    if (!chatHistory[chatIndex].messages) {
-                        chatHistory[chatIndex].messages = [];
-                    }
-                    chatHistory[chatIndex].messages.push({
-                        role,
-                        text,
-                        imageUrls,
-                        timestamp: new Date()
-                    });
-                    chatHistory[chatIndex].lastUpdated = new Date();
-                }
-                
-                // If this is the first message and role is user, update the title
-                if (role === 'user' && chatHistory[chatIndex]?.messages?.length === 1) {
-                    await updateChatTitle(text);
-                }
-            } catch (error) {
-                console.error('Error saving message to Firestore:', error);
             }
         }
 
-        // Update chat title based on first message
-        async function updateChatTitle(title) {
-            try {
-                // Create a concise title from the first message
-                let conciseTitle = title.length > 30 ? title.substring(0, 30) + '...' : title;
-                
-                const user = auth.currentUser;
-                if (!user || !currentChatId) return;
-                
-                const chatRef = db.collection('users').doc(user.uid).collection('chats').doc(currentChatId);
-                await chatRef.update({
-                    title: conciseTitle
+        function updateArchivedChatsDisplay() {
+            const archivedChatsDiv = document.getElementById('archivedChats');
+            if (archivedChats.length === 0) {
+                archivedChatsDiv.innerHTML = '<p>No archived chats yet.</p>';
+            } else {
+                let html = '';
+                archivedChats.forEach((chat, index) => {
+                    html += `
+                        <div style="margin-bottom: 10px; padding: 10px; background-color: rgba(0,0,0,0.05); border-radius: 5px;">
+                            <div style="font-weight: bold;">${chat.title || 'Untitled Chat'}</div>
+                            <div style="font-size: 0.8rem; color: #666;">${new Date(chat.timestamp).toLocaleString()}</div>
+                            <button onclick="restoreArchivedChat(${index})" style="margin-top: 5px; background-color: var(--primary-color); color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Restore</button>
+                        </div>
+                    `;
                 });
-                
-                // Update local chat history
-                const chatIndex = chatHistory.findIndex(chat => chat.id === currentChatId);
-                if (chatIndex !== -1) {
-                    chatHistory[chatIndex].title = conciseTitle;
-                }
-                
-                // Update UI
-                renderChatHistory();
-                document.title = `Milli AI - ${conciseTitle}`;
-            } catch (error) {
-                console.error('Error updating chat title:', error);
+                archivedChatsDiv.innerHTML = html;
             }
         }
 
-        // Update chat title if needed
-        async function updateChatTitleIfNeeded(firstMessage) {
-            try {
-                const user = auth.currentUser;
-                if (!user || !currentChatId) return;
-                
-                const chatRef = db.collection('users').doc(user.uid).collection('chats').doc(currentChatId);
-                const doc = await chatRef.get();
-                
-                if (doc.exists) {
-                    const chatData = doc.data();
-                    // If title is still "New Chat" and this is the first user message
-                    if (chatData.title === 'New Chat' && chatData.messages && chatData.messages.length === 1) {
-                        await updateChatTitle(firstMessage);
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking if chat title needs update:', error);
+        function checkForMaintenance() {
+            // In a real app, this would check with the server
+            // For demo purposes, we'll randomly show maintenance banner 10% of the time
+            if (Math.random() < 0.1) {
+                maintenanceBanner.style.display = 'block';
             }
         }
 
-        // Rename chat
-        async function renameChat(chatId) {
-            const newName = prompt('Enter new chat name:', 
-                chatHistory.find(chat => chat.id === chatId)?.title || 'New Chat');
-            
-            if (newName && newName.trim()) {
-                try {
-                    const user = auth.currentUser;
-                    if (!user) return;
-                    
-                    const chatRef = db.collection('users').doc(user.uid).collection('chats').doc(chatId);
-                    await chatRef.update({
-                        title: newName.trim()
-                    });
-                    
-                    // Update local chat history
-                    const chatIndex = chatHistory.findIndex(chat => chat.id === chatId);
-                    if (chatIndex !== -1) {
-                        chatHistory[chatIndex].title = newName.trim();
-                    }
-                    
-                    // If this is the current chat, update document title
-                    if (chatId === currentChatId) {
-                        document.title = `Milli AI - ${newName.trim()}`;
-                    }
-                    
-                    // Update UI
-                    renderChatHistory();
-                } catch (error) {
-                    console.error('Error renaming chat:', error);
-                    alert('Error renaming chat. Please try again.');
-                }
+        function simulateNotifications() {
+            // Simulate receiving notifications
+            setTimeout(() => {
+                addNotification('New Feature', '📚 Quiz mode is now available! Ask "quiz me on [topic]" to test your knowledge.', 'feature');
+                addNotification('Holiday Notice', '🏫 School will be closed on Monday for Teacher Training Day.', 'holiday');
+                addNotification('System Update', '⚙️ Milli AI will be updated tonight at 10 PM for better performance.', 'warning');
+            }, 3000);
+        }
+
+        function addNotification(title, body, type) {
+            notifications.push({
+                title,
+                body,
+                type,
+                timestamp: new Date().toISOString(),
+                read: false
+            });
+            unreadNotifications++;
+            updateNotificationCount();
+        }
+
+        function updateNotificationCount() {
+            notificationCount.textContent = unreadNotifications;
+            if (unreadNotifications > 0) {
+                notificationCount.style.display = 'block';
+            } else {
+                notificationCount.style.display = 'none';
             }
         }
 
-        // Delete chat
-        async function deleteChat(chatId) {
-            if (!confirm('Are you sure you want to delete this chat? This cannot be undone.')) {
+        function showNotifications() {
+            if (notifications.length === 0) {
+                alert('No notifications');
                 return;
             }
             
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                const chatRef = db.collection('users').doc(user.uid).collection('chats').doc(chatId);
-                await chatRef.delete();
-                
-                // Update local chat history
-                chatHistory = chatHistory.filter(chat => chat.id !== chatId);
-                
-                // If this is the current chat, create a new one
-                if (chatId === currentChatId) {
-                    await createNewChat();
-                }
-                
-                // Update UI
-                renderChatHistory();
-            } catch (error) {
-                console.error('Error deleting chat:', error);
-                alert('Error deleting chat. Please try again.');
-            }
+            let notificationText = '🔔 Notifications:\n\n';
+            notifications.forEach((notif, index) => {
+                notificationText += `${index + 1}. ${notif.title}\n   ${notif.body}\n   ${new Date(notif.timestamp).toLocaleString()}\n\n`;
+                notif.read = true;
+            });
+            
+            alert(notificationText);
+            unreadNotifications = 0;
+            updateNotificationCount();
         }
 
-        // Request notification permission
-        function requestNotificationPermission() {
-            if ('Notification' in window) {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        notificationPermissionGranted = true;
-                        console.log('Notification permission granted.');
-                    } else {
-                        console.log('Notification permission denied.');
-                    }
-                });
-            }
-        }
-
-        // Start listening for notifications
-        function startNotificationListener() {
-            if (!notificationPermissionGranted) return;
-            
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            // Listen for notifications
-            notificationListener = db.collection('notifications')
-                .orderBy('timestamp', 'desc')
-                .limit(10)
-                .onSnapshot(snapshot => {
-                    // Count unread notifications
-                    let unreadCount = 0;
-                    const notifications = [];
-                    
-                    snapshot.forEach(doc => {
-                        const notif = doc.data();
-                        notifications.push({
-                            id: doc.id,
-                            ...notif
-                        });
-                        
-                        // Check if notification is unread (simplified logic)
-                        if (!notif.readBy || !notif.readBy.includes(user.uid)) {
-                            unreadCount++;
-                        }
-                    });
-                    
-                    // Update notification count
-                    notificationCount = unreadCount;
-                    notificationCountEl.textContent = unreadCount > 9 ? '9+' : unreadCount;
-                    
-                    // If there are new notifications, show the latest one
-                    if (unreadCount > 0) {
-                        const latestNotif = notifications[0];
-                        showNotificationToast(latestNotif.title, latestNotif.message);
-                        
-                        // Mark as read (simplified)
-                        markNotificationAsRead(latestNotif.id);
-                    }
+        // Global functions for message actions
+        function copyToClipboard(button) {
+            const messageContent = button.closest('.message').querySelector('.message-content').innerText;
+            navigator.clipboard.writeText(messageContent)
+                .then(() => {
+                    alert('Copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Could not copy text: ', err);
                 });
         }
 
-        // Show notification toast
-        function showNotificationToast(title, message) {
-            notificationTitle.textContent = title;
-            notificationMessage.textContent = message;
-            notificationToast.classList.add('show');
+        function regenerateResponse(button) {
+            const messageDiv = button.closest('.message');
+            const previousUserMessage = Array.from(chatMessages.querySelectorAll('.message'))
+                .filter(msg => msg.classList.contains('user-message'))
+                .pop();
             
-            // Hide after 5 seconds
-            setTimeout(() => {
-                notificationToast.classList.remove('show');
-            }, 5000);
-        }
-
-        // Mark notification as read
-        async function markNotificationAsRead(notificationId) {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            try {
-                const notifRef = db.collection('notifications').doc(notificationId);
-                const doc = await notifRef.get();
-                
-                if (doc.exists) {
-                    const notifData = doc.data();
-                    const readBy = notifData.readBy || [];
-                    
-                    if (!readBy.includes(user.uid)) {
-                        readBy.push(user.uid);
-                        await notifRef.update({
-                            readBy: readBy
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error marking notification as read:', error);
+            if (previousUserMessage) {
+                const userMessage = previousUserMessage.querySelector('.message-content').innerText;
+                // Remove the current AI message
+                messageDiv.remove();
+                // Remove from chats array
+                chats.pop();
+                // Send the message again
+                chatInput.value = userMessage;
+                sendMessage();
             }
         }
 
-        // Load suggestions (most asked questions)
-        async function loadSuggestions() {
-            try {
-                // In a real app, this would fetch from Firestore
-                // For demo, using hardcoded suggestions
-                const suggestions = [
-                    "What are the school timings?",
-                    "Help me with math homework",
-                    "Explain photosynthesis",
-                    "Generate image of solar system",
-                    "School holidays schedule",
-                    "How to prepare for exams?",
-                    "Science project ideas",
-                    "English grammar rules"
-                ];
-                
-                suggestionsContainer.innerHTML = '';
-                
-                suggestions.forEach(suggestion => {
-                    const chip = document.createElement('div');
-                    chip.className = 'suggestion-chip';
-                    chip.textContent = suggestion;
-                    chip.addEventListener('click', () => {
-                        userInput.value = suggestion;
-                        userInput.focus();
-                        sendButton.disabled = false;
-                    });
-                    suggestionsContainer.appendChild(chip);
+        function likeMessage(button) {
+            button.textContent = '👍 Liked';
+            button.style.color = 'green';
+            // In a real app, this would send feedback to the server
+            console.log('Message liked');
+        }
+
+        function dislikeMessage(button) {
+            button.textContent = '👎 Disliked';
+            button.style.color = 'red';
+            // In a real app, this would send feedback to the server
+            console.log('Message disliked');
+        }
+
+        function shareMessage(button) {
+            const messageContent = button.closest('.message').querySelector('.message-content').innerText;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Milli AI Response',
+                    text: messageContent,
+                })
+                .catch(error => {
+                    console.log('Error sharing:', error);
+                    fallbackShare(messageContent);
                 });
-            } catch (error) {
-                console.error('Error loading suggestions:', error);
+            } else {
+                fallbackShare(messageContent);
             }
         }
 
-        // Download image
-        function downloadImage(url) {
+        function fallbackShare(content) {
+            const tempInput = document.createElement('input');
+            tempInput.value = content;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert('Content copied to clipboard! You can now paste it anywhere.');
+        }
+
+        function downloadImage(url, topic) {
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'milli-ai-image.jpg';
+            a.download = `milli-ai-${topic.replace(/\s+/g, '-').toLowerCase()}.jpg`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
         }
 
-        // Copy text to clipboard
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).catch(err => {
-                console.error('Error copying text: ', err);
-                // Fallback for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                    document.execCommand('copy');
-                } catch (err) {
-                    console.error('Fallback: Error copying text: ', err);
-                }
-                document.body.removeChild(textarea);
-            });
+        function openImagePreview(url) {
+            window.open(url, '_blank');
         }
 
-        // Regenerate response
-        function regenerateResponse(originalText) {
-            // In a real app, this would make a new API call with the same prompt
-            // For demo, just show a message
-            addSystemMessage("Regenerating response for: " + originalText);
-            
-            // Simulate regeneration
-            setTimeout(() => {
-                addAIMessage("Here's an alternative response to your query: " + originalText + " ... [Regenerated content would appear here]");
-            }, 2000);
-        }
-
-        // Show toast message
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'notification-toast';
-            toast.style.top = 'auto';
-            toast.style.bottom = '20px';
-            toast.style.backgroundColor = 'var(--primary-color)';
-            toast.innerHTML = `
-                <button class="notification-close close-toast">
-                    <span class="material-icons">close</span>
-                </button>
-                <div class="notification-content">
-                    <div class="notification-message">${message}</div>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            
-            // Show toast
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 100);
-            
-            // Hide after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
-            
-            // Close button
-            toast.querySelector('.close-toast').addEventListener('click', () => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            });
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            // Send message on button click
-            sendButton.addEventListener('click', sendMessage);
-            
-            // Send message on Enter key
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-            
-            // Enable/disable send button based on input
-            userInput.addEventListener('input', function() {
-                sendButton.disabled = this.value.trim() === '';
-            });
-            
-            // Menu button toggle
-            menuButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                menuContainer.style.display = menuContainer.style.display === 'flex' ? 'none' : 'flex';
-            });
-            
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!menuButton.contains(e.target) && !menuContainer.contains(e.target)) {
-                    menuContainer.style.display = 'none';
-                }
-            });
-            
-            // Menu items
-            newChatMenuItem.addEventListener('click', async function() {
-                menuContainer.style.display = 'none';
-                await createNewChat();
-            });
-            
-            chatHistoryMenuItem.addEventListener('click', function() {
-                menuContainer.style.display = 'none';
-                openChatListContainer();
-            });
-            
-            settingsMenuItem.addEventListener('click', function() {
-                menuContainer.style.display = 'none';
-                settingsModal.classList.add('active');
-            });
-            
-            aboutMenuItem.addEventListener('click', function() {
-                menuContainer.style.display = 'none';
-                settingsModal.classList.add('active');
-                // Scroll to about section
-                setTimeout(() => {
-                    const aboutSection = document.querySelector('.modal-section:nth-child(3)');
-                    if (aboutSection) {
-                        aboutSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }, 300);
-            });
-            
-            termsMenuItem.addEventListener('click', function() {
-                menuContainer.style.display = 'none';
-                termsModal.classList.add('active');
-            });
-            
-            // Modal close buttons
-            closeSettingsModal.addEventListener('click', function() {
-                settingsModal.classList.remove('active');
-            });
-            
-            closeTermsModal.addEventListener('click', function() {
-                termsModal.classList.remove('active');
-            });
-            
-            // Close modals when clicking outside
-            settingsModal.addEventListener('click', function(e) {
-                if (e.target === settingsModal) {
-                    settingsModal.classList.remove('active');
-                }
-            });
-            
-            termsModal.addEventListener('click', function(e) {
-                if (e.target === termsModal) {
-                    termsModal.classList.remove('active');
-                }
-            });
-            
-            // Dark mode toggle
-            darkModeToggle.addEventListener('change', function() {
-                isDarkMode = this.checked;
-                document.body.classList.toggle('dark-mode', isDarkMode);
-                localStorage.setItem('darkMode', isDarkMode);
-            });
-            
-            // Language options
-            languageOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    languageOptions.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
-                    currentLanguage = this.dataset.lang;
-                    localStorage.setItem('language', currentLanguage);
-                    updateLanguageContent();
+        function shareImage(url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Generated Image from Milli AI',
+                    url: url,
+                })
+                .catch(error => {
+                    console.log('Error sharing:', error);
+                    fallbackShare(url);
                 });
-            });
-            
-            // Notification bell
-            notificationBell.addEventListener('click', function() {
-                // In a real app, this would open notification center
-                showToast("Notification center would open here");
-            });
-            
-            // Close notification toast
-            closeNotification.addEventListener('click', function() {
-                notificationToast.classList.remove('show');
-            });
-            
-            // Mic button (placeholder)
-            micButton.addEventListener('click', function() {
-                showToast("Voice input feature coming soon!");
-            });
-            
-            // File upload (placeholder)
-            fileUpload.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    showToast(`File "${this.files[0].name}" selected. Processing...`);
-                    // Reset input
-                    this.value = '';
-                }
-            });
-            
-            // Image upload (placeholder)
-            imageUpload.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    showToast(`Image "${this.files[0].name}" selected. Processing...`);
-                    // Reset input
-                    this.value = '';
-                }
-            });
-            
-            // New chat button
-            newChatBtn.addEventListener('click', async function() {
-                await createNewChat();
-            });
-            
-            // Close chat list
-            closeChatList.addEventListener('click', closeChatListContainer);
+            } else {
+                fallbackShare(url);
+            }
         }
 
-        // Open chat list container
-        function openChatListContainer() {
-            chatListContainer.classList.add('active');
-        }
-
-        // Close chat list container
-        function closeChatListContainer() {
-            chatListContainer.classList.remove('active');
-        }
-
-        // Update language selection
-        function updateLanguageSelection(lang) {
-            languageOptions.forEach(option => {
-                option.classList.toggle('active', option.dataset.lang === lang);
-            });
-            updateLanguageContent();
-        }
-
-        // Update language content
-        function updateLanguageContent() {
-            updateGreeting();
-            
-            // In a real app, you would update all text content based on language
-            // For demo, just updating greeting
+        function restoreArchivedChat(index) {
+            const restoredChat = archivedChats.splice(index, 1)[0];
+            chats.push(restoredChat);
+            saveChats();
+            localStorage.setItem('milliAI_archived', JSON.stringify(archivedChats));
+            updateArchivedChatsDisplay();
+            alert('Chat restored!');
         }
     </script>
 </body>
