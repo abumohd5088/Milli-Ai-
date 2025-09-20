@@ -4,1200 +4,1751 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Milli AI - MKPS Balrampur</title>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        .chat-container {
-            height: calc(100vh - 180px);
+        :root {
+            --primary: #1E3A8A;
+            --primary-light: #3B82F6;
+            --accent: #F59E0B;
+            --background: #FFFFFF;
+            --background-dark: #1F2937;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --card: #F9FAFB;
+            --card-dark: #374151;
+            --border: #E5E7EB;
+            --border-dark: #4B5563;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.3);
         }
-        @media (max-width: 640px) {
-            .chat-container {
-                height: calc(100vh - 160px);
-            }
+
+        .dark-mode {
+            --background: #111827;
+            --background-dark: #1F2937;
+            --text: #F9FAFB;
+            --text-light: #9CA3AF;
+            --card: #1F2937;
+            --card-dark: #374151;
+            --border: #374151;
+            --border-dark: #4B5563;
         }
-        .typing-indicator:after {
-            content: '...';
-            animation: typing 1.5s infinite;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
-        @keyframes typing {
-            0% { content: '.'; }
-            33% { content: '..'; }
-            66% { content: '...'; }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        .dropdown {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
+
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--primary);
+            color: white;
+            position: relative;
             z-index: 10;
         }
-        .dropdown.active {
-            display: block;
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
         }
-        .message-options {
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 120px);
+            padding: 0 16px;
+            text-align: center;
+            background-color: var(--background);
+        }
+
+        .welcome-logo {
+            width: 80px;
+            height: 80px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .welcome-subtitle {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            max-width: 500px;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .quick-action {
+            padding: 16px;
+            background-color: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            padding: 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message-user {
+            align-self: flex-end;
+            background-color: var(--primary-light);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-ai {
+            align-self: flex-start;
+            background-color: var(--card);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .message-content {
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        .message-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: background-color 0.2s ease;
+        }
+
+        .message-user .message-action {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .message-user .message-action:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .message-ai .message-action {
+            color: var(--text-light);
+        }
+
+        .message-ai .message-action:hover {
+            background-color: var(--border);
+        }
+
+        .message-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+
+        /* Input Area */
+        .input-area {
+            display: none;
+            padding: 16px;
+            background-color: var(--background);
+            border-top: 1px solid var(--border);
+            position: relative;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 8px 16px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .attachment-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            padding: 8px 0;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .send-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 24px;
+            margin-left: 8px;
+        }
+
+        .stop-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 8px;
             display: none;
         }
-        .message:hover .message-options {
+
+        /* Three Dot Menu */
+        .thread-menu {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--text);
+            z-index: 5;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 40px;
+            right: 16px;
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow);
+            padding: 8px 0;
+            min-width: 160px;
+            z-index: 10;
+            display: none;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
             display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--border);
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100vh;
+            background-color: var(--card);
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            transition: right 0.3s ease;
+            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .settings-panel.active {
+            right: 0;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toggle-label {
+            font-size: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .language-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--background);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .language-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .info-card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .info-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-light);
+        }
+
+        /* Notifications Panel */
+        .notifications-panel {
+            position: absolute;
+            top: 56px;
+            right: 16px;
+            width: 320px;
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow);
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 15;
+            display: none;
+        }
+
+        .notification-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item:hover {
+            background-color: var(--border);
+        }
+
+        .notification-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .type-warning {
+            background-color: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .type-holiday {
+            background-color: #FEF3C7;
+            color: #D97706;
+        }
+
+        .type-feature {
+            background-color: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .type-maintenance {
+            background-color: #F3E8FF;
+            color: #7C3AED;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-body {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(30, 58, 138, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-container {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        /* Image Actions */
+        .image-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .image-action {
+            padding: 6px 12px;
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .image-action:hover {
+            background-color: var(--border);
+        }
+
+        /* File Input */
+        #fileInput {
+            display: none;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .welcome-screen {
+                height: calc(100vh - 100px);
+            }
+            
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .settings-panel.active {
+                right: 0;
+            }
+        }
+
+        /* File Preview */
+        .file-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin: 8px 0;
+            object-fit: cover;
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <!-- Firebase Config -->
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">Milli AI</div>
+            <div class="header-actions">
+                <button class="icon-button" id="notificationsBtn">
+                    <span class="material-icons">notifications</span>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <button class="icon-button" id="settingsBtn">
+                    <span class="material-icons">settings</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-logo">M</div>
+            <h1 class="welcome-title">Milli AI</h1>
+            <p class="welcome-subtitle">Ask me anything about study (Milli Karwaan Public School)</p>
+            <div class="quick-actions">
+                <div class="quick-action" data-prompt="Explain the Pythagorean theorem">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">school</span>
+                    Explain the Pythagorean theorem
+                </div>
+                <div class="quick-action" data-prompt="What is photosynthesis?">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">science</span>
+                    What is photosynthesis?
+                </div>
+                <div class="quick-action" data-prompt="Help me with math homework">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">calculate</span>
+                    Help me with math homework
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer"></div>
+
+        <!-- Input Area -->
+        <div class="input-area" id="inputArea">
+            <div class="input-container">
+                <button class="attachment-btn" id="attachmentBtn">
+                    <span class="material-icons">attach_file</span>
+                </button>
+                <input type="text" class="input-field" id="inputField" placeholder="What can I help with study?" autocomplete="off">
+                <button class="send-btn" id="sendBtn">
+                    <span class="material-icons">send</span>
+                </button>
+                <button class="stop-btn" id="stopBtn">Stop Responding</button>
+            </div>
+        </div>
+
+        <!-- Thread Menu -->
+        <div class="thread-menu" id="threadMenu" style="display: none;">
+            <span class="material-icons">more_vert</span>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-item" data-action="rename">
+                <span class="material-icons">edit</span>
+                Rename
+            </div>
+            <div class="dropdown-item" data-action="delete">
+                <span class="material-icons">delete</span>
+                Delete
+            </div>
+            <div class="dropdown-item" data-action="archive">
+                <span class="material-icons">archive</span>
+                Archive
+            </div>
+            <div class="dropdown-item" data-action="share">
+                <span class="material-icons">share</span>
+                Share
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-header">
+                <h2 class="settings-title">Settings</h2>
+                <button class="close-settings" id="closeSettings">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Appearance</h3>
+                <div class="toggle-container">
+                    <span class="toggle-label">Dark Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Language</h3>
+                <div class="language-selector">
+                    <button class="language-btn active" data-lang="en">English</button>
+                    <button class="language-btn" data-lang="hi">Hindi</button>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 8px;">
+                    AI will respond in the selected language or auto-detect from your input.
+                </p>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">About Developer</h3>
+                <div class="info-card">
+                    <h4 class="info-title">Abutalha</h4>
+                    <p class="info-content">
+                        Student at Milli Karwaan Public School<br>
+                        Contact: 9839469669<br><br>
+                        "A brilliant young coder with a passion for AI and education. Built Milli AI to help his peers learn smarter, not harder. Future tech leader of MKPS!"
+                    </p>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">About School</h3>
+                <div class="info-card">
+                    <h4 class="info-title">Milli Karwaan Public School, Balrampur (MKPS)</h4>
+                    <p class="info-content">
+                        Principal: Md Arshad Alig<br>
+                        Contact: 9758919151
+                    </p>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Terms & Conditions</h3>
+                <div class="info-card">
+                    <p class="info-content">
+                        Milli AI is designed for educational purposes only. 
+                        Please use responsibly and respect academic integrity. 
+                        The AI may make mistakes - always verify important information.
+                    </p>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Maintenance Status</h3>
+                <div class="info-card">
+                    <p class="info-content" id="maintenanceStatus">
+                        Loading maintenance status...
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" id="notificationsPanel">
+            <h3 style="font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                Notifications
+            </h3>
+            <div id="notificationsList">
+                <!-- Notifications will be populated here -->
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast">Message</div>
+
+        <!-- Overlay -->
+        <div class="overlay" id="overlay"></div>
+
+        <!-- File Input -->
+        <input type="file" id="fileInput" accept="image/jpeg, image/png, image/webp">
+    </div>
+
     <script>
+        // Initialize Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
+            apiKey: "AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs",
             authDomain: "mkps-balrampur.firebaseapp.com",
             projectId: "mkps-balrampur",
             storageBucket: "mkps-balrampur.appspot.com",
             messagingSenderId: "469227187804",
             appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const messaging = firebase.messaging();
-    </script>
 
-    <div class="flex flex-col h-screen">
-        <!-- Header -->
-        <header class="bg-blue-600 dark:bg-blue-800 text-white p-4 shadow-md">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <img src="http://static.photos/education/200x200/1" alt="MKPS Logo" class="w-10 h-10 rounded-full">
-                    <h1 class="text-xl font-bold">Milli AI</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button id="notificationBtn" class="relative p-2 rounded-full hover:bg-blue-700 dark:hover:bg-blue-900">
-                            <i data-feather="bell"></i>
-                            <span id="notificationCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
-                        </button>
-                        <div id="notificationDropdown" class="dropdown bg-white dark:bg-gray-800 shadow-lg rounded-md mt-2 w-64 max-h-96 overflow-y-auto">
-                            <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="font-semibold">Notifications</h3>
-                            </div>
-                            <div id="notificationList" class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <div class="p-3 text-center text-gray-500">No new notifications</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <button id="settingsBtn" class="p-2 rounded-full hover:bg-blue-700 dark:hover:bg-blue-900">
-                            <i data-feather="settings"></i>
-                        </button>
-                        <div id="settingsDropdown" class="dropdown bg-white dark:bg-gray-800 shadow-lg rounded-md mt-2 w-48">
-                            <div class="py-1">
-                                <button id="themeToggle" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-                                    <i data-feather="moon" class="mr-2"></i> Dark Mode
-                                </button>
-                                <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-                                    <i data-feather="globe" class="mr-2"></i> Language
-                                </button>
-                                <button id="aboutSchoolBtn" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-                                    <i data-feather="info" class="mr-2"></i> About School
-                                </button>
-                                <button id="aboutDevBtn" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-                                    <i data-feather="code" class="mr-2"></i> About Developer
-                                </button>
-                                <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-                                    <i data-feather="file-text" class="mr-2"></i> Terms & Conditions
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+        // DOM Elements
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const chatContainer = document.getElementById('chatContainer');
+        const inputArea = document.getElementById('inputArea');
+        const inputField = document.getElementById('inputField');
+        const sendBtn = document.getElementById('sendBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const attachmentBtn = document.getElementById('attachmentBtn');
+        const fileInput = document.getElementById('fileInput');
+        const threadMenu = document.getElementById('threadMenu');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const closeSettings = document.getElementById('closeSettings');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const languageBtns = document.querySelectorAll('.language-btn');
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationsList = document.getElementById('notificationsList');
+        const overlay = document.getElementById('overlay');
+        const toast = document.getElementById('toast');
+        const maintenanceStatus = document.getElementById('maintenanceStatus');
 
-        <!-- Sidebar (hidden on mobile) -->
-        <div class="flex flex-1 overflow-hidden">
-            <aside class="hidden md:block w-64 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
-                <div class="mb-4">
-                    <button id="newChatBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center justify-center">
-                        <i data-feather="plus" class="mr-2"></i> New Chat
-                    </button>
-                </div>
-                <div class="space-y-2">
-                    <div id="chatList" class="space-y-1">
-                        <!-- Chats will be loaded here -->
-                    </div>
-                </div>
-            </aside>
+        // App State
+        let currentThreadId = null;
+        let threads = [];
+        let isGenerating = false;
+        let abortController = null;
+        let selectedLanguage = 'auto';
+        let notificationCount = 0;
+        let isDarkMode = false;
 
-            <!-- Main Chat Area -->
-            <main class="flex-1 flex flex-col">
-                <!-- Chat Header (mobile) -->
-                <div class="md:hidden bg-gray-100 dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                    <button id="mobileMenuBtn" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <i data-feather="menu"></i>
-                    </button>
-                    <h2 id="currentChatTitle" class="text-lg font-semibold">New Chat</h2>
-                    <div class="w-8"></div> <!-- Spacer for alignment -->
-                </div>
+        // Gemini API Keys
+        const GEMINI_KEYS = [
+            'AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs',
+            'AIzaSyCqGS8gb5kh7Jr0pv8d84LxCLhgHU-O_VU'
+        ];
+        let currentGeminiKeyIndex = 0;
 
-                <!-- Chat Container -->
-                <div id="chatContainer" class="chat-container overflow-y-auto p-4 space-y-4 flex-1">
-                    <!-- Welcome Message -->
-                    <div class="text-center py-10">
-                        <img src="http://static.photos/technology/200x200/1" alt="Milli AI" class="w-20 h-20 mx-auto rounded-full mb-4">
-                        <h2 class="text-2xl font-bold mb-2">Welcome to Milli AI</h2>
-                        <p class="text-gray-600 dark:text-gray-400 mb-6">Ask me anything about studies from Mill Karwaan Public School, Balrampur</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                            <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                "Explain Newton's Laws of Motion"
-                            </button>
-                            <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                "What's the syllabus for Class 10 Science?"
-                            </button>
-                            <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                "Help me with algebra problems"
-                            </button>
-                            <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                "Generate an image of the solar system"
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        // Initialize App
+        function initApp() {
+            // Load saved data
+            loadSavedData();
+            
+            // Check for dark mode preference
+            const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (savedDarkMode) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.checked = true;
+                isDarkMode = true;
+            }
 
-                <!-- Input Area -->
-                <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                    <div class="flex items-center space-x-2">
-                        <button id="attachBtn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i data-feather="paperclip"></i>
-                        </button>
-                        <div class="flex-1 relative">
-                            <textarea id="messageInput" rows="1" class="w-full border border-gray-300 dark:border-gray-600 rounded-full py-2 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white dark:bg-gray-900" placeholder="Ask me anything about study..."></textarea>
-                            <button id="sendBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                                <i data-feather="send"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Milli AI may produce inaccurate information. Always verify important information.</p>
-                </div>
-            </main>
-        </div>
+            // Set language preference
+            const savedLanguage = localStorage.getItem('language') || 'auto';
+            selectedLanguage = savedLanguage;
+            updateLanguageButtons(savedLanguage);
 
-        <!-- Mobile Sidebar Overlay -->
-        <div id="mobileSidebar" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden">
-            <div class="absolute left-0 top-0 bottom-0 w-64 bg-gray-100 dark:bg-gray-800 p-4 overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Chats</h3>
-                    <button id="closeMobileMenuBtn" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <i data-feather="x"></i>
-                    </button>
-                </div>
-                <div class="mb-4">
-                    <button id="newChatBtnMobile" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center justify-center">
-                        <i data-feather="plus" class="mr-2"></i> New Chat
-                    </button>
-                </div>
-                <div id="mobileChatList" class="space-y-1">
-                    <!-- Mobile chat list will be loaded here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Modals -->
-        <div id="aboutSchoolModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold">About Mill Karwaan Public School</h3>
-                    <button class="close-modal p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i data-feather="x"></i>
-                    </button>
-                </div>
-                <img src="http://static.photos/education/640x360/1" alt="MKPS" class="w-full h-48 object-cover rounded-md mb-4">
-                <p class="mb-2"><strong>Name:</strong> Mill Karwaan Public School, Balrampur (MKPS)</p>
-                <p class="mb-2"><strong>Principal:</strong> Md Arshad Alig</p>
-                <p class="mb-4"><strong>Contact:</strong> 9758919151</p>
-                <p class="text-gray-700 dark:text-gray-300">MKPS is committed to providing quality education with modern teaching methodologies and a focus on holistic development of students.</p>
-            </div>
-        </div>
-
-        <div id="aboutDevModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold">About Developer</h3>
-                    <button class="close-modal p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i data-feather="x"></i>
-                    </button>
-                </div>
-                <img src="http://static.photos/people/200x200/1" alt="Developer" class="w-20 h-20 rounded-full mx-auto mb-4">
-                <p class="mb-2"><strong>Name:</strong> Abutalha</p>
-                <p class="mb-2"><strong>School:</strong> Mill Karwaan Public School (Student)</p>
-                <p class="mb-4"><strong>Contact:</strong> 9839469669</p>
-                <p class="text-gray-700 dark:text-gray-300">Abutalha is a talented student developer with a passion for creating innovative solutions to enhance the learning experience at MKPS. His dedication to combining technology with education has resulted in this advanced AI assistant for the school community.</p>
-            </div>
-        </div>
-
-        <div id="imagePreviewModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold">Image Preview</h3>
-                    <button class="close-modal p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i data-feather="x"></i>
-                    </button>
-                </div>
-                <img id="previewedImage" src="" alt="Preview" class="w-full h-auto rounded-md mb-4">
-                <div class="flex space-x-2 justify-center">
-                    <button id="downloadImageBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center">
-                        <i data-feather="download" class="mr-2"></i> Download
-                    </button>
-                    <button id="shareImageBtn" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 py-2 px-4 rounded-md flex items-center">
-                        <i data-feather="share-2" class="mr-2"></i> Share
-                    </button>
-                    <button id="regenerateImageBtn" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 py-2 px-4 rounded-md flex items-center">
-                        <i data-feather="refresh-cw" class="mr-2"></i> Regenerate
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <script>
-            // Initialize AOS and Feather Icons
-            AOS.init();
-            feather.replace();
-
-            // DOM Elements
-            const messageInput = document.getElementById('messageInput');
-            const sendBtn = document.getElementById('sendBtn');
-            const chatContainer = document.getElementById('chatContainer');
-            const newChatBtn = document.getElementById('newChatBtn');
-            const newChatBtnMobile = document.getElementById('newChatBtnMobile');
-            const chatList = document.getElementById('chatList');
-            const mobileChatList = document.getElementById('mobileChatList');
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const closeMobileMenuBtn = document.getElementById('closeMobileMenuBtn');
-            const mobileSidebar = document.getElementById('mobileSidebar');
-            const currentChatTitle = document.getElementById('currentChatTitle');
-            const notificationBtn = document.getElementById('notificationBtn');
-            const notificationDropdown = document.getElementById('notificationDropdown');
-            const notificationList = document.getElementById('notificationList');
-            const notificationCount = document.getElementById('notificationCount');
-            const settingsBtn = document.getElementById('settingsBtn');
-            const settingsDropdown = document.getElementById('settingsDropdown');
-            const themeToggle = document.getElementById('themeToggle');
-            const aboutSchoolBtn = document.getElementById('aboutSchoolBtn');
-            const aboutDevBtn = document.getElementById('aboutDevBtn');
-            const aboutSchoolModal = document.getElementById('aboutSchoolModal');
-            const aboutDevModal = document.getElementById('aboutDevModal');
-            const imagePreviewModal = document.getElementById('imagePreviewModal');
-            const previewedImage = document.getElementById('previewedImage');
-            const downloadImageBtn = document.getElementById('downloadImageBtn');
-            const shareImageBtn = document.getElementById('shareImageBtn');
-            const regenerateImageBtn = document.getElementById('regenerateImageBtn');
-            const attachBtn = document.getElementById('attachBtn');
-            const suggestionBtns = document.querySelectorAll('.suggestion-btn');
-
-            // Chat state
-            let chats = JSON.parse(localStorage.getItem('milliAiChats')) || [];
-            let currentChatId = null;
-            let isGenerating = false;
-
-            // Initialize the app
-            function init() {
-                loadChats();
-                setupEventListeners();
-                checkDarkModePreference();
-                setupFirebaseListeners();
-                
-                // If no chats exist, create a default one
-                if (chats.length === 0) {
-                    createNewChat();
-                } else {
-                    loadChat(chats[0].id);
+            // Event Listeners
+            sendBtn.addEventListener('click', handleSendMessage);
+            inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
                 }
-            }
+            });
 
-            // Set up event listeners
-            function setupEventListeners() {
-                // Message input
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
+            attachmentBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', handleFileUpload);
+
+            settingsBtn.addEventListener('click', () => {
+                settingsPanel.classList.add('active');
+                overlay.classList.add('active');
+            });
+
+            closeSettings.addEventListener('click', () => {
+                settingsPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            overlay.addEventListener('click', () => {
+                settingsPanel.classList.remove('active');
+                notificationsPanel.style.display = 'none';
+                overlay.classList.remove('active');
+                dropdownMenu.style.display = 'none';
+            });
+
+            darkModeToggle.addEventListener('change', toggleDarkMode);
+
+            languageBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    languageBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedLanguage = btn.dataset.lang;
+                    localStorage.setItem('language', selectedLanguage);
                 });
+            });
+
+            notificationsBtn.addEventListener('click', toggleNotifications);
+
+            threadMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Dropdown menu actions
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const action = item.dataset.action;
+                    handleThreadAction(action);
+                    dropdownMenu.style.display = 'none';
+                });
+            });
+
+            // Quick actions
+            document.querySelectorAll('.quick-action').forEach(item => {
+                item.addEventListener('click', () => {
+                    const prompt = item.dataset.prompt;
+                    inputField.value = prompt;
+                    handleSendMessage();
+                });
+            });
+
+            // Initialize Firebase
+            initializeFirebase();
+
+            // Show welcome screen or last thread
+            if (threads.length > 0 && threads[0].messages.length > 0) {
+                showThread(threads[0].id);
+            } else {
+                welcomeScreen.style.display = 'flex';
+            }
+        }
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            try {
+                // In a real app, we would initialize Firebase here
+                // For this demo, we'll simulate Firebase functionality
                 
-                messageInput.addEventListener('input', () => {
-                    messageInput.style.height = 'auto';
-                    messageInput.style.height = (messageInput.scrollHeight) + 'px';
-                });
-
-                sendBtn.addEventListener('click', sendMessage);
-
-                // Chat management
-                newChatBtn.addEventListener('click', createNewChat);
-                newChatBtnMobile.addEventListener('click', createNewChat);
-
-                // Mobile menu
-                mobileMenuBtn.addEventListener('click', () => {
-                    mobileSidebar.classList.remove('hidden');
-                });
-
-                closeMobileMenuBtn.addEventListener('click', () => {
-                    mobileSidebar.classList.add('hidden');
-                });
-
-                // Dropdowns
-                notificationBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    notificationDropdown.classList.toggle('active');
-                    settingsDropdown.classList.remove('active');
-                });
-
-                settingsBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    settingsDropdown.classList.toggle('active');
-                    notificationDropdown.classList.remove('active');
-                });
-
-                document.addEventListener('click', (e) => {
-                    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-                        notificationDropdown.classList.remove('active');
-                    }
-                    if (!settingsBtn.contains(e.target) && !settingsDropdown.contains(e.target)) {
-                        settingsDropdown.classList.remove('active');
-                    }
-                });
-
-                // Theme toggle
-                themeToggle.addEventListener('click', toggleDarkMode);
-
-                // Modals
-                aboutSchoolBtn.addEventListener('click', () => {
-                    aboutSchoolModal.classList.remove('hidden');
-                });
-
-                aboutDevBtn.addEventListener('click', () => {
-                    aboutDevModal.classList.remove('hidden');
-                });
-
-                document.querySelectorAll('.close-modal').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        aboutSchoolModal.classList.add('hidden');
-                        aboutDevModal.classList.add('hidden');
-                        imagePreviewModal.classList.add('hidden');
-                    });
-                });
-
-                // Suggestion buttons
-                suggestionBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        messageInput.value = btn.textContent.trim().replace(/"/g, '');
-                        messageInput.focus();
-                    });
-                });
-
-                // Image buttons
-                downloadImageBtn.addEventListener('click', downloadImage);
-                shareImageBtn.addEventListener('click', shareImage);
-                regenerateImageBtn.addEventListener('click', regenerateImage);
-            }
-
-            // Firebase setup
-            function setupFirebaseListeners() {
-                // Listen for notifications
-                db.collection("notifications")
-                    .orderBy("timestamp", "desc")
-                    .limit(10)
-                    .onSnapshot((snapshot) => {
-                        const notifications = [];
-                        snapshot.forEach(doc => {
-                            notifications.push(doc.data());
-                        });
-                        updateNotifications(notifications);
-                    });
-
-                // Check maintenance status
-                db.collection("system").doc("maintenance")
-                    .onSnapshot((doc) => {
-                        if (doc.exists && doc.data().isMaintenance) {
-                            showMaintenanceAlert(doc.data().message);
-                        }
-                    });
-            }
-
-            function updateNotifications(notifications) {
-                notificationList.innerHTML = '';
-                
-                if (notifications.length === 0) {
-                    notificationList.innerHTML = '<div class="p-3 text-center text-gray-500">No new notifications</div>';
-                    notificationCount.classList.add('hidden');
-                    return;
-                }
-
-                notificationCount.textContent = notifications.length;
-                notificationCount.classList.remove('hidden');
-
-                notifications.forEach(notif => {
-                    const notifElement = document.createElement('div');
-                    notifElement.className = 'p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer';
-                    notifElement.innerHTML = `
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 pt-0.5">
-                                <i data-feather="${notif.type === 'warning' ? 'alert-triangle' : notif.type === 'holiday' ? 'calendar' : 'info'}" class="text-${notif.type === 'warning' ? 'red' : notif.type === 'holiday' ? 'yellow' : 'blue'}-500"></i>
-                            </div>
-                            <div class="ml-3 flex-1">
-                                <p class="text-sm font-medium">${notif.title}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">${notif.message}</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">${new Date(notif.timestamp).toLocaleString()}</p>
-                            </div>
-                        </div>
-                    `;
-                    notificationList.appendChild(notifElement);
-                });
-                feather.replace();
-            }
-
-            function showMaintenanceAlert(message) {
-                const alert = document.createElement('div');
-                alert.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center';
-                alert.innerHTML = `
-                    <i data-feather="alert-triangle" class="mr-2"></i>
-                    <span>${message || 'System is under maintenance. Some features may not work.'}</span>
-                `;
-                document.body.appendChild(alert);
-                feather.replace();
-                
+                // Simulate getting maintenance status
                 setTimeout(() => {
-                    alert.remove();
-                }, 10000);
+                    maintenanceStatus.textContent = "System is running normally. No maintenance scheduled.";
+                }, 1000);
+
+                // Simulate notifications
+                simulateNotifications();
+                
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                maintenanceStatus.textContent = "Unable to connect to server";
+            }
+        }
+
+        // Simulate notifications for demo
+        function simulateNotifications() {
+            const demoNotifications = [
+                {
+                    id: '1',
+                    title: 'Holiday Announcement',
+                    body: 'School will remain closed on Monday for Teacher Training.',
+                    type: 'holiday',
+                    timestamp: new Date(Date.now() - 3600000).toISOString()
+                },
+                {
+                    id: '2',
+                    title: 'New Feature',
+                    body: 'Image analysis feature now available! Upload diagrams for explanations.',
+                    type: 'feature',
+                    timestamp: new Date(Date.now() - 7200000).toISOString()
+                },
+                {
+                    id: '3',
+                    title: 'Exam Reminder',
+                    body: 'Mathematics exam scheduled for next Friday. Start preparing!',
+                    type: 'warning',
+                    timestamp: new Date(Date.now() - 86400000).toISOString()
+                }
+            ];
+
+            // Load saved notifications or use demo ones
+            const savedNotifications = localStorage.getItem('notifications');
+            const notifications = savedNotifications ? JSON.parse(savedNotifications) : demoNotifications;
+            
+            displayNotifications(notifications);
+            updateNotificationCount(notifications.length);
+        }
+
+        // Display notifications
+        function displayNotifications(notifications) {
+            notificationsList.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 16px;">No notifications</p>';
+                return;
             }
 
-            // Chat functions
-            function createNewChat() {
-                const newChat = {
-                    id: Date.now().toString(),
-                    title: 'New Chat',
-                    messages: [],
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                
-                chats.unshift(newChat);
-                saveChats();
-                loadChat(newChat.id);
-                
-                // Close mobile menu if open
-                mobileSidebar.classList.add('hidden');
-            }
-
-            function loadChats() {
-                chatList.innerHTML = '';
-                mobileChatList.innerHTML = '';
-                
-                chats.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-                
-                chats.forEach(chat => {
-                    const chatElement = createChatElement(chat);
-                    chatList.appendChild(chatElement.cloneNode(true));
-                    mobileChatList.appendChild(chatElement);
-                });
-                
-                feather.replace();
-            }
-
-            function createChatElement(chat) {
-                const chatElement = document.createElement('div');
-                chatElement.className = `group flex items-center justify-between p-2 rounded-md cursor-pointer ${currentChatId === chat.id ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`;
-                chatElement.dataset.chatId = chat.id;
-                
-                chatElement.innerHTML = `
-                    <div class="flex items-center truncate flex-1" onclick="loadChat('${chat.id}')">
-                        <i data-feather="message-square" class="mr-2 flex-shrink-0"></i>
-                        <span class="truncate">${chat.title}</span>
-                    </div>
-                    <div class="relative">
-                        <button class="chat-options-btn p-1 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100">
-                            <i data-feather="more-vertical"></i>
-                        </button>
-                        <div class="dropdown bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1 w-48">
-                            <div class="py-1">
-                                <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center rename-chat-btn">
-                                    <i data-feather="edit-2" class="mr-2"></i> Rename
-                                </button>
-                                <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center delete-chat-btn">
-                                    <i data-feather="trash-2" class="mr-2"></i> Delete
-                                </button>
-                                <button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center share-chat-btn">
-                                    <i data-feather="share-2" class="mr-2"></i> Share
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            notifications.forEach(notification => {
+                const item = document.createElement('div');
+                item.className = 'notification-item';
+                item.innerHTML = `
+                    <span class="notification-type type-${notification.type}">${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}</span>
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-body">${notification.body}</div>
+                    <div class="notification-time">${formatTime(new Date(notification.timestamp))}</div>
                 `;
-                
-                // Add event listeners to the buttons
-                const chatOptionsBtn = chatElement.querySelector('.chat-options-btn');
-                const dropdown = chatElement.querySelector('.dropdown');
-                
-                chatOptionsBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    dropdown.classList.toggle('active');
-                });
-                
-                chatElement.querySelector('.rename-chat-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    renameChat(chat.id);
-                    dropdown.classList.remove('active');
-                });
-                
-                chatElement.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deleteChat(chat.id);
-                    dropdown.classList.remove('active');
-                });
-                
-                chatElement.querySelector('.share-chat-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    shareChat(chat.id);
-                    dropdown.classList.remove('active');
-                });
-                
-                return chatElement;
+                notificationsList.appendChild(item);
+            });
+        }
+
+        // Toggle notifications panel
+        function toggleNotifications() {
+            notificationsPanel.style.display = notificationsPanel.style.display === 'block' ? 'none' : 'block';
+            if (notificationsPanel.style.display === 'block') {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
+
+        // Update notification count
+        function updateNotificationCount(count) {
+            notificationCount = count;
+            notificationBadge.textContent = count > 9 ? '9+' : count;
+            notificationBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            isDarkMode = darkModeToggle.checked;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Update language buttons
+        function updateLanguageButtons(lang) {
+            languageBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+        }
+
+        // Handle file upload
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type and size
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                showToast('Please upload JPG, PNG, or WEBP files only');
+                return;
             }
 
-            function loadChat(chatId) {
-                const chat = chats.find(c => c.id === chatId);
-                if (!chat) return;
-                
-                currentChatId = chatId;
-                currentChatTitle.textContent = chat.title;
-                
-                // Update chat list UI
-                document.querySelectorAll('[data-chat-id]').forEach(el => {
-                    if (el.dataset.chatId === chatId) {
-                        el.classList.add('bg-blue-100', 'dark:bg-blue-900');
-                    } else {
-                        el.classList.remove('bg-blue-100', 'dark:bg-blue-900');
-                    }
-                });
-                
-                // Clear and rebuild chat container
-                chatContainer.innerHTML = '';
-                
-                if (chat.messages.length === 0) {
-                    // Show welcome message if chat is empty
-                    chatContainer.innerHTML = `
-                        <div class="text-center py-10">
-                            <img src="http://static.photos/technology/200x200/1" alt="Milli AI" class="w-20 h-20 mx-auto rounded-full mb-4">
-                            <h2 class="text-2xl font-bold mb-2">Welcome to Milli AI</h2>
-                            <p class="text-gray-600 dark:text-gray-400 mb-6">Ask me anything about studies from Mill Karwaan Public School, Balrampur</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                                <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                    "Explain Newton's Laws of Motion"
-                                </button>
-                                <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                    "What's the syllabus for Class 10 Science?"
-                                </button>
-                                <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                    "Help me with algebra problems"
-                                </button>
-                                <button class="suggestion-btn bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-3 rounded-lg text-left">
-                                    "Generate an image of the solar system"
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Add event listeners to suggestion buttons
-                    document.querySelectorAll('.suggestion-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            messageInput.value = btn.textContent.trim().replace(/"/g, '');
-                            messageInput.focus();
-                        });
-                    });
-                } else {
-                    // Display all messages
-                    chat.messages.forEach(message => {
-                        addMessageToChat(message, false);
-                    });
-                    
-                    // Scroll to bottom
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }
-                
-                // Close mobile menu if open
-                mobileSidebar.classList.add('hidden');
+            if (file.size > 4 * 1024 * 1024) {
+                showToast('File size must be less than 4MB');
+                return;
             }
 
-            function renameChat(chatId) {
-                const chat = chats.find(c => c.id === chatId);
-                if (!chat) return;
-                
-                const newTitle = prompt('Enter new chat title:', chat.title);
-                if (newTitle && newTitle.trim() !== '') {
-                    chat.title = newTitle.trim();
-                    chat.updatedAt = new Date().toISOString();
-                    saveChats();
-                    loadChats();
-                    
-                    if (currentChatId === chatId) {
-                        currentChatTitle.textContent = newTitle.trim();
-                    }
-                }
+            // Create thread if none exists
+            if (!currentThreadId) {
+                createNewThread();
             }
 
-            function deleteChat(chatId) {
-                if (!confirm('Are you sure you want to delete this chat?')) return;
+            // Display user message with image
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imageUrl = event.target.result;
                 
-                const chatIndex = chats.findIndex(c => c.id === chatId);
-                if (chatIndex === -1) return;
-                
-                chats.splice(chatIndex, 1);
-                saveChats();
-                loadChats();
-                
-                if (currentChatId === chatId) {
-                    if (chats.length > 0) {
-                        loadChat(chats[0].id);
-                    } else {
-                        createNewChat();
-                    }
-                }
-            }
-
-            function shareChat(chatId) {
-                const chat = chats.find(c => c.id === chatId);
-                if (!chat) return;
-                
-                // In a real app, you would implement actual sharing functionality
-                alert(`Share link for "${chat.title}" would be generated here.`);
-            }
-
-            function saveChats() {
-                localStorage.setItem('milliAiChats', JSON.stringify(chats));
-            }
-
-            // Message functions
-            function sendMessage() {
-                const messageText = messageInput.value.trim();
-                if (messageText === '' || isGenerating) return;
-                
-                const chat = chats.find(c => c.id === currentChatId);
-                if (!chat) return;
-                
-                // Add user message to chat
-                const userMessage = {
-                    id: Date.now().toString(),
-                    text: messageText,
-                    sender: 'user',
+                // Add user message with image
+                addMessageToThread(currentThreadId, {
+                    role: 'user',
+                    content: imageUrl,
+                    isImage: true,
                     timestamp: new Date().toISOString()
+                });
+
+                // Clear file input
+                fileInput.value = '';
+
+                // Analyze image with Gemini Vision
+                analyzeImageWithGemini(imageUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Analyze image with Gemini Vision
+        async function analyzeImageWithGemini(imageUrl) {
+            try {
+                // Add AI thinking message
+                const thinkingMessage = addMessageToThread(currentThreadId, {
+                    role: 'ai',
+                    content: 'Milli AI is analyzing your image...',
+                    isThinking: true,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Get base64 from data URL
+                const base64Image = imageUrl.split(',')[1];
+
+                // Prepare request for Gemini Vision
+                const apiKey = GEMINI_KEYS[currentGeminiKeyIndex];
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`;
+
+                const requestBody = {
+                    contents: [{
+                        parts: [
+                            {
+                                text: "Analyze this image and explain it in educational context for school students. Keep the explanation clear, detailed, and curriculum-aligned."
+                            },
+                            {
+                                inline_data: {
+                                    mime_type: "image/jpeg",
+                                    data: base64Image
+                                }
+                            }
+                        ]
+                    }]
                 };
-                
-                chat.messages.push(userMessage);
-                chat.updatedAt = new Date().toISOString();
-                chat.title = messageText.length > 30 ? messageText.substring(0, 30) + '...' : messageText;
-                saveChats();
-                loadChats();
-                
-                addMessageToChat(userMessage, true);
-                messageInput.value = '';
-                messageInput.style.height = 'auto';
-                
-                // Generate AI response
-                generateAIResponse(messageText);
-            }
 
-            function addMessageToChat(message, scrollToBottom = true) {
-                const messageElement = document.createElement('div');
-                messageElement.className = `message flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`;
-                messageElement.dataset.messageId = message.id;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
                 
-                if (message.sender === 'user') {
-                    messageElement.innerHTML = `
-                        <div class="max-w-[80%] bg-blue-600 text-white rounded-lg p-3 relative">
-                            <div class="message-content">${formatMessageText(message.text)}</div>
-                            <div class="message-options absolute -bottom-2 right-2 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center">
-                                <button class="copy-message-btn p-1 text-gray-500 hover:text-blue-500" title="Copy">
-                                    <i data-feather="copy" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                // Remove thinking message
+                thinkingMessage.remove();
+
+                if (data.candidates && data.candidates[0].content) {
+                    const aiResponse = data.candidates[0].content.parts[0].text;
+                    
+                    // Add AI response
+                    addMessageToThread(currentThreadId, {
+                        role: 'ai',
+                        content: aiResponse + "\n\n--- Want me to generate a related diagram?",
+                        timestamp: new Date().toISOString()
+                    });
                 } else {
-                    // AI message
-                    let content = formatMessageText(message.text);
-                    
-                    if (message.imageUrl) {
-                        content += `
-                            <div class="mt-3">
-                                <img src="${message.imageUrl}" alt="Generated image" class="rounded-md cursor-pointer max-w-full h-auto max-h-64 object-cover hover:opacity-90 view-image-btn" data-image-url="${message.imageUrl}">
-                                <div class="flex justify-end mt-2 space-x-2">
-                                    <button class="like-btn p-1 text-gray-500 hover:text-green-500" title="Like">
-                                        <i data-feather="thumbs-up" class="w-4 h-4"></i>
-                                    </button>
-                                    <button class="dislike-btn p-1 text-gray-500 hover:text-red-500" title="Dislike">
-                                        <i data-feather="thumbs-down" class="w-4 h-4"></i>
-                                    </button>
-                                    <button class="copy-message-btn p-1 text-gray-500 hover:text-blue-500" title="Copy">
-                                        <i data-feather="copy" class="w-4 h-4"></i>
-                                    </button>
-                                    <button class="regenerate-btn p-1 text-gray-500 hover:text-purple-500" title="Regenerate">
-                                        <i data-feather="refresh-cw" class="w-4 h-4"></i>
-                                    </button>
-                                    <button class="share-btn p-1 text-gray-500 hover:text-yellow-500" title="Share">
-                                        <i data-feather="share-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    messageElement.innerHTML = `
-                        <div class="max-w-[80%] bg-gray-200 dark:bg-gray-700 rounded-lg p-3 relative">
-                            <div class="flex items-center mb-1">
-                                <span class="font-semibold text-blue-600 dark:text-blue-400">Milli AI</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">${new Date(message.timestamp).toLocaleTimeString()}</span>
-                            </div>
-                            <div class="message-content">${content}</div>
-                            ${message.suggestions ? `
-                                <div class="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">--- Suggestion ---</p>
-                                    <p class="text-sm">${message.suggestions}</p>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                    throw new Error('No response from AI');
                 }
+
+            } catch (error) {
+                console.error('Error analyzing image:', error);
                 
-                chatContainer.appendChild(messageElement);
-                feather.replace();
-                
-                if (scrollToBottom) {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Try with fallback key
+                if (currentGeminiKeyIndex === 0) {
+                    currentGeminiKeyIndex = 1;
+                    showToast('Switching to backup AI service...');
+                    await analyzeImageWithGemini(imageUrl);
+                } else {
+                    showToast('Error analyzing image. Please try again.');
                 }
-                
-                // Add event listeners to message buttons
-                if (message.sender === 'ai') {
-                    // Image preview
-                    if (message.imageUrl) {
-                        document.querySelectorAll('.view-image-btn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                previewImage(btn.dataset.imageUrl);
-                            });
-                        });
-                    }
-                    
-                    // Like/dislike buttons
-                    document.querySelectorAll('.like-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            alert('Thank you for your feedback!');
-                        });
-                    });
-                    
-                    document.querySelectorAll('.dislike-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            alert('We appreciate your feedback and will improve.');
-                        });
-                    });
-                }
-                
-                // Copy button
-                document.querySelectorAll('.copy-message-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const messageContent = btn.closest('.message').querySelector('.message-content').textContent;
-                        navigator.clipboard.writeText(messageContent.trim());
-                        
-                        // Show copied tooltip
-                        const tooltip = document.createElement('div');
-                        tooltip.className = 'absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded';
-                        tooltip.textContent = 'Copied!';
-                        btn.appendChild(tooltip);
-                        
-                        setTimeout(() => {
-                            tooltip.remove();
-                        }, 2000);
-                    });
-                });
-                
-                // Regenerate button
-                document.querySelectorAll('.regenerate-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const messageId = btn.closest('.message').dataset.messageId;
-                        regenerateResponse(messageId);
-                    });
-                });
-                
-                // Share button
-                document.querySelectorAll('.share-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const messageContent = btn.closest('.message').querySelector('.message-content').textContent;
-                        shareContent(messageContent.trim());
-                    });
-                });
+            }
+        }
+
+        // Handle send message
+        function handleSendMessage() {
+            const message = inputField.value.trim();
+            if (!message || isGenerating) return;
+
+            // Create thread if none exists
+            if (!currentThreadId) {
+                createNewThread();
             }
 
-            function formatMessageText(text) {
-                // Simple formatting for links and line breaks
-                return text
-                    .replace(/\n/g, '<br>')
-                    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-500 hover:underline">$1</a>');
-            }
+            // Clear input
+            inputField.value = '';
 
-            async function generateAIResponse(prompt) {
-                isGenerating = true;
+            // Add user message
+            addMessageToThread(currentThreadId, {
+                role: 'user',
+                content: message,
+                timestamp: new Date().toISOString()
+            });
+
+            // Generate AI response
+            generateAIResponse(message);
+        }
+
+        // Generate AI response
+        async function generateAIResponse(prompt) {
+            isGenerating = true;
+            sendBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
+
+            try {
+                // Add AI thinking message
+                const thinkingMessage = addMessageToThread(currentThreadId, {
+                    role: 'ai',
+                    content: 'Milli AI is thinking...',
+                    isThinking: true,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Detect language if set to auto
+                let language = selectedLanguage;
+                if (language === 'auto') {
+                    language = detectLanguage(prompt);
+                }
+
+                // Prepare request for Gemini
+                const apiKey = GEMINI_KEYS[currentGeminiKeyIndex];
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+
+                let systemPrompt = "You are Milli AI, an educational assistant for Milli Karwaan Public School students. ";
+                systemPrompt += "Always respond in the same language as the user's input. ";
+                systemPrompt += "If the query is not study-related, politely remind: 'I'm designed to help with study-related topics.' ";
+                systemPrompt += "After every response, add contextual suggestions prefixed with '---' (e.g., '--- Want an image for this?', '--- Need Hindi summary?', '--- Upload a diagram to explain?'). ";
+                systemPrompt += "Keep explanations clear, detailed, and curriculum-aligned for school students.";
+
+                if (language === 'hi') {
+                    systemPrompt += " Respond in Hindi.";
+                }
+
+                const requestBody = {
+                    contents: [{
+                        parts: [{
+                            text: systemPrompt + "\n\nUser query: " + prompt
+                        }]
+                    }]
+                };
+
+                abortController = new AbortController();
                 
-                const chat = chats.find(c => c.id === currentChatId);
-                if (!chat) return;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                    signal: abortController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
                 
-                // Show typing indicator
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'message flex justify-start';
-                typingIndicator.innerHTML = `
-                    <div class="max-w-[80%] bg-gray-200 dark:bg-gray-700 rounded-lg p-3">
-                        <div class="flex items-center">
-                            <span class="font-semibold text-blue-600 dark:text-blue-400">Milli AI</span>
-                            <span class="typing-indicator ml-2"></span>
-                        </div>
-                    </div>
-                `;
-                chatContainer.appendChild(typingIndicator);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-                
-                try {
-                    // Check if the prompt is study-related
-                    const isStudyRelated = checkStudyRelated(prompt);
+                // Remove thinking message
+                thinkingMessage.remove();
+
+                if (data.candidates && data.candidates[0].content) {
+                    let aiResponse = data.candidates[0].content.parts[0].text;
                     
-                    if (!isStudyRelated) {
-                        // For non-study related queries
-                        const responseMessage = {
-                            id: Date.now().toString(),
-                            text: "I'm designed specifically to help with study-related questions from Mill Karwaan Public School. Please ask me about your studies, syllabus, or any academic topics.",
-                            sender: 'ai',
-                            timestamp: new Date().toISOString(),
-                            suggestions: "You might want to ask about: 'What's today's homework?' or 'Explain photosynthesis'"
-                        };
-                        
-                        chat.messages.push(responseMessage);
-                        chat.updatedAt = new Date().toISOString();
-                        saveChats();
-                        
-                        typingIndicator.remove();
-                        addMessageToChat(responseMessage, true);
-                        isGenerating = false;
-                        return;
+                    // Add polite reminder for off-topic if needed
+                    if (!isStudyRelated(prompt) && !aiResponse.includes("I'm designed to help with study-related topics")) {
+                        aiResponse = "I'm designed to help with study-related topics. " + aiResponse;
                     }
                     
-                    // Check if the user is asking for an image
-                    const wantsImage = prompt.toLowerCase().includes('image') || 
-                                      prompt.toLowerCase().includes('picture') || 
-                                      prompt.toLowerCase().includes('generate') ||
-                                      prompt.toLowerCase().includes('show me');
-                    
-                    if (wantsImage) {
-                        // Generate image
-                        const imageUrl = await generateImage(prompt);
-                        
-                        if (imageUrl) {
-                            const responseMessage = {
-                                id: Date.now().toString(),
-                                text: `Here's the image you requested based on: "${prompt}"`,
-                                sender: 'ai',
-                                timestamp: new Date().toISOString(),
-                                imageUrl: imageUrl,
-                                suggestions: "Would you like me to generate another image with different parameters?"
-                            };
-                            
-                            chat.messages.push(responseMessage);
-                            chat.updatedAt = new Date().toISOString();
-                            saveChats();
-                            
-                            typingIndicator.remove();
-                            addMessageToChat(responseMessage, true);
-                        } else {
-                            const responseMessage = {
-                                id: Date.now().toString(),
-                                text: "I couldn't generate the image at this time. Please try again later.",
-                                sender: 'ai',
-                                timestamp: new Date().toISOString()
-                            };
-                            
-                            chat.messages.push(responseMessage);
-                            chat.updatedAt = new Date().toISOString();
-                            saveChats();
-                            
-                            typingIndicator.remove();
-                            addMessageToChat(responseMessage, true);
-                        }
-                    } else {
-                        // Generate text response using Gemini API
-                        const responseText = await generateTextResponse(prompt);
-                        
-                        const responseMessage = {
-                            id: Date.now().toString(),
-                            text: responseText,
-                            sender: 'ai',
-                            timestamp: new Date().toISOString(),
-                            suggestions: getRandomSuggestion(prompt)
-                        };
-                        
-                        chat.messages.push(responseMessage);
-                        chat.updatedAt = new Date().toISOString();
-                        saveChats();
-                        
-                        typingIndicator.remove();
-                        addMessageToChat(responseMessage, true);
-                    }
-                } catch (error) {
+                    // Add AI response
+                    addMessageToThread(currentThreadId, {
+                        role: 'ai',
+                        content: aiResponse,
+                        timestamp: new Date().toISOString()
+                    });
+                } else {
+                    throw new Error('No response from AI');
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Generation aborted by user');
+                } else {
                     console.error('Error generating response:', error);
                     
-                    const errorMessage = {
-                        id: Date.now().toString(),
-                        text: "I'm having trouble responding right now. Please try again later.",
-                        sender: 'ai',
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    chat.messages.push(errorMessage);
-                    chat.updatedAt = new Date().toISOString();
-                    saveChats();
-                    
-                    typingIndicator.remove();
-                    addMessageToChat(errorMessage, true);
-                }
-                
-                isGenerating = false;
-            }
-
-            function checkStudyRelated(prompt) {
-                // Simple check for study-related keywords
-                const studyKeywords = [
-                    'study', 'homework', 'assignment', 'syllabus', 'exam', 'test', 'question', 
-                    'math', 'science', 'history', 'geography', 'physics', 'chemistry', 'biology',
-                    'english', 'hindi', 'urdu', 'computer', 'programming', 'algebra', 'geometry',
-                    'calculate', 'explain', 'define', 'what is', 'who is', 'when did', 'why does',
-                    'how to', 'class', 'lesson', 'chapter', 'subject', 'teacher', 'principal',
-                    'school', 'mkps', 'mill karwaan', 'milli', 'education', 'learn', 'teaching'
-                ];
-                
-                const promptLower = prompt.toLowerCase();
-                return studyKeywords.some(keyword => promptLower.includes(keyword));
-            }
-
-            async function generateTextResponse(prompt) {
-                // In a real implementation, you would call the Gemini API here
-                // This is a mock implementation for demonstration
-                
-                // First try with primary API key
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyB4xCisV5WXwLKpBgh75ZWk1JaZdMptoQs`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{
-                                    text: `You are Milli AI, an assistant for Mill Karwaan Public School, Balrampur. Respond to this study-related query: ${prompt}`
-                                }]
-                            }]
-                        })
-                    });
-                    
-                    if (!response.ok) throw new Error('Primary API failed');
-                    
-                    const data = await response.json();
-                    return data.candidates[0].content.parts[0].text;
-                } catch (error) {
-                    console.log('Primary API failed, trying backup API');
-                    
-                    // Fallback to backup API key
-                    try {
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCqGS8gb5kh7Jr0pv8d84LxCLhgHU-O_VU`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [{
-                                        text: `You are Milli AI, an assistant for Mill Karwaan Public School, Balrampur. Respond to this study-related query: ${prompt}`
-                                    }]
-                                }]
-                            })
-                        });
-                        
-                        if (!response.ok) throw new Error('Backup API failed');
-                        
-                        const data = await response.json();
-                        return data.candidates[0].content.parts[0].text;
-                    } catch (error) {
-                        console.error('Both APIs failed:', error);
-                        return "I'm sorry, I'm currently unable to process your request. Please try again later.";
+                    // Try with fallback key
+                    if (currentGeminiKeyIndex === 0) {
+                        currentGeminiKeyIndex = 1;
+                        showToast('Switching to backup AI service...');
+                        await generateAIResponse(prompt);
+                    } else {
+                        showToast('Error generating response. Please try again.');
                     }
                 }
+            } finally {
+                isGenerating = false;
+                sendBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                abortController = null;
+                saveThreads();
+            }
+        }
+
+        // Stop AI generation
+        stopBtn.addEventListener('click', () => {
+            if (abortController) {
+                abortController.abort();
+                isGenerating = false;
+                sendBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+            }
+        });
+
+        // Create new thread
+        function createNewThread() {
+            const threadId = 'thread_' + Date.now();
+            const newThread = {
+                id: threadId,
+                title: 'New Chat',
+                messages: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            threads.unshift(newThread);
+            currentThreadId = threadId;
+            
+            // Show chat interface
+            welcomeScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            inputArea.style.display = 'block';
+            threadMenu.style.display = 'block';
+            
+            saveThreads();
+            return newThread;
+        }
+
+        // Add message to thread
+        function addMessageToThread(threadId, message) {
+            const thread = threads.find(t => t.id === threadId);
+            if (!thread) return;
+
+            // Add message to thread
+            thread.messages.push(message);
+
+            // Update thread title if it's the first message
+            if (thread.messages.length === 1 && message.role === 'user') {
+                thread.title = message.content.length > 30 ? 
+                    message.content.substring(0, 30) + '...' : 
+                    message.content;
             }
 
-            async function generateImage(prompt) {
-                // In a real implementation, you would call the Stable Horde API here
-                // This is a mock implementation for demonstration
-                
+            // Render message
+            renderMessage(message, thread.messages.length - 1);
+
+            // Save threads
+            saveThreads();
+
+            // Scroll to bottom
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 100);
+
+            return document.querySelector(`.message[data-index="${thread.messages.length - 1}"]`);
+        }
+
+        // Render message
+        function renderMessage(message, index) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${message.role}`;
+            messageDiv.setAttribute('data-index', index);
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            headerDiv.innerHTML = `
+                <span>${message.role === 'user' ? 'You' : 'Milli AI'}</span>
+                <span>${formatTime(new Date(message.timestamp))}</span>
+            `;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            if (message.isImage) {
+                const img = document.createElement('img');
+                img.src = message.content;
+                img.className = 'message-image';
+                contentDiv.appendChild(img);
+            } else if (message.isThinking) {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'loading-container';
+                loadingDiv.innerHTML = `
+                    <div class="spinner"></div>
+                    <span>${message.content}</span>
+                `;
+                contentDiv.appendChild(loadingDiv);
+            } else {
+                // Process content with markdown-like formatting
+                contentDiv.innerHTML = formatMessageContent(message.content);
+            }
+
+            messageDiv.appendChild(headerDiv);
+            messageDiv.appendChild(contentDiv);
+
+            // Add actions for AI messages
+            if (message.role === 'ai' && !message.isThinking) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+                actionsDiv.innerHTML = `
+                    <button class="message-action" data-action="copy">
+                        <span class="material-icons">content_copy</span>
+                        <span>Copy</span>
+                    </button>
+                    <button class="message-action" data-action="regenerate">
+                        <span class="material-icons">refresh</span>
+                        <span>Regenerate</span>
+                    </button>
+                    <button class="message-action" data-action="like">
+                        <span class="material-icons">thumb_up</span>
+                        <span>Like</span>
+                    </button>
+                    <button class="message-action" data-action="dislike">
+                        <span class="material-icons">thumb_down</span>
+                        <span>Dislike</span>
+                    </button>
+                    <button class="message-action" data-action="share">
+                        <span class="material-icons">share</span>
+                        <span>Share</span>
+                    </button>
+                `;
+                messageDiv.appendChild(actionsDiv);
+
+                // Add event listeners to actions
+                actionsDiv.querySelectorAll('.message-action').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const action = btn.dataset.action;
+                        handleMessageAction(action, message, index);
+                    });
+                });
+            }
+
+            // Add actions for user image messages
+            if (message.role === 'user' && message.isImage) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+                actionsDiv.innerHTML = `
+                    <button class="message-action" data-action="copy">
+                        <span class="material-icons">content_copy</span>
+                        <span>Copy</span>
+                    </button>
+                    <button class="message-action" data-action="delete">
+                        <span class="material-icons">delete</span>
+                        <span>Delete</span>
+                    </button>
+                `;
+                messageDiv.appendChild(actionsDiv);
+
+                // Add event listeners to actions
+                actionsDiv.querySelectorAll('.message-action').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const action = btn.dataset.action;
+                        handleMessageAction(action, message, index);
+                    });
+                });
+            }
+
+            chatContainer.appendChild(messageDiv);
+        }
+
+        // Format message content
+        function formatMessageContent(content) {
+            // Convert --- suggestions to bold
+            content = content.replace(/--- (.*)/g, '<strong>--- $1</strong>');
+            
+            // Convert newlines to br tags
+            content = content.replace(/\n/g, '<br>');
+            
+            return content;
+        }
+
+        // Handle message action
+        function handleMessageAction(action, message, index) {
+            switch (action) {
+                case 'copy':
+                    navigator.clipboard.writeText(message.content.replace(/<[^>]*>?/gm, ''))
+                        .then(() => showToast('Copied to clipboard!'))
+                        .catch(err => showToast('Failed to copy'));
+                    break;
+                case 'regenerate':
+                    if (message.role === 'ai') {
+                        // Find the corresponding user message
+                        const thread = threads.find(t => t.id === currentThreadId);
+                        if (thread && index > 0) {
+                            const userMessage = thread.messages[index - 1];
+                            if (userMessage.role === 'user') {
+                                // Remove current AI message
+                                thread.messages.splice(index, 1);
+                                chatContainer.removeChild(chatContainer.querySelector(`.message[data-index="${index}"]`));
+                                
+                                // Regenerate response
+                                generateAIResponse(userMessage.content);
+                            }
+                        }
+                    }
+                    break;
+                case 'like':
+                    showToast('Thank you! I\'m glad I could help.');
+                    break;
+                case 'dislike':
+                    showToast('Sorry to hear that. I\'ll learn and improve!');
+                    break;
+                case 'share':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Milli AI Response',
+                            text: message.content.replace(/<[^>]*>?/gm, ''),
+                        }).catch(err => console.log('Share failed:', err));
+                    } else {
+                        navigator.clipboard.writeText(message.content.replace(/<[^>]*>?/gm, ''))
+                            .then(() => showToast('Copied to clipboard! Share manually.'))
+                            .catch(err => showToast('Failed to copy'));
+                    }
+                    break;
+                case 'delete':
+                    const thread = threads.find(t => t.id === currentThreadId);
+                    if (thread) {
+                        thread.messages.splice(index, 1);
+                        chatContainer.removeChild(chatContainer.querySelector(`.message[data-index="${index}"]`));
+                        saveThreads();
+                    }
+                    break;
+            }
+        }
+
+        // Handle thread action
+        function handleThreadAction(action) {
+            const thread = threads.find(t => t.id === currentThreadId);
+            if (!thread) return;
+
+            switch (action) {
+                case 'rename':
+                    const newName = prompt('Enter new name for this chat:', thread.title);
+                    if (newName && newName.trim()) {
+                        thread.title = newName.trim();
+                        saveThreads();
+                    }
+                    break;
+                case 'delete':
+                    if (confirm('Are you sure you want to delete this chat?')) {
+                        threads = threads.filter(t => t.id !== currentThreadId);
+                        saveThreads();
+                        showWelcomeScreen();
+                    }
+                    break;
+                case 'archive':
+                    // In a real app, we would move to archive
+                    showToast('Chat archived!');
+                    break;
+                case 'share':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: thread.title,
+                            text: 'Check out this chat with Milli AI!',
+                        }).catch(err => console.log('Share failed:', err));
+                    } else {
+                        showToast('Share feature not available on this device');
+                    }
+                    break;
+            }
+        }
+
+        // Show thread
+        function showThread(threadId) {
+            currentThreadId = threadId;
+            const thread = threads.find(t => t.id === threadId);
+            
+            if (!thread) {
+                showWelcomeScreen();
+                return;
+            }
+
+            // Clear chat container
+            chatContainer.innerHTML = '';
+
+            // Render all messages
+            thread.messages.forEach((message, index) => {
+                renderMessage(message, index);
+            });
+
+            // Show chat interface
+            welcomeScreen.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            inputArea.style.display = 'block';
+            threadMenu.style.display = 'block';
+
+            // Scroll to bottom
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 100);
+        }
+
+        // Show welcome screen
+        function showWelcomeScreen() {
+            currentThreadId = null;
+            welcomeScreen.style.display = 'flex';
+            chatContainer.style.display = 'none';
+            inputArea.style.display = 'none';
+            threadMenu.style.display = 'none';
+            dropdownMenu.style.display = 'none';
+        }
+
+        // Format time
+        function formatTime(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+            return `${formattedHours}:${formattedMinutes} ${ampm}`;
+        }
+
+        // Detect language
+        function detectLanguage(text) {
+            // Simple language detection based on common Hindi characters
+            const hindiRegex = /[\u0900-\u097F]/;
+            return hindiRegex.test(text) ? 'hi' : 'en';
+        }
+
+        // Check if query is study related
+        function isStudyRelated(text) {
+            const studyKeywords = [
+                'math', 'maths', 'mathematics', 'algebra', 'geometry', 'calculus',
+                'science', 'physics', 'chemistry', 'biology', 'scientific',
+                'history', 'geography', 'civics', 'economics', 'political',
+                'english', 'hindi', 'language', 'literature', 'grammar',
+                'computer', 'programming', 'coding', 'algorithm', 'data',
+                'question', 'problem', 'solve', 'explain', 'help', 'study',
+                'homework', 'assignment', 'exam', 'test', 'quiz', 'learn',
+                'education', 'school', 'class', 'lesson', 'chapter',
+                'गणित', 'विज्ञान', 'इतिहास', 'भूगोल', 'नागरिक', 'अर्थशास्त्र',
+                'अंग्रेजी', 'हिंदी', 'भाषा', 'साहित्य', 'व्याकरण',
+                'कंप्यूटर', 'प्रोग्रामिंग', 'कोडिंग', 'एल्गोरिदम', 'डेटा',
+                'प्रश्न', 'समस्या', 'हल', 'समझाएं', 'मदद', 'पढ़ाई',
+                'होमवर्क', 'असाइनमेंट', 'परीक्षा', 'टेस्ट', 'क्विज', 'सीखें',
+                'शिक्षा', 'स्कूल', 'कक्षा', 'पाठ', 'अध्याय'
+            ];
+
+            const lowerText = text.toLowerCase();
+            return studyKeywords.some(keyword => lowerText.includes(keyword.toLowerCase()));
+        }
+
+        // Show toast message
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Save threads to localStorage
+        function saveThreads() {
+            localStorage.setItem('milli_ai_threads', JSON.stringify(threads));
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            const savedThreads = localStorage.getItem('milli_ai_threads');
+            if (savedThreads) {
                 try {
-                    const submitRes = await fetch("https://stablehorde.net/api/v2/generate/async", {              
-                        method: "POST",              
-                        headers: {              
-                            "apikey": "4y9VQUFr3wiwNJOOnnuh1w",              
-                            "Content-Type": "application/json"              
-                        },              
-                        body: JSON.stringify({              
-                            prompt: `Educational illustration of ${prompt}, clean, professional, school-appropriate`,              
-                            params: { steps: 20, width: 512, height: 512 },              
-                            nsfw: false              
-                        })              
-                    });              
-                            
-                    const submitData = await submitRes.json();              
-                    if (!submitRes.ok) {              
-                        throw new Error(submitData.message);              
-                    }              
-                            
-                    const jobId = submitData.id;              
-                    
-                    // Poll for result (simplified for demo)
-                    await new Promise(r => setTimeout(r, 3000));
-                    
-                    // In a real app, you would continue polling until the image is ready
-                    // For demo purposes, we'll return a placeholder
-                    return `http://static.photos/education/512x512/${Math.floor(Math.random() * 100)}`;
+                    threads = JSON.parse(savedThreads);
                 } catch (error) {
-                    console.error('Error generating image:', error);
-                    return null;
+                    console.error('Error parsing saved threads:', error);
+                    threads = [];
                 }
+            } else {
+                threads = [];
             }
+        }
 
-            function getRandomSuggestion(prompt) {
-                const suggestions = [
-                    "Would you like me to explain this in more detail?",
-                    "Should I provide examples related to this topic?",
-                    "Would you like me to generate an image to help visualize this?",
-                    "Would you like me to summarize the key points?",
-                    "Should I create a quiz to test your understanding?",
-                    "Would you like me to relate this to your current syllabus?",
-                    "Should I provide additional resources on this topic?"
-                ];
-                
-                return suggestions[Math.floor(Math.random() * suggestions.length)];
-            }
-
-            function regenerateResponse(messageId) {
-                const chat = chats.find(c => c.id === currentChatId);
-                if (!chat) return;
-                
-                const messageIndex = chat.messages.findIndex(m => m.id === messageId);
-                if (messageIndex === -1 || messageIndex === 0) return;
-                
-                // Get the previous user message
-                const userMessage = chat.messages[messageIndex - 1];
-                if (userMessage.sender !== 'user') return;
-                
-                // Remove the old AI response
-                chat.messages.splice(messageIndex, 1);
-                saveChats();
-                
-                // Remove the message from UI
-                document.querySelector(`[data-message-id="${messageId}"]`).remove();
-                
-                // Generate new response
-                generateAIResponse(userMessage.text);
-            }
-
-            // Image functions
-            function previewImage(imageUrl) {
-                previewedImage.src = imageUrl;
-                imagePreviewModal.classList.remove('hidden');
-            }
-
-            function downloadImage() {
-                const link = document.createElement('a');
-                link.href = previewedImage.src;
-                link.download = `milli-ai-image-${Date.now()}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            function shareImage() {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Image from Milli AI',
-                        text: 'Check out this image generated by Milli AI',
-                        url: previewedImage.src
-                    }).catch(err => {
-                        console.log('Error sharing:', err);
-                        alert('Sharing failed. Please try another method.');
-                    });
-                } else {
-                    // Fallback for browsers that don't support Web Share API
-                    prompt('Copy this link to share the image:', previewedImage.src);
-                }
-            }
-
-            function regenerateImage() {
-                const imageUrl = previewedImage.src;
-                const messageElement = document.querySelector(`img[src="${imageUrl}"]`).closest('.message');
-                const messageId = messageElement.dataset.messageId;
-                
-                imagePreviewModal.classList.add('hidden');
-                regenerateResponse(messageId);
-            }
-
-            function shareContent(content) {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Message from Milli AI',
-                        text: content,
-                        url: window.location.href
-                    }).catch(err => {
-                        console.log('Error sharing:', err);
-                        alert('Sharing failed. Please try another method.');
-                    });
-                } else {
-                    // Fallback for browsers that don't support Web Share API
-                    prompt('Copy this text to share:', content);
-                }
-            }
-
-            // Theme functions
-            function checkDarkModePreference() {
-                const isDark = localStorage.getItem('darkMode') === 'true' || 
-                              (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                
-                if (isDark) {
-                    document.documentElement.classList.add('dark');
-                    themeToggle.innerHTML = '<i data-feather="sun" class="mr-2"></i> Light Mode';
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    themeToggle.innerHTML = '<i data-feather="moon" class="mr-2"></i> Dark Mode';
-                }
-                feather.replace();
-            }
-
-            function toggleDarkMode() {
-                const isDark = document.documentElement.classList.toggle('dark');
-                localStorage.setItem('darkMode', isDark);
-                
-                if (isDark) {
-                    themeToggle.innerHTML = '<i data-feather="sun" class="mr-2"></i> Light Mode';
-                } else {
-                    themeToggle.innerHTML = '<i data-feather="moon" class="mr-2"></i> Dark Mode';
-                }
-                feather.replace();
-            }
-
-            // Initialize the app
-            init();
-        </script>
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>
