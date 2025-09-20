@@ -4,1563 +4,331 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Milli AI - Admin Panel</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <style>
-        :root {
-            --primary-color: #4285f4;
-            --secondary-color: #34a853;
-            --background-color: #f5f5f5;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-            --accent-color: #ea4335;
-            --success-color: #0f9d58;
-            --warning-color: #f4b400;
+        .sidebar {
+            width: 280px;
         }
-
-        .dark-mode {
-            --background-color: #121212;
-            --card-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --border-color: #333333;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .logo i {
-            font-size: 2rem;
-        }
-
-        .admin-badge {
-            background-color: var(--accent-color);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
         .main-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
+            margin-left: 280px;
         }
-
-        @media (min-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .card {
-            background-color: var(--card-color);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            padding: 25px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-title i {
-            font-size: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            background-color: var(--card-color);
-            color: var(--text-color);
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #3367d6;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #d3302f;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #0c834a;
-            transform: translateY(-2px);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, var(--primary-color), #2d6ad6);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background-color: var(--background-color);
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        tr:hover {
-            background-color: var(--background-color);
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .badge-success {
-            background-color: rgba(15, 157, 88, 0.1);
-            color: var(--success-color);
-        }
-
-        .badge-warning {
-            background-color: rgba(244, 180, 0, 0.1);
-            color: var(--warning-color);
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            margin: 0 5px;
-            color: var(--text-color);
-            transition: color 0.2s ease;
-        }
-
-        .action-btn:hover {
-            color: var(--primary-color);
-        }
-
-        .action-btn.delete:hover {
-            color: var(--accent-color);
-        }
-
-        .question-item {
-            background-color: var(--background-color);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .question-text {
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-
-        .question-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 40px;
-            background-color: var(--card-color);
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            text-align: center;
-        }
-
-        .login-logo {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-
-        .login-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: var(--text-color);
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .loader {
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: var(--border-color);
-        }
-
-        .maintenance-toggle {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 24px;
-            width: 24px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(30px);
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--success-color);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.error {
-            background-color: var(--accent-color);
-        }
-
-        .toast.success {
-            background-color: var(--success-color);
-        }
-
-        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .sidebar {
+                width: 100%;
+                position: fixed;
+                z-index: 10;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
             }
-            
-            header {
-                padding: 15px;
+            .sidebar.active {
+                transform: translateX(0);
             }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .login-container {
-                margin: 50px 15px;
-                padding: 30px 20px;
+            .main-content {
+                margin-left: 0;
             }
         }
     </style>
 </head>
-<body>
-    <div class="container" id="appContainer">
-        <!-- Login Screen -->
-        <div class="login-container" id="loginScreen">
-            <div class="login-logo">
-                <i class="material-icons">school</i>
+<body class="bg-gray-100">
+    <!-- Firebase Config -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
+            authDomain: "mkps-balrampur.firebaseapp.com",
+            projectId: "mkps-balrampur",
+            storageBucket: "mkps-balrampur.appspot.com",
+            messagingSenderId: "469227187804",
+            appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+    </script>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Admin Login</h2>
+                <button id="closeLoginModal" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x"></i>
+                </button>
             </div>
-            <h1 class="login-title">Milli AI Admin</h1>
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" id="emailInput" placeholder="Enter your email" required>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-control" id="passwordInput" placeholder="Enter your password" required>
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="btn btn-primary" id="loginButton">
-                    <span>Login</span>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Login
                 </button>
             </form>
-            <div style="margin-top: 20px; font-size: 0.9rem; color: var(--text-color); opacity: 0.7;">
-                Admin Access: madamsir066@gmail.com or Abutalha5088@...
-            </div>
         </div>
-
-        <!-- Main Admin Interface (hidden initially) -->
-        <div id="adminInterface" style="display: none;">
-            <header>
-                <div class="logo">
-                    <i class="material-icons">school</i>
-                    <span>Milli AI Admin Panel</span>
-                </div>
-                <div class="admin-badge">ADMIN</div>
-            </header>
-
-            <div class="main-content">
-                <!-- System Controls Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="material-icons">settings</i>
-                            System Controls
-                        </h2>
-                    </div>
-                    
-                    <div class="maintenance-toggle">
-                        <span>Maintenance Mode</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="maintenanceToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Maintenance Message</label>
-                        <input type="text" class="form-control" id="maintenanceMessage" placeholder="Enter maintenance message...">
-                    </div>
-                    
-                    <button class="btn btn-primary" id="updateMaintenance">
-                        <i class="material-icons">save</i>
-                        <span>Update System Status</span>
-                    </button>
-                </div>
-
-                <!-- Send Notification Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="material-icons">notifications</i>
-                            Send Notification
-                        </h2>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Notification Title</label>
-                        <input type="text" class="form-control" id="notificationTitle" placeholder="Enter notification title..." required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Notification Message</label>
-                        <textarea class="form-control" id="notificationMessage" rows="4" placeholder="Enter notification message..." required></textarea>
-                    </div>
-                    
-                    <button class="btn btn-success" id="sendNotification">
-                        <i class="material-icons">send</i>
-                        <span>Send Notification</span>
-                    </button>
-                </div>
-
-                <!-- Most Asked Questions Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="material-icons">question_answer</i>
-                            Most Asked Questions
-                        </h2>
-                        <button class="btn btn-primary" id="addQuestionBtn">
-                            <i class="material-icons">add</i>
-                            <span>Add</span>
-                        </button>
-                    </div>
-                    
-                    <div id="questionsList">
-                        <!-- Questions will be loaded here -->
-                        <div class="empty-state">
-                            <i class="material-icons">help_outline</i>
-                            <p>No questions yet</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Add Question Form (hidden initially) -->
-                    <div id="addQuestionForm" style="display: none; margin-top: 20px;">
-                        <div class="form-group">
-                            <label class="form-label">New Question</label>
-                            <input type="text" class="form-control" id="newQuestionInput" placeholder="Enter question..." required>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-primary" id="saveQuestionBtn">
-                                <i class="material-icons">save</i>
-                                <span>Save</span>
-                            </button>
-                            <button class="btn" id="cancelQuestionBtn" style="background-color: #f1f1f1; color: var(--text-color);">
-                                <i class="material-icons">close</i>
-                                <span>Cancel</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="material-icons">analytics</i>
-                            Usage Statistics
-                        </h2>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalUsers">0</div>
-                            <div class="stat-label">Total Users</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalMessages">0</div>
-                            <div class="stat-label">Total Messages</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="activeChats">0</div>
-                            <div class="stat-label">Active Chats</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="imageGenerations">0</div>
-                            <div class="stat-label">Images Generated</div>
-                        </div>
-                    </div>
-                    
-                    <h3 style="margin: 25px 0 15px; font-weight: 600;">Top 10 Most Asked Questions</h3>
-                    <div class="table-container">
-                        <table id="topQuestionsTable">
-                            <thead>
-                                <tr>
-                                    <th>Rank</th>
-                                    <th>Question</th>
-                                    <th>Asked Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="3" style="text-align: center; padding: 40px;">No data available</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Chat Logs Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="material-icons">chat</i>
-                            Chat Logs
-                        </h2>
-                        <button class="btn btn-danger" id="resetAppBtn">
-                            <i class="material-icons">refresh</i>
-                            <span>Reset App</span>
-                        </button>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Search User ID</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" class="form-control" id="searchUserId" placeholder="Enter user ID...">
-                            <button class="btn btn-primary" id="searchUserBtn">
-                                <i class="material-icons">search</i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table id="chatLogsTable">
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Last Active</th>
-                                    <th>Chats</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="4" style="text-align: center; padding: 40px;">No chat logs available</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Recent Notifications Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i class="material-icons">notifications_active</i>
-                            Recent Notifications
-                        </h2>
-                    </div>
-                    
-                    <div id="notificationsList">
-                        <!-- Notifications will be loaded here -->
-                        <div class="empty-state">
-                            <i class="material-icons">notifications_off</i>
-                            <p>No notifications sent yet</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Toast Notification -->
-        <div class="toast" id="toastNotification">
-            <i class="material-icons">check_circle</i>
-            <span id="toastMessage">Operation successful</span>
-        </div>
-
-        <!-- Firebase SDK -->
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
-        <script>
-            // Firebase configuration
-            const firebaseConfig = {
-                apiKey: "AIzaSyB0fHtqeoerlckQ2RXx_VC86cZz_BJaIIU",
-                authDomain: "mkps-balrampur.firebaseapp.com",
-                projectId: "mkps-balrampur",
-                storageBucket: "mkps-balrampur.appspot.com",
-                messagingSenderId: "469227187804",
-                appId: "1:469227187804:web:8abdb9b75ed05b7eadc099"
-            };
-
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-            const auth = firebase.auth();
-            
-            // Valid admin credentials
-            const ADMIN_UID = "PEjvSCXzScXA2q0NnVo7CUWnXrj1";
-            const ADMIN_EMAILS = ["madamsir066@gmail.com", "Abutalha5088@gmail.com", "Abutalha5088@yahoo.com"];
-            
-            let currentUser = null;
-            let isDarkMode = false;
-
-            // DOM Elements
-            const loginScreen = document.getElementById('loginScreen');
-            const adminInterface = document.getElementById('adminInterface');
-            const loginForm = document.getElementById('loginForm');
-            const emailInput = document.getElementById('emailInput');
-            const passwordInput = document.getElementById('passwordInput');
-            const loginButton = document.getElementById('loginButton');
-            
-            // System Controls
-            const maintenanceToggle = document.getElementById('maintenanceToggle');
-            const maintenanceMessage = document.getElementById('maintenanceMessage');
-            const updateMaintenance = document.getElementById('updateMaintenance');
-            
-            // Notifications
-            const notificationTitle = document.getElementById('notificationTitle');
-            const notificationMessage = document.getElementById('notificationMessage');
-            const sendNotification = document.getElementById('sendNotification');
-            
-            // Most Asked Questions
-            const questionsList = document.getElementById('questionsList');
-            const addQuestionBtn = document.getElementById('addQuestionBtn');
-            const addQuestionForm = document.getElementById('addQuestionForm');
-            const newQuestionInput = document.getElementById('newQuestionInput');
-            const saveQuestionBtn = document.getElementById('saveQuestionBtn');
-            const cancelQuestionBtn = document.getElementById('cancelQuestionBtn');
-            
-            // Stats
-            const totalUsers = document.getElementById('totalUsers');
-            const totalMessages = document.getElementById('totalMessages');
-            const activeChats = document.getElementById('activeChats');
-            const imageGenerations = document.getElementById('imageGenerations');
-            const topQuestionsTable = document.getElementById('topQuestionsTable');
-            
-            // Chat Logs
-            const searchUserId = document.getElementById('searchUserId');
-            const searchUserBtn = document.getElementById('searchUserBtn');
-            const chatLogsTable = document.getElementById('chatLogsTable');
-            const resetAppBtn = document.getElementById('resetAppBtn');
-            
-            // Recent Notifications
-            const notificationsList = document.getElementById('notificationsList');
-            
-            // Toast Notification
-            const toastNotification = document.getElementById('toastNotification');
-            const toastMessage = document.getElementById('toastMessage');
-
-            // Initialize the app
-            document.addEventListener('DOMContentLoaded', async () => {
-                // Check if user is logged in
-                auth.onAuthStateChanged(async (user) => {
-                    if (user && await isAdmin(user)) {
-                        currentUser = user;
-                        showAdminInterface();
-                        loadSystemStatus();
-                        loadMostAskedQuestions();
-                        loadStats();
-                        loadChatLogs();
-                        loadRecentNotifications();
-                    } else if (user) {
-                        // User is logged in but not admin
-                        showToast('Access denied. Admin privileges required.', 'error');
-                        setTimeout(() => {
-                            auth.signOut();
-                        }, 3000);
-                    }
-                    // If no user, show login screen (already visible by default)
-                });
-
-                // Event Listeners
-                loginForm.addEventListener('submit', handleLogin);
-                updateMaintenance.addEventListener('click', updateSystemStatus);
-                sendNotification.addEventListener('click', handleSendNotification);
-                addQuestionBtn.addEventListener('click', showAddQuestionForm);
-                saveQuestionBtn.addEventListener('click', saveQuestion);
-                cancelQuestionBtn.addEventListener('click', hideAddQuestionForm);
-                searchUserBtn.addEventListener('click', searchUserChats);
-                resetAppBtn.addEventListener('click', showResetConfirmation);
-            });
-
-            // Login Function
-            async function handleLogin(e) {
-                e.preventDefault();
-                
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;
-                
-                if (!email || !password) {
-                    showToast('Please enter both email and password', 'error');
-                    return;
-                }
-                
-                // Show loading state
-                const originalText = loginButton.innerHTML;
-                loginButton.innerHTML = '<div class="loader"></div> Logging in...';
-                loginButton.disabled = true;
-                
-                try {
-                    // Try to sign in with email and password
-                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    const user = userCredential.user;
-                    
-                    // Check if user is admin
-                    if (await isAdmin(user)) {
-                        currentUser = user;
-                        showAdminInterface();
-                        loadSystemStatus();
-                        loadMostAskedQuestions();
-                        loadStats();
-                        loadChatLogs();
-                        loadRecentNotifications();
-                    } else {
-                        showToast('Access denied. Admin privileges required.', 'error');
-                        await auth.signOut();
-                    }
-                } catch (error) {
-                    console.error("Login error:", error);
-                    
-                    // For demo purposes, allow access with correct email regardless of password
-                    if (ADMIN_EMAILS.includes(email.toLowerCase())) {
-                        try {
-                            // Create a temporary admin session
-                            const demoUser = { 
-                                uid: ADMIN_UID, 
-                                email: email,
-                                isDemoAdmin: true 
-                            };
-                            currentUser = demoUser;
-                            showAdminInterface();
-                            loadSystemStatus();
-                            loadMostAskedQuestions();
-                            loadStats();
-                            loadChatLogs();
-                            loadRecentNotifications();
-                            
-                            showToast('Demo admin access granted', 'success');
-                        } catch (demoError) {
-                            console.error("Demo login error:", demoError);
-                            showToast('Failed to grant demo access', 'error');
-                        }
-                    } else {
-                        showToast('Invalid credentials or insufficient privileges', 'error');
-                    }
-                } finally {
-                    loginButton.innerHTML = originalText;
-                    loginButton.disabled = false;
-                }
-            }
-
-            // Check if user is admin
-            async function isAdmin(user) {
-                if (!user) return false;
-                
-                // Check if UID matches admin UID
-                if (user.uid === ADMIN_UID) {
-                    return true;
-                }
-                
-                // Check if email is in admin emails list
-                if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-                    return true;
-                }
-                
-                // For demo purposes, check if it's a demo admin
-                if (user.isDemoAdmin) {
-                    return true;
-                }
-                
-                return false;
-            }
-
-            // Show admin interface
-            function showAdminInterface() {
-                loginScreen.style.display = 'none';
-                adminInterface.style.display = 'block';
-            }
-
-            // Load system status
-            async function loadSystemStatus() {
-                try {
-                    const systemDoc = await db.collection('system').doc('status').get();
-                    if (systemDoc.exists) {
-                        const data = systemDoc.data();
-                        maintenanceToggle.checked = data.maintenance || false;
-                        maintenanceMessage.value = data.maintenanceMessage || '';
-                    }
-                } catch (error) {
-                    console.error("Error loading system status:", error);
-                    showToast('Failed to load system status', 'error');
-                }
-            }
-
-            // Update system status
-            async function updateSystemStatus() {
-                if (!currentUser) {
-                    showToast('Please log in again', 'error');
-                    return;
-                }
-                
-                const isMaintenance = maintenanceToggle.checked;
-                const message = maintenanceMessage.value.trim();
-                
-                try {
-                    await db.collection('system').doc('status').set({
-                        maintenance: isMaintenance,
-                        maintenanceMessage: message,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedBy: currentUser.uid
-                    }, { merge: true });
-                    
-                    showToast('System status updated successfully', 'success');
-                } catch (error) {
-                    console.error("Error updating system status:", error);
-                    showToast('Failed to update system status', 'error');
-                }
-            }
-
-            // Handle send notification
-            async function handleSendNotification() {
-                const title = notificationTitle.value.trim();
-                const message = notificationMessage.value.trim();
-                
-                if (!title || !message) {
-                    showToast('Please enter both title and message', 'error');
-                    return;
-                }
-                
-                // Show loading state
-                const originalText = sendNotification.innerHTML;
-                sendNotification.innerHTML = '<div class="loader"></div> Sending...';
-                sendNotification.disabled = true;
-                
-                try {
-                    // Generate notification ID
-                    const notifId = 'notif_' + Date.now();
-                    
-                    // Save notification to Firestore
-                    await db.collection('notifications').doc(notifId).set({
-                        id: notifId,
-                        title: title,
-                        message: message,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        createdBy: currentUser.uid,
-                        targetUsers: ['all'], // Send to all users
-                        readBy: []
-                    });
-                    
-                    // Clear form
-                    notificationTitle.value = '';
-                    notificationMessage.value = '';
-                    
-                    showToast('Notification sent successfully', 'success');
-                    loadRecentNotifications();
-                } catch (error) {
-                    console.error("Error sending notification:", error);
-                    showToast('Failed to send notification', 'error');
-                } finally {
-                    sendNotification.innerHTML = originalText;
-                    sendNotification.disabled = false;
-                }
-            }
-
-            // Load most asked questions
-            async function loadMostAskedQuestions() {
-                try {
-                    const questionsDoc = await db.collection('system').doc('mostAskedQuestions').get();
-                    if (questionsDoc.exists) {
-                        const data = questionsDoc.data();
-                        const questions = data.questions || [];
-                        
-                        if (questions.length === 0) {
-                            questionsList.innerHTML = `
-                                <div class="empty-state">
-                                    <i class="material-icons">help_outline</i>
-                                    <p>No questions yet</p>
-                                </div>
-                            `;
-                            return;
-                        }
-                        
-                        questionsList.innerHTML = '';
-                        questions.forEach((question, index) => {
-                            const questionItem = document.createElement('div');
-                            questionItem.className = 'question-item';
-                            questionItem.innerHTML = `
-                                <div class="question-text">${question}</div>
-                                <div class="question-actions">
-                                    <button class="action-btn" onclick="editQuestion(${index}, '${question.replace(/'/g, "\\'")}')">
-                                        <i class="material-icons">edit</i>
-                                    </button>
-                                    <button class="action-btn delete" onclick="deleteQuestion(${index})">
-                                        <i class="material-icons">delete</i>
-                                    </button>
-                                </div>
-                            `;
-                            questionsList.appendChild(questionItem);
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error loading questions:", error);
-                    showToast('Failed to load questions', 'error');
-                }
-            }
-
-            // Show add question form
-            function showAddQuestionForm() {
-                addQuestionForm.style.display = 'block';
-                addQuestionBtn.style.display = 'none';
-                newQuestionInput.focus();
-            }
-
-            // Hide add question form
-            function hideAddQuestionForm() {
-                addQuestionForm.style.display = 'none';
-                addQuestionBtn.style.display = 'block';
-                newQuestionInput.value = '';
-            }
-
-            // Save question
-            async function saveQuestion() {
-                const question = newQuestionInput.value.trim();
-                if (!question) {
-                    showToast('Please enter a question', 'error');
-                    return;
-                }
-                
-                try {
-                    const questionsDoc = await db.collection('system').doc('mostAskedQuestions').get();
-                    let questions = [];
-                    
-                    if (questionsDoc.exists) {
-                        questions = questionsDoc.data().questions || [];
-                    }
-                    
-                    questions.push(question);
-                    
-                    await db.collection('system').doc('mostAskedQuestions').set({
-                        questions: questions,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedBy: currentUser.uid
-                    }, { merge: true });
-                    
-                    hideAddQuestionForm();
-                    loadMostAskedQuestions();
-                    showToast('Question added successfully', 'success');
-                } catch (error) {
-                    console.error("Error saving question:", error);
-                    showToast('Failed to save question', 'error');
-                }
-            }
-
-            // Edit question (window function for onclick)
-            window.editQuestion = async function(index, currentText) {
-                const newText = prompt('Edit question:', currentText);
-                if (newText === null) return; // User cancelled
-                
-                if (!newText.trim()) {
-                    showToast('Question cannot be empty', 'error');
-                    return;
-                }
-                
-                try {
-                    const questionsDoc = await db.collection('system').doc('mostAskedQuestions').get();
-                    if (questionsDoc.exists) {
-                        let questions = questionsDoc.data().questions || [];
-                        questions[index] = newText.trim();
-                        
-                        await db.collection('system').doc('mostAskedQuestions').set({
-                            questions: questions,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            updatedBy: currentUser.uid
-                        }, { merge: true });
-                        
-                        loadMostAskedQuestions();
-                        showToast('Question updated successfully', 'success');
-                    }
-                } catch (error) {
-                    console.error("Error updating question:", error);
-                    showToast('Failed to update question', 'error');
-                }
-            };
-
-            // Delete question (window function for onclick)
-            window.deleteQuestion = async function(index) {
-                if (!confirm('Are you sure you want to delete this question?')) {
-                    return;
-                }
-                
-                try {
-                    const questionsDoc = await db.collection('system').doc('mostAskedQuestions').get();
-                    if (questionsDoc.exists) {
-                        let questions = questionsDoc.data().questions || [];
-                        questions.splice(index, 1);
-                        
-                        await db.collection('system').doc('mostAskedQuestions').set({
-                            questions: questions,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            updatedBy: currentUser.uid
-                        }, { merge: true });
-                        
-                        loadMostAskedQuestions();
-                        showToast('Question deleted successfully', 'success');
-                    }
-                } catch (error) {
-                    console.error("Error deleting question:", error);
-                    showToast('Failed to delete question', 'error');
-                }
-            };
-
-            // Load stats
-            async function loadStats() {
-                try {
-                    // Get total users
-                    const usersSnapshot = await db.collection('users').get();
-                    totalUsers.textContent = usersSnapshot.size;
-                    
-                    // Get total messages (simplified for demo)
-                    const statsDoc = await db.collection('stats').doc('usage').get();
-                    if (statsDoc.exists) {
-                        const statsData = statsDoc.data();
-                        totalMessages.textContent = statsData.totalMessages || 0;
-                    }
-                    
-                    // Get active chats (users with chats in last 30 days)
-                    const thirtyDaysAgo = new Date();
-                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                    
-                    const activeUsersSnapshot = await db.collection('users')
-                        .where('lastActive', '>=', firebase.firestore.Timestamp.fromDate(thirtyDaysAgo))
-                        .get();
-                    activeChats.textContent = activeUsersSnapshot.size;
-                    
-                    // Get image generations (simplified for demo)
-                    imageGenerations.textContent = Math.floor(Math.random() * 1000);
-                    
-                    // Load top questions
-                    await loadTopQuestions();
-                } catch (error) {
-                    console.error("Error loading stats:", error);
-                    showToast('Failed to load statistics', 'error');
-                }
-            }
-
-            // Load top questions
-            async function loadTopQuestions() {
-                try {
-                    const questionsDoc = await db.collection('system').doc('mostAskedQuestions').get();
-                    if (questionsDoc.exists) {
-                        const questions = questionsDoc.data().questions || [];
-                        
-                        if (questions.length === 0) {
-                            topQuestionsTable.innerHTML = `
-                                <thead>
-                                    <tr>
-                                        <th>Rank</th>
-                                        <th>Question</th>
-                                        <th>Asked Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="3" style="text-align: center; padding: 40px;">No data available</td>
-                                    </tr>
-                                </tbody>
-                            `;
-                            return;
-                        }
-                        
-                        // Mock asked counts for demo
-                        const questionsWithCounts = questions.map((q, i) => ({
-                            question: q,
-                            count: Math.floor(Math.random() * 100) + 1
-                        })).sort((a, b) => b.count - a.count).slice(0, 10);
-                        
-                        let tableHTML = `
-                            <thead>
-                                <tr>
-                                    <th>Rank</th>
-                                    <th>Question</th>
-                                    <th>Asked Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        `;
-                        
-                        questionsWithCounts.forEach((item, index) => {
-                            tableHTML += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.question}</td>
-                                    <td>${item.count}</td>
-                                </tr>
-                            `;
-                        });
-                        
-                        tableHTML += `</tbody>`;
-                        topQuestionsTable.innerHTML = tableHTML;
-                    }
-                } catch (error) {
-                    console.error("Error loading top questions:", error);
-                }
-            }
-
-            // Search user chats
-            async function searchUserChats() {
-                const userId = searchUserId.value.trim();
-                if (!userId) {
-                    showToast('Please enter a user ID', 'error');
-                    return;
-                }
-                
-                try {
-                    const userDoc = await db.collection('users').doc(userId).get();
-                    if (!userDoc.exists) {
-                        showToast('User not found', 'error');
-                        return;
-                    }
-                    
-                    // Get user's chats
-                    const chatsSnapshot = await db.collection('users').doc(userId)
-                        .collection('chats').get();
-                    
-                    if (chatsSnapshot.empty) {
-                        chatLogsTable.innerHTML = `
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Last Active</th>
-                                    <th>Chats</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="4" style="text-align: center; padding: 40px;">No chats found for this user</td>
-                                </tr>
-                            </tbody>
-                        `;
-                        return;
-                    }
-                    
-                    // Display user info and chats
-                    let tableHTML = `
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Last Active</th>
-                                <th>Chats</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                    `;
-                    
-                    const userData = userDoc.data();
-                    const lastActive = userData.lastActive ? userData.lastActive.toDate().toLocaleString() : 'Unknown';
-                    
-                    tableHTML += `
-                        <tr>
-                            <td>${userId}</td>
-                            <td>${lastActive}</td>
-                            <td>${chatsSnapshot.size}</td>
-                            <td>
-                                <button class="action-btn" onclick="viewUserChats('${userId}')">
-                                    <i class="material-icons">visibility</i>
-                                </button>
-                                <button class="action-btn delete" onclick="deleteUserChats('${userId}')">
-                                    <i class="material-icons">delete</i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    
-                    tableHTML += `</tbody>`;
-                    chatLogsTable.innerHTML = tableHTML;
-                } catch (error) {
-                    console.error("Error searching user chats:", error);
-                    showToast('Failed to search user chats', 'error');
-                }
-            }
-
-            // View user chats (window function for onclick)
-            window.viewUserChats = async function(userId) {
-                try {
-                    const chatsSnapshot = await db.collection('users').doc(userId)
-                        .collection('chats').get();
-                    
-                    let chatDetails = `Chats for user ${userId}:\n\n`;
-                    chatsSnapshot.forEach(doc => {
-                        const chatData = doc.data();
-                        chatDetails += `Chat: ${chatData.title || 'Untitled'}\n`;
-                        chatDetails += `Last message: ${chatData.lastMessageAt ? chatData.lastMessageAt.toDate().toLocaleString() : 'Unknown'}\n\n`;
-                    });
-                    
-                    alert(chatDetails);
-                } catch (error) {
-                    console.error("Error viewing user chats:", error);
-                    showToast('Failed to view user chats', 'error');
-                }
-            };
-
-            // Delete user chats (window function for onclick)
-            window.deleteUserChats = async function(userId) {
-                if (!confirm(`Are you sure you want to delete all chats for user ${userId}? This action cannot be undone.`)) {
-                    return;
-                }
-                
-                try {
-                    // Get all chats for user
-                    const chatsSnapshot = await db.collection('users').doc(userId)
-                        .collection('chats').get();
-                    
-                    // Delete each chat and its messages
-                    const batch = db.batch();
-                    for (const chatDoc of chatsSnapshot.docs) {
-                        // Delete all messages in the chat
-                        const messagesSnapshot = await db.collection('users').doc(userId)
-                            .collection('chats').doc(chatDoc.id).collection('messages').get();
-                        
-                        messagesSnapshot.forEach(msgDoc => {
-                            batch.delete(msgDoc.ref);
-                        });
-                        
-                        // Delete the chat document
-                        batch.delete(chatDoc.ref);
-                    }
-                    
-                    await batch.commit();
-                    
-                    showToast('User chats deleted successfully', 'success');
-                    searchUserChats(); // Refresh the view
-                } catch (error) {
-                    console.error("Error deleting user chats:", error);
-                    showToast('Failed to delete user chats', 'error');
-                }
-            };
-
-            // Show reset confirmation
-            function showResetConfirmation() {
-                if (confirm('Are you sure you want to reset the app? This will clear all temporary chats and data. This action cannot be undone.')) {
-                    resetApp();
-                }
-            }
-
-            // Reset app
-            async function resetApp() {
-                try {
-                    // Show loading state
-                    const originalText = resetAppBtn.innerHTML;
-                    resetAppBtn.innerHTML = '<div class="loader"></div> Resetting...';
-                    resetAppBtn.disabled = true;
-                    
-                    // In a real app, you would clear temporary data here
-                    // For demo purposes, we'll just show a success message
-                    
-                    // Simulate reset process
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    showToast('App reset successfully', 'success');
-                    
-                    // Reload data
-                    loadStats();
-                    loadChatLogs();
-                    
-                } catch (error) {
-                    console.error("Error resetting app:", error);
-                    showToast('Failed to reset app', 'error');
-                } finally {
-                    resetAppBtn.innerHTML = originalText;
-                    resetAppBtn.disabled = false;
-                }
-            }
-
-            // Load recent notifications
-            async function loadRecentNotifications() {
-                try {
-                    const notificationsSnapshot = await db.collection('notifications')
-                        .orderBy('timestamp', 'desc')
-                        .limit(10)
-                        .get();
-                    
-                    if (notificationsSnapshot.empty) {
-                        notificationsList.innerHTML = `
-                            <div class="empty-state">
-                                <i class="material-icons">notifications_off</i>
-                                <p>No notifications sent yet</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    notificationsList.innerHTML = '';
-                    notificationsSnapshot.forEach(doc => {
-                        const notif = doc.data();
-                        const notifElement = document.createElement('div');
-                        notifElement.className = 'question-item';
-                        notifElement.style.borderLeftColor = '#ea4335';
-                        
-                        const time = notif.timestamp ? notif.timestamp.toDate().toLocaleString() : 'Unknown';
-                        
-                        notifElement.innerHTML = `
-                            <div style="font-weight: 500; margin-bottom: 5px;">${notif.title}</div>
-                            <div style="margin-bottom: 10px;">${notif.message}</div>
-                            <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 10px;">${time}</div>
-                            <div class="question-actions">
-                                <button class="action-btn delete" onclick="deleteNotification('${doc.id}')">
-                                    <i class="material-icons">delete</i>
-                                </button>
-                            </div>
-                        `;
-                        notificationsList.appendChild(notifElement);
-                    });
-                } catch (error) {
-                    console.error("Error loading notifications:", error);
-                    showToast('Failed to load notifications', 'error');
-                }
-            }
-
-            // Delete notification (window function for onclick)
-            window.deleteNotification = async function(notifId) {
-                if (!confirm('Are you sure you want to delete this notification?')) {
-                    return;
-                }
-                
-                try {
-                    await db.collection('notifications').doc(notifId).delete();
-                    loadRecentNotifications();
-                    showToast('Notification deleted successfully', 'success');
-                } catch (error) {
-                    console.error("Error deleting notification:", error);
-                    showToast('Failed to delete notification', 'error');
-                }
-            };
-
-            // Load chat logs
-            async function loadChatLogs() {
-                try {
-                    const usersSnapshot = await db.collection('users').limit(10).get();
-                    
-                    if (usersSnapshot.empty) {
-                        chatLogsTable.innerHTML = `
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Last Active</th>
-                                    <th>Chats</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="4" style="text-align: center; padding: 40px;">No users found</td>
-                                </tr>
-                            </tbody>
-                        `;
-                        return;
-                    }
-                    
-                    let tableHTML = `
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Last Active</th>
-                                <th>Chats</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                    `;
-                    
-                    for (const userDoc of usersSnapshot.docs) {
-                        const userData = userDoc.data();
-                        const lastActive = userData.lastActive ? userData.lastActive.toDate().toLocaleString() : 'Never';
-                        
-                        // Get chat count for user
-                        const chatsSnapshot = await db.collection('users').doc(userDoc.id)
-                            .collection('chats').get();
-                        
-                        tableHTML += `
-                            <tr>
-                                <td>${userDoc.id}</td>
-                                <td>${lastActive}</td>
-                                <td>${chatsSnapshot.size}</td>
-                                <td>
-                                    <button class="action-btn" onclick="viewUserChats('${userDoc.id}')">
-                                        <i class="material-icons">visibility</i>
-                                    </button>
-                                    <button class="action-btn delete" onclick="deleteUserChats('${userDoc.id}')">
-                                        <i class="material-icons">delete</i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    }
-                    
-                    tableHTML += `</tbody>`;
-                    chatLogsTable.innerHTML = tableHTML;
-                } catch (error) {
-                    console.error("Error loading chat logs:", error);
-                    showToast('Failed to load chat logs', 'error');
-                }
-            }
-
-            // Show toast notification
-            function showToast(message, type = 'success') {
-                toastMessage.textContent = message;
-                toastNotification.className = 'toast';
-                toastNotification.classList.add(type);
-                toastNotification.classList.add('show');
-                
-                setTimeout(() => {
-                    toastNotification.classList.remove('show');
-                }, 3000);
-            }
-
-            // Override console.error to prevent errors in the demo
-            const originalConsoleError = console.error;
-            console.error = function(...args) {
-                // Don't show Firebase permission errors in console for demo
-                if (typeof args[0] === 'string' && args[0].includes('FirebaseError: Missing or insufficient permissions')) {
-                    return;
-                }
-                originalConsoleError.apply(console, args);
-            };
-        </script>
     </div>
+
+    <!-- Main Layout -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-white shadow-md">
+            <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <img src="http://static.photos/education/200x200/1" alt="MKPS Logo" class="w-8 h-8 rounded-full">
+                    <h1 class="font-bold">Milli AI Admin</h1>
+                </div>
+                <button id="mobileMenuButton" class="md:hidden p-1 rounded-md hover:bg-gray-100">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <nav class="p-2">
+                <div class="space-y-1">
+                    <button id="notificationsTab" class="w-full text-left px-4 py-2 rounded-md bg-blue-100 text-blue-700 flex items-center">
+                        <i data-feather="bell" class="mr-2"></i> Notifications
+                    </button>
+                    <button id="maintenanceTab" class="w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 flex items-center">
+                        <i data-feather="alert-triangle" class="mr-2"></i> Maintenance
+                    </button>
+                    <button id="holidaysTab" class="w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 flex items-center">
+                        <i data-feather="calendar" class="mr-2"></i> Holidays
+                    </button>
+                    <button id="featuresTab" class="w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 flex items-center">
+                        <i data-feather="zap" class="mr-2"></i> New Features
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-1 overflow-auto">
+            <!-- Mobile Header -->
+            <div class="md:hidden bg-white shadow-sm p-3 flex items-center">
+                <button id="mobileMenuToggle" class="p-1 rounded-md hover:bg-gray-100 mr-2">
+                    <i data-feather="menu"></i>
+                </button>
+                <h2 id="currentTabTitle" class="font-semibold">Notifications</h2>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-6">
+                <!-- Notifications Content -->
+                <div id="notificationsContent" class="space-y-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Send Notification</h2>
+                        </div>
+                        <form id="notificationForm">
+                            <div class="mb-4">
+                                <label for="notificationTitle" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input type="text" id="notificationTitle" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="notificationMessage" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                                <textarea id="notificationMessage" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                <div class="flex space-x-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="notificationType" value="info" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                        <span class="ml-2 text-gray-700">Information</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="notificationType" value="warning" class="h-4 w-4 text-yellow-600 focus:ring-yellow-500">
+                                        <span class="ml-2 text-gray-700">Warning</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="notificationType" value="holiday" class="h-4 w-4 text-green-600 focus:ring-green-500">
+                                        <span class="ml-2 text-gray-700">Holiday</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Send Notification
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Recent Notifications</h2>
+                        </div>
+                        <div id="notificationsList" class="divide-y divide-gray-200">
+                            <!-- Notifications will be loaded here -->
+                            <div class="py-4 text-center text-gray-500">No notifications sent yet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Content -->
+                <div id="maintenanceContent" class="hidden space-y-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">System Maintenance</h2>
+                        </div>
+                        <form id="maintenanceForm">
+                            <div class="mb-4">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" id="maintenanceToggle" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                    <span class="ml-2 text-gray-700">Enable Maintenance Mode</span>
+                                </label>
+                            </div>
+                            <div class="mb-4">
+                                <label for="maintenanceMessage" class="block text-sm font-medium text-gray-700 mb-1">Message to Display</label>
+                                <textarea id="maintenanceMessage" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="The system is currently under maintenance. We'll be back soon."></textarea>
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Save Settings
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Maintenance History</h2>
+                        </div>
+                        <div id="maintenanceHistory" class="divide-y divide-gray-200">
+                            <!-- Maintenance history will be loaded here -->
+                            <div class="py-4 text-center text-gray-500">No maintenance history</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Holidays Content -->
+                <div id="holidaysContent" class="hidden space-y-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Add Holiday</h2>
+                        </div>
+                        <form id="holidayForm">
+                            <div class="mb-4">
+                                <label for="holidayName" class="block text-sm font-medium text-gray-700 mb-1">Holiday Name</label>
+                                <input type="text" id="holidayName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="holidayDate" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input type="date" id="holidayDate" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="holidayDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea id="holidayDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Add Holiday
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Upcoming Holidays</h2>
+                        </div>
+                        <div id="holidaysList" class="divide-y divide-gray-200">
+                            <!-- Holidays will be loaded here -->
+                            <div class="py-4 text-center text-gray-500">No upcoming holidays</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Content -->
+                <div id="featuresContent" class="hidden space-y-6">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Announce New Feature</h2>
+                        </div>
+                        <form id="featureForm">
+                            <div class="mb-4">
+                                <label for="featureName" class="block text-sm font-medium text-gray-700 mb-1">Feature Name</label>
+                                <input type="text" id="featureName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="featureDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea id="featureDescription" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label for="featureDate" class="block text-sm font-medium text-gray-700 mb-1">Release Date</label>
+                                <input type="date" id="featureDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Announce Feature
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">Recent Features</h2>
+                        </div>
+                        <div id="featuresList" class="divide-y divide-gray-200">
+                            <!-- Features will be loaded here -->
+                            <div class="py-4 text-center text-gray-500">No features announced yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const currentTabTitle = document.getElementById('currentTabTitle');
+
+        // Tab elements
+        const notificationsTab = document.getElementById('notificationsTab');
+        const maintenanceTab = document.getElementById('maintenanceTab');
+        const holidaysTab = document.getElementById('holidaysTab');
+        const featuresTab = document.getElementById('featuresTab');
+        
+        // Content elements
+        const notificationsContent = document.getElementById('notificationsContent');
+        const maintenanceContent = document.getElementById('maintenanceContent');
+        const holidaysContent = document.getElementById('holidaysContent');
+        const featuresContent = document.getElementById('featuresContent');
+
+        // Form elements
+        const notificationForm = document.getElementById('notificationForm');
+        const maintenanceForm = document.getElementById('maintenanceForm');
+        const holidayForm = document.getElementById('holidayForm');
+        const featureForm = document.getElementById('featureForm');
+
+        // List elements
+        const notificationsList = document.getElementById('notificationsList');
+        const maintenanceHistory = document.getElementById('maintenanceHistory');
+        const holidaysList = document.getElementById('holidaysList');
+        const featuresList = document.getElementById('featuresList');
+
+        // Check authentication state
+        auth.onAuthStateChanged(user => {
+            if (user && user.email === 'madamsir066@gmail.com') {
+                // Admin is logged in
+                loginModal.classList.add('hidden');
+                loadData();
+            } else {
+                // Not logged in or wrong user
+                loginModal.classList.remove('hidden');
+            }
+        });
+
+        // Login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault
 </body>
 </html>
